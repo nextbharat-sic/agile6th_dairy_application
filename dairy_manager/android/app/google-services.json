@@ -1,0 +1,68 @@
+{
+  "project_info": {
+    "project_number": "526058541371",
+    "project_id": "agile6th",
+    "storage_bucket": "agile6th.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:526058541371:android:97e26faac2c01949b5671e",
+        "android_client_info": {
+          "package_name": "com.dairy_manager.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "526058541371-1tsa6f523nt73mgsiktb4rarm8ltq5su.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCBCsc9xl_jyIW5rNa2_U20diiYzpuVufs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "526058541371-1tsa6f523nt73mgsiktb4rarm8ltq5su.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:526058541371:android:fbad161b3bbb2349b5671e",
+        "android_client_info": {
+          "package_name": "com.dairy_manager.dairy_manager"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "526058541371-1tsa6f523nt73mgsiktb4rarm8ltq5su.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCBCsc9xl_jyIW5rNa2_U20diiYzpuVufs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "526058541371-1tsa6f523nt73mgsiktb4rarm8ltq5su.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../presentation/login_screen/login_screen_google.dart';
 import '../providers/auth_provider.dart';
 import '../presentation/login_screen/login_screen.dart';
 import '../presentation/registration_screen/registration_screen.dart';
@@ -13,6 +14,8 @@ import '../presentation/settings_screen/settings_screen.dart';
 import '../presentation/settings_screen/profile_screen.dart';
 import '../presentation/community_screen/community_screen.dart';
 import '../presentation/login_screen/reset_password_screen.dart';
+
+const clientId = '526058541371-1tsa6f523nt73mgsiktb4rarm8ltq5su.apps.googleusercontent.com';
 
 class AppRoutes {
   static const String initial = '/';
@@ -31,7 +34,8 @@ class AppRoutes {
 
   static Map<String, WidgetBuilder> routes = {
     initial: (context) => _buildAuthWrapper(context),
-    loginScreen: (context) => const LoginScreen(),
+    // loginScreen: (context) => const LoginScreen(),
+    loginScreen: (context) => const LoginScreenGoogle(clientId: clientId),
     registrationScreen: (context) => const RegistrationScreen(),
     dashboard: (context) => const DashboardScreen(),
     milkEntry: (context) => const MilkEntryScreen(),
@@ -51,7 +55,7 @@ class AppRoutes {
         if (authProvider.isAuthenticated) {
           return const DashboardScreen();
         } else {
-          return const LoginScreen();
+          return const LoginScreenGoogle(clientId: clientId );
         }
       },
     );
