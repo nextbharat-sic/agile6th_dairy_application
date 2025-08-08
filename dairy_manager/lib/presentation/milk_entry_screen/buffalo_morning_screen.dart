@@ -11,31 +11,28 @@ class BuffaloMorningScreen extends StatefulWidget {
 class _BuffaloMorningScreenState extends State<BuffaloMorningScreen> {
   final _formKey = GlobalKey<FormState>();
   final _dateController = TextEditingController();
-  final _quantityController = TextEditingController();
-  final _fatController = TextEditingController();
+  final _milkController = TextEditingController();
   final _snfController = TextEditingController();
-  final _rateController = TextEditingController();
-  final _amountController = TextEditingController();
+  final _fatController = TextEditingController();
+  final _costController = TextEditingController();
   
-  String _selectedSession = 'Morning';
+  bool _isMorning = true;
   DateTime _selectedDate = DateTime.now();
+  double _todayIncome = 0.0;
 
   @override
   void initState() {
     super.initState();
     _dateController.text = _formatDate(_selectedDate);
-    _rateController.text = '62.0';
-    _calculateAmount();
   }
 
   @override
   void dispose() {
     _dateController.dispose();
-    _quantityController.dispose();
-    _fatController.dispose();
+    _milkController.dispose();
     _snfController.dispose();
-    _rateController.dispose();
-    _amountController.dispose();
+    _fatController.dispose();
+    _costController.dispose();
     super.dispose();
   }
 
@@ -43,13 +40,13 @@ class _BuffaloMorningScreenState extends State<BuffaloMorningScreen> {
     return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
   }
 
-  void _calculateAmount() {
-    final quantity = double.tryParse(_quantityController.text) ?? 0.0;
-    final rate = double.tryParse(_rateController.text) ?? 0.0;
+  void _calculateIncome() {
+    final milkQuantity = double.tryParse(_milkController.text) ?? 0.0;
+    final costPerLiter = double.tryParse(_costController.text) ?? 0.0;
     
-    double amount = quantity * rate;
-    
-    _amountController.text = amount.toStringAsFixed(2);
+    setState(() {
+      _todayIncome = milkQuantity * costPerLiter;
+    });
   }
 
   void _selectDate() async {
@@ -79,7 +76,6 @@ class _BuffaloMorningScreenState extends State<BuffaloMorningScreen> {
 
   void _handleSubmit() {
     if (_formKey.currentState!.validate()) {
-      // Handle form submission
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Milk entry saved successfully!'),
@@ -94,249 +90,362 @@ class _BuffaloMorningScreenState extends State<BuffaloMorningScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
-      appBar: AppBar(
-        backgroundColor: AppTheme.backgroundColor,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppTheme.whiteColor),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: Text(
-          'Buffalo -  _selectedSession',
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-            color: AppTheme.whiteColor,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.settings, color: AppTheme.whiteColor),
-            onPressed: () {
-              Navigator.pushNamed(context, '/settings');
-            },
-          ),
-        ],
-      ),
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24.0),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const SizedBox(height: 20),
-                
-                // Animal Icon
-                Center(
-                  child: Container(
-                    width: 80,
-                    height: 80,
-                    decoration: BoxDecoration(
-                      color: AppTheme.secondaryColor.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Icon(
-                      Icons.pets,
-                      size: 40,
-                      color: AppTheme.secondaryColor,
+        child: Column(
+          children: [
+            // Header section with back button, buffalo image, and settings
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
+              child: Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.arrow_back, color: Colors.white, size: 28),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                  Expanded(
+                    child: Column(
+                      children: [
+                        Container(
+                          width: 80,
+                          height: 80,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: Image.asset(
+                              'assets/images/buffalo.png',
+                              fit: BoxFit.contain,
+                              errorBuilder: (context, error, stackTrace) {
+                                return Icon(
+                                  Icons.pets,
+                                  size: 40,
+                                  color: AppTheme.textPrimaryColor,
+                                );
+                              },
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          'Buffalo',
+                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 20,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                ),
-                
-                const SizedBox(height: 24),
-                
-                // Session Toggle
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                  IconButton(
+                    icon: const Icon(Icons.settings, color: Colors.white, size: 28),
+                    onPressed: () {
+                      Navigator.pushNamed(context, '/settings');
+                    },
+                  ),
+                ],
+              ),
+            ),
+            
+            // Toggle bar
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              child: SizedBox(
+                height: 80,
+                child: Stack(
                   children: [
-                    _buildSessionButton('Morning', Icons.wb_sunny),
-                    const SizedBox(width: 16),
-                    _buildSessionButton('Evening', Icons.nightlight),
-                  ],
-                ),
-                
-                const SizedBox(height: 32),
-                
-                // Form Fields
-                _buildFormField(
-                  controller: _dateController,
-                  label: 'Date',
-                  icon: Icons.calendar_today,
-                  readOnly: true,
-                  onTap: _selectDate,
-                ),
-                
-                const SizedBox(height: 16),
-                
-                _buildFormField(
-                  controller: _quantityController,
-                  label: 'Quantity',
-                  icon: Icons.scale,
-                  keyboardType: TextInputType.number,
-                  onChanged: (value) => _calculateAmount(),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter quantity';
-                    }
-                    if (double.tryParse(value) == null || double.parse(value) <= 0) {
-                      return 'Please enter a valid quantity';
-                    }
-                    return null;
-                  },
-                ),
-                
-                const SizedBox(height: 16),
-                
-                _buildFormField(
-                  controller: _fatController,
-                  label: 'Fat',
-                  icon: Icons.pie_chart,
-                  keyboardType: TextInputType.number,
-                  onChanged: (value) => _calculateAmount(),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter fat percentage';
-                    }
-                    if (double.tryParse(value) == null || double.parse(value) <= 0) {
-                      return 'Please enter a valid fat percentage';
-                    }
-                    return null;
-                  },
-                ),
-                
-                const SizedBox(height: 16),
-                
-                _buildFormField(
-                  controller: _snfController,
-                  label: 'SNF',
-                  icon: Icons.science,
-                  keyboardType: TextInputType.number,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter SNF';
-                    }
-                    if (double.tryParse(value) == null || double.parse(value) <= 0) {
-                      return 'Please enter a valid SNF';
-                    }
-                    return null;
-                  },
-                ),
-                
-                const SizedBox(height: 16),
-                
-                _buildFormField(
-                  controller: _rateController,
-                  label: 'Rate',
-                  icon: Icons.attach_money,
-                  keyboardType: TextInputType.number,
-                  onChanged: (value) => _calculateAmount(),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter rate';
-                    }
-                    if (double.tryParse(value) == null || double.parse(value) <= 0) {
-                      return 'Please enter a valid rate';
-                    }
-                    return null;
-                  },
-                ),
-                
-                const SizedBox(height: 16),
-                
-                _buildFormField(
-                  controller: _amountController,
-                  label: 'Amount',
-                  icon: Icons.calculate,
-                  readOnly: true,
-                ),
-                
-                const SizedBox(height: 32),
-                
-                // Submit Button
-                ElevatedButton(
-                  onPressed: _handleSubmit,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppTheme.primaryColor,
-                    foregroundColor: AppTheme.whiteColor,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                    // Background pill
+                    Container(
+                      height: 80,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFE4E5E6),
+                        borderRadius: BorderRadius.circular(40),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.08),
+                            blurRadius: 8,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                  child: const Text(
-                    'Submit',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-                
-                const SizedBox(height: 32),
-                
-                // Income Display
-                Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: AppTheme.accentColor.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: AppTheme.accentColor.withValues(alpha: 0.3),
-                      width: 1,
-                    ),
-                  ),
-                  child: Column(
-                    children: [
-                      Text(
-                        'INCOME',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          color: AppTheme.accentColor,
-                          fontWeight: FontWeight.w600,
+                    // Animated sliding white pill
+                    AnimatedAlign(
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeInOut,
+                      alignment: _isMorning ? Alignment.centerLeft : Alignment.centerRight,
+                      child: Container(
+                        width: MediaQuery.of(context).size.width / 2 - 24,
+                        height: 72,
+                        margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(36),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.12),
+                              blurRadius: 12,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
                         ),
                       ),
-                      const SizedBox(height: 8),
-                      Text(
-                        '₹${_amountController.text.isEmpty ? '0.00' : _amountController.text}',
-                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          color: AppTheme.accentColor,
-                          fontWeight: FontWeight.bold,
+                    ),
+                    // Row with icons/text and tap handlers
+                    Row(
+                      children: [
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: () => setState(() => _isMorning = true),
+                            child: SizedBox(
+                              height: 80,
+                              child: Center(
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(Icons.wb_sunny, size: 32, color: _isMorning ? const Color(0xFF395364) : Colors.white),
+                                    const SizedBox(width: 12),
+                                    Text(
+                                      'Morning',
+                                      style: TextStyle(
+                                        color: _isMorning ? const Color(0xFF395364) : Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 22,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
                         ),
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: () => setState(() => _isMorning = false),
+                            child: SizedBox(
+                              height: 80,
+                              child: Center(
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(Icons.nightlight_round, size: 32, color: !_isMorning ? const Color(0xFF395364) : Colors.white),
+                                    const SizedBox(width: 12),
+                                    Text(
+                                      'Evening',
+                                      style: TextStyle(
+                                        color: !_isMorning ? const Color(0xFF395364) : Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 22,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+            // Main content card
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Container(
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: _isMorning ? const Color(0xFFE4E5E6) : const Color(0xFF395364),
+                    borderRadius: BorderRadius.circular(32),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.08),
+                        blurRadius: 16,
+                        offset: const Offset(0, 8),
                       ),
                     ],
                   ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          // Form fields (unchanged, but always white background)
+                          _buildFormField(
+                            controller: _dateController,
+                            label: 'Date',
+                            hint: 'dd/mm/yyyy',
+                            onTap: _selectDate,
+                            readOnly: true,
+                          ),
+                          const SizedBox(height: 20),
+                          _buildFormField(
+                            controller: _milkController,
+                            label: 'Milk (L)',
+                            hint: 'Input Text',
+                            onChanged: (value) => _calculateIncome(),
+                          ),
+                          const SizedBox(height: 20),
+                          _buildFormField(
+                            controller: _snfController,
+                            label: 'SNF',
+                            hint: 'Input Text',
+                          ),
+                          const SizedBox(height: 20),
+                          _buildFormField(
+                            controller: _fatController,
+                            label: 'Fat',
+                            hint: 'Input Text',
+                          ),
+                          const SizedBox(height: 20),
+                          _buildFormField(
+                            controller: _costController,
+                            label: 'Cost/L',
+                            hint: 'Enter the cost',
+                            suffixIcon: Icons.lock,
+                            onChanged: (value) => _calculateIncome(),
+                          ),
+                          const Spacer(),
+                          // Submit button
+                          Container(
+                            width: double.infinity,
+                            height: 56,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(16),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.08),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
+                            ),
+                            child: Material(
+                              color: Colors.transparent,
+                              child: InkWell(
+                                onTap: _handleSubmit,
+                                borderRadius: BorderRadius.circular(16),
+                                child: Center(
+                                  child: Text(
+                                    'Submit',
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w600,
+                                      color: _isMorning ? const Color(0xFF395364) : Colors.white,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                 ),
-              ],
+              ),
             ),
-          ),
+            
+            // Today's Income section
+            Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "Today's Income",
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Container(
+                    width: double.infinity,
+                    height: 60,
+                    decoration: BoxDecoration(
+                      color: AppTheme.backgroundColor,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: Colors.white,
+                        width: 2,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 50),
+                          blurRadius: 8,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Center(
+                      child: Text(
+                        '₹${_todayIncome.toStringAsFixed(0)}/-',
+                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 24,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildSessionButton(String session, IconData icon) {
-    final isSelected = _selectedSession == session;
+  Widget _buildToggleButton(String text, IconData icon, bool isMorning, bool isSelected) {
     return GestureDetector(
       onTap: () {
         setState(() {
-          _selectedSession = session;
+          _isMorning = isMorning;
         });
       },
       child: Container(
-        width: 80,
-        height: 80,
+        height: 48,
         decoration: BoxDecoration(
-          color: isSelected ? AppTheme.secondaryColor : AppTheme.cardColor,
-          borderRadius: BorderRadius.circular(40),
-          border: Border.all(
-            color: isSelected ? AppTheme.secondaryColor : AppTheme.textSecondaryColor.withValues(alpha: 0.3),
-            width: 2,
-          ),
+          color: isSelected 
+            ? Colors.white 
+            : (_isMorning ? AppTheme.backgroundColor : const Color(0xFF585F65)),
+          borderRadius: BorderRadius.circular(12),
+          border: isSelected 
+            ? Border.all(color: AppTheme.primaryColor, width: 2)
+            : null,
         ),
-        child: Icon(
-          icon,
-          size: 32,
-          color: isSelected ? AppTheme.whiteColor : AppTheme.textSecondaryColor,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              icon,
+              size: 20,
+              color: isSelected 
+                ? const Color(0xFF395364)
+                : Colors.white,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              text,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: isSelected 
+                  ? const Color(0xFF395364)
+                  : Colors.white,
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -345,46 +454,82 @@ class _BuffaloMorningScreenState extends State<BuffaloMorningScreen> {
   Widget _buildFormField({
     required TextEditingController controller,
     required String label,
-    required IconData icon,
-    TextInputType? keyboardType,
+    required String hint,
     bool readOnly = false,
     VoidCallback? onTap,
+    IconData? suffixIcon,
     ValueChanged<String>? onChanged,
-    String? Function(String?)? validator,
   }) {
-    return TextFormField(
-      controller: controller,
-      keyboardType: keyboardType,
-      readOnly: readOnly,
-      onTap: onTap,
-      onChanged: onChanged,
-      validator: validator,
-      decoration: InputDecoration(
-        labelText: label,
-        prefixIcon: Icon(icon),
-        filled: true,
-        fillColor: AppTheme.cardColor,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: AppTheme.textSecondaryColor.withValues(alpha: 0.3)),
+    return Row(
+      children: [
+        Expanded(
+          flex: 2,
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: _isMorning ? AppTheme.textPrimaryColor : Colors.white,
+            ),
+          ),
         ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: AppTheme.textSecondaryColor.withValues(alpha: 0.3)),
+        const SizedBox(width: 16),
+        Expanded(
+          flex: 3,
+          child: TextFormField(
+            controller: controller,
+            readOnly: readOnly,
+            onTap: onTap,
+            onChanged: onChanged,
+            decoration: InputDecoration(
+              hintText: hint,
+              hintStyle: TextStyle(
+                color: _isMorning 
+                  ? AppTheme.textSecondaryColor 
+                  : Colors.white.withAlpha(180),
+              ),
+              filled: true,
+              fillColor: _isMorning 
+                ? Colors.white 
+                : const Color(0xFF585F65),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide.none,
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide.none,
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(
+                  color: AppTheme.primaryColor,
+                  width: 2,
+                ),
+              ),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 16,
+              ),
+              suffixIcon: suffixIcon != null 
+                ? Icon(
+                    suffixIcon,
+                    size: 20,
+                    color: _isMorning 
+                      ? AppTheme.textSecondaryColor 
+                      : Colors.white.withAlpha(180),
+                  )
+                : null,
+            ),
+            style: TextStyle(
+              color: _isMorning 
+                ? AppTheme.textPrimaryColor 
+                : Colors.white,
+              fontSize: 16,
+            ),
+          ),
         ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: AppTheme.primaryColor, width: 2),
-        ),
-        errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: AppTheme.errorColor),
-        ),
-        focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: AppTheme.errorColor, width: 2),
-        ),
-      ),
+      ],
     );
   }
 } 

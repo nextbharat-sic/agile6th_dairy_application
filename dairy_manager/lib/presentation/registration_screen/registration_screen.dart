@@ -114,7 +114,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                     borderRadius: BorderRadius.circular(28),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.08),
+                        color: Colors.black.withValues(alpha: 0.08),
                         blurRadius: 16,
                         offset: const Offset(0, 8),
                       ),
@@ -294,7 +294,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                                   borderRadius: BorderRadius.circular(20),
                                 ),
                                 elevation: 4,
-                                shadowColor: AppTheme.primaryColor.withOpacity(0.2),
+                                shadowColor: AppTheme.primaryColor.withValues(alpha: 0.2),
                               ),
                               child: authProvider.isLoading
                                   ? const SizedBox(

@@ -149,6 +149,110 @@ class _CowMorningScreenState extends State<CowMorningScreen> {
               ),
             ),
             
+            // Toggle bar
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              child: SizedBox(
+                height: 80,
+                child: Stack(
+                  children: [
+                    // Background pill
+                    Container(
+                      height: 80,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFE4E5E6),
+                        borderRadius: BorderRadius.circular(40),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.08),
+                            blurRadius: 8,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                    ),
+                    // Animated sliding white pill
+                    AnimatedAlign(
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeInOut,
+                      alignment: _isMorning ? Alignment.centerLeft : Alignment.centerRight,
+                      child: Container(
+                        width: MediaQuery.of(context).size.width / 2 - 24,
+                        height: 72,
+                        margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(36),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.12),
+                              blurRadius: 12,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    // Row with icons/text and tap handlers
+                    Row(
+                      children: [
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: () => setState(() => _isMorning = true),
+                            child: SizedBox(
+                              height: 80,
+                              child: Center(
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(Icons.wb_sunny, size: 32, color: _isMorning ? const Color(0xFF395364) : Colors.white),
+                                    const SizedBox(width: 12),
+                                    Text(
+                                      'Morning',
+                                      style: TextStyle(
+                                        color: _isMorning ? const Color(0xFF395364) : Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 22,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: () => setState(() => _isMorning = false),
+                            child: SizedBox(
+                              height: 80,
+                              child: Center(
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(Icons.nightlight_round, size: 32, color: !_isMorning ? const Color(0xFF395364) : Colors.white),
+                                    const SizedBox(width: 12),
+                                    Text(
+                                      'Evening',
+                                      style: TextStyle(
+                                        color: !_isMorning ? const Color(0xFF395364) : Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 22,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
             // Main content card
             Expanded(
               child: Padding(
@@ -156,11 +260,11 @@ class _CowMorningScreenState extends State<CowMorningScreen> {
                 child: Container(
                   width: double.infinity,
                   decoration: BoxDecoration(
-                    color: _isMorning ? Colors.white : const Color(0xFF585F65),
-                    borderRadius: BorderRadius.circular(24),
+                    color: _isMorning ? const Color(0xFFE4E5E6) : const Color(0xFF395364),
+                    borderRadius: BorderRadius.circular(32),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.1),
+                        color: Colors.black.withValues(alpha: 0.08),
                         blurRadius: 16,
                         offset: const Offset(0, 8),
                       ),
@@ -173,32 +277,7 @@ class _CowMorningScreenState extends State<CowMorningScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          // Toggle buttons
-                          Row(
-                            children: [
-                              Expanded(
-                                child: _buildToggleButton(
-                                  'Morning',
-                                  Icons.wb_sunny,
-                                  true,
-                                  _isMorning,
-                                ),
-                              ),
-                              const SizedBox(width: 16),
-                              Expanded(
-                                child: _buildToggleButton(
-                                  'Evening',
-                                  Icons.nightlight_round,
-                                  false,
-                                  !_isMorning,
-                                ),
-                              ),
-                            ],
-                          ),
-                          
-                          const SizedBox(height: 32),
-                          
-                          // Form fields
+                          // Form fields (unchanged, but always white background)
                           _buildFormField(
                             controller: _dateController,
                             label: 'Date',
@@ -206,81 +285,67 @@ class _CowMorningScreenState extends State<CowMorningScreen> {
                             onTap: _selectDate,
                             readOnly: true,
                           ),
-                          
                           const SizedBox(height: 20),
-                          
-                                                     _buildFormField(
-                             controller: _milkController,
-                             label: 'Milk (L)',
-                             hint: 'Input Text',
-                             onChanged: (value) => _calculateIncome(),
-                           ),
-                          
+                          _buildFormField(
+                            controller: _milkController,
+                            label: 'Milk (L)',
+                            hint: 'Input Text',
+                            onChanged: (value) => _calculateIncome(),
+                          ),
                           const SizedBox(height: 20),
-                          
                           _buildFormField(
                             controller: _snfController,
                             label: 'SNF',
                             hint: 'Input Text',
                           ),
-                          
                           const SizedBox(height: 20),
-                          
                           _buildFormField(
                             controller: _fatController,
                             label: 'Fat',
                             hint: 'Input Text',
                           ),
-                          
                           const SizedBox(height: 20),
-                          
-                                                     _buildFormField(
-                             controller: _costController,
-                             label: 'Cost/L',
-                             hint: 'Enter the cost',
-                             suffixIcon: Icons.lock,
-                             onChanged: (value) => _calculateIncome(),
-                           ),
-                          
+                          _buildFormField(
+                            controller: _costController,
+                            label: 'Cost/L',
+                            hint: 'Enter the cost',
+                            suffixIcon: Icons.lock,
+                            onChanged: (value) => _calculateIncome(),
+                          ),
                           const Spacer(),
-                          
-                                                     // Submit button
-                           Container(
-                             width: double.infinity,
-                             height: 56,
-                             decoration: BoxDecoration(
-                               color: Colors.white,
-                               borderRadius: BorderRadius.circular(16),
-                               border: Border.all(
-                                 color: AppTheme.primaryColor,
-                                 width: 2,
-                               ),
-                               boxShadow: [
-                                 BoxShadow(
-                                   color: Colors.black.withValues(alpha: 0.1),
-                                   blurRadius: 8,
-                                   offset: const Offset(0, 4),
-                                 ),
-                               ],
-                             ),
-                             child: Material(
-                               color: Colors.transparent,
-                               child: InkWell(
-                                 onTap: _handleSubmit,
-                                 borderRadius: BorderRadius.circular(16),
-                                 child: Center(
-                                   child: Text(
-                                     'Submit',
-                                     style: TextStyle(
-                                       fontSize: 18,
-                                       fontWeight: FontWeight.w600,
-                                       color: AppTheme.textPrimaryColor,
-                                     ),
-                                   ),
-                                 ),
-                               ),
-                             ),
-                           ),
+                          // Submit button
+                          Container(
+                            width: double.infinity,
+                            height: 56,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(16),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.08),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
+                            ),
+                            child: Material(
+                              color: Colors.transparent,
+                              child: InkWell(
+                                onTap: _handleSubmit,
+                                borderRadius: BorderRadius.circular(16),
+                                child: Center(
+                                  child: Text(
+                                    'Submit',
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w600,
+                                      color: _isMorning ? const Color(0xFF395364) : Colors.white,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -352,12 +417,13 @@ class _CowMorningScreenState extends State<CowMorningScreen> {
         height: 48,
         decoration: BoxDecoration(
           color: isSelected 
-            ? Colors.white 
-            : (_isMorning ? AppTheme.backgroundColor : const Color(0xFF585F65)),
+            ? const Color(0xFF395364)
+            : Colors.white,
           borderRadius: BorderRadius.circular(12),
-          border: isSelected 
-            ? Border.all(color: AppTheme.primaryColor, width: 2)
-            : null,
+          border: Border.all(
+            color: isSelected ? const Color(0xFF395364) : Colors.white,
+            width: 2,
+          ),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -365,9 +431,7 @@ class _CowMorningScreenState extends State<CowMorningScreen> {
             Icon(
               icon,
               size: 20,
-              color: isSelected 
-                ? AppTheme.textPrimaryColor 
-                : Colors.white,
+              color: isSelected ? Colors.white : const Color(0xFF395364),
             ),
             const SizedBox(width: 8),
             Text(
@@ -375,9 +439,7 @@ class _CowMorningScreenState extends State<CowMorningScreen> {
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
-                color: isSelected 
-                  ? AppTheme.textPrimaryColor 
-                  : Colors.white,
+                color: isSelected ? Colors.white : const Color(0xFF395364),
               ),
             ),
           ],

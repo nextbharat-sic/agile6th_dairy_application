@@ -36,7 +36,6 @@ class AuthProvider extends ChangeNotifier {
     _setLoading(true);
     
     try {
-      // TODO: Implement Firebase authentication
       // For now, simulate login
       await Future.delayed(const Duration(seconds: 2));
       
@@ -60,8 +59,7 @@ class AuthProvider extends ChangeNotifier {
     _setLoading(true);
     
     try {
-      // TODO: Implement Firebase registration
-      // For now, simulate registration
+ 
       await Future.delayed(const Duration(seconds: 2));
       
       final prefs = await SharedPreferences.getInstance();

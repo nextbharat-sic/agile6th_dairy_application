@@ -12,6 +12,7 @@ import '../presentation/expenses_screen/expenses_screen.dart';
 import '../presentation/settings_screen/settings_screen.dart';
 import '../presentation/settings_screen/profile_screen.dart';
 import '../presentation/community_screen/community_screen.dart';
+import '../presentation/login_screen/reset_password_screen.dart';
 
 class AppRoutes {
   static const String initial = '/';
@@ -26,6 +27,7 @@ class AppRoutes {
   static const String settings = '/settings';
   static const String profile = '/profile';
   static const String community = '/community';
+  static const String resetPassword = '/resetPassword';
 
   static Map<String, WidgetBuilder> routes = {
     initial: (context) => _buildAuthWrapper(context),
@@ -40,6 +42,7 @@ class AppRoutes {
     settings: (context) => const SettingsScreen(),
     profile: (context) => const ProfileScreen(),
     community: (context) => const CommunityScreen(),
+    resetPassword: (context) => const ResetPasswordScreen(),
   };
 
   static Widget _buildAuthWrapper(BuildContext context) {

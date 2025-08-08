@@ -27,10 +27,10 @@ class CustomErrorWidget extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              SvgPicture.asset(
-                'assets/images/sad_face.svg',
-                height: 42,
-                width: 42,
+              Icon(
+                Icons.error_outline,
+                color: Colors.redAccent,
+                size: 42,
               ),
               const SizedBox(height: 8),
               Text(
