@@ -43,17 +43,11 @@ class AuthProvider extends ChangeNotifier {
   Future<void> login(String email, String password) async {
     _setLoading(true);
     try {
-<<<<<<< HEAD
-      // For now, simulate login
-      await Future.delayed(const Duration(seconds: 2));
-      
-=======
       final userCredential = await _auth.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
 
->>>>>>> e022b1da376d5d9d1f4d3653f82c24fde9b620a1
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('auth_token', userCredential.user!.uid);
 
@@ -68,11 +62,6 @@ class AuthProvider extends ChangeNotifier {
   Future<void> register(String name, String email, String password) async {
     _setLoading(true);
     try {
-<<<<<<< HEAD
- 
-      await Future.delayed(const Duration(seconds: 2));
-      
-=======
       final userCredential = await _auth.createUserWithEmailAndPassword(
         email: email,
         password: password,
@@ -80,7 +69,6 @@ class AuthProvider extends ChangeNotifier {
 
       await userCredential.user!.updateDisplayName(name);
 
->>>>>>> e022b1da376d5d9d1f4d3653f82c24fde9b620a1
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('auth_token', userCredential.user!.uid);
 
@@ -102,7 +90,8 @@ class AuthProvider extends ChangeNotifier {
         return;
       }
 
-      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
       final AuthCredential credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
