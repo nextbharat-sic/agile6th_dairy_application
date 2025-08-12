@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "526058541371-48mtrj3hpt9edcekj5o3pvr4pbo6cc86.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.dairy_manager.app",
+            "certificate_hash": "f6a7ff926dd2d9fdfb0a8aec90146b7351e68665"
+          }
+        },
+        {
           "client_id": "526058541371-1tsa6f523nt73mgsiktb4rarm8ltq5su.apps.googleusercontent.com",
           "client_type": 3
         }

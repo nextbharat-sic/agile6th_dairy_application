@@ -14,7 +14,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   final _codeControllers = List.generate(6, (_) => TextEditingController());
   final _newPasswordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
-  bool _codeVerified = true; // For demo, always true
+  final bool _codeVerified = true; // For demo, always true
 
   @override
   void dispose() {

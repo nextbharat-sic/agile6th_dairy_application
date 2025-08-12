@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../presentation/login_screen/login_screen_google.dart';
 import '../providers/auth_provider.dart';
-import '../presentation/login_screen/login_screen.dart';
 import '../presentation/registration_screen/registration_screen.dart';
 import '../presentation/dashboard_screen/dashboard_screen.dart';
 import '../presentation/milk_entry_screen/milk_entry_screen.dart';

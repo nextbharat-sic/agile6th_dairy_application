@@ -7,7 +7,12 @@ import 'package:google_sign_in/google_sign_in.dart';
 
 class AuthProvider extends ChangeNotifier {
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final GoogleSignIn _googleSignIn = GoogleSignIn();
+  final GoogleSignIn _googleSignIn = GoogleSignIn(
+    scopes: [
+      'email',
+      'profile',
+    ],
+  );
 
   bool _isAuthenticated = false;
   String? _userId;
@@ -43,20 +48,12 @@ class AuthProvider extends ChangeNotifier {
   Future<void> login(String email, String password) async {
     _setLoading(true);
     try {
-<<<<<<< HEAD
-      // For now, simulate login
-      await Future.delayed(const Duration(seconds: 2));
-      
-=======
       final userCredential = await _auth.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
-
->>>>>>> e022b1da376d5d9d1f4d3653f82c24fde9b620a1
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('auth_token', userCredential.user!.uid);
-
       // The authStateChanges listener will handle updating the UI
     } on FirebaseAuthException catch (e) {
       throw Exception(_getFirebaseErrorMessage(e.code));
@@ -68,22 +65,13 @@ class AuthProvider extends ChangeNotifier {
   Future<void> register(String name, String email, String password) async {
     _setLoading(true);
     try {
-<<<<<<< HEAD
- 
-      await Future.delayed(const Duration(seconds: 2));
-      
-=======
       final userCredential = await _auth.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
-
       await userCredential.user!.updateDisplayName(name);
-
->>>>>>> e022b1da376d5d9d1f4d3653f82c24fde9b620a1
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('auth_token', userCredential.user!.uid);
-
       // The authStateChanges listener will handle updating the UI
     } on FirebaseAuthException catch (e) {
       throw Exception(_getFirebaseErrorMessage(e.code));
@@ -95,29 +83,89 @@ class AuthProvider extends ChangeNotifier {
   Future<void> signInWithGoogle() async {
     _setLoading(true);
     try {
+      print('Starting Google Sign-In process...');
+      
+      // Check if user is already signed in
+      if (await _googleSignIn.isSignedIn()) {
+        print('User already signed in, signing out first...');
+        await _googleSignIn.signOut();
+      }
+      
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
       if (googleUser == null) {
-        // The user canceled the sign-in
+        print('User canceled Google Sign-In');
         _setLoading(false);
         return;
       }
 
+      print('Google user obtained: ${googleUser.email}');
       final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      print('Google authentication tokens obtained');
+      
+      if (googleAuth.accessToken == null || googleAuth.idToken == null) {
+        print('Failed to get authentication tokens');
+        throw Exception('Failed to get Google authentication tokens');
+      }
+      
       final AuthCredential credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
 
+      print('Attempting to sign in with Firebase...');
       final userCredential = await _auth.signInWithCredential(credential);
+      print('Firebase sign-in successful: ${userCredential.user?.email}');
 
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('auth_token', userCredential.user!.uid);
 
       // The authStateChanges listener will handle updating the UI
     } on FirebaseAuthException catch (e) {
-      throw Exception(_getFirebaseErrorMessage(e.code));
+      print('Firebase Auth Exception: ${e.code} - ${e.message}');
+      String errorMessage = _getFirebaseErrorMessage(e.code);
+      
+      // Handle Google-specific Firebase errors
+      switch (e.code) {
+        case 'account-exists-with-different-credential':
+          errorMessage = 'An account already exists with the same email address but different sign-in credentials.';
+          break;
+        case 'invalid-credential':
+          errorMessage = 'The provided credential is invalid or expired.';
+          break;
+        case 'operation-not-allowed':
+          errorMessage = 'Google sign-in is not enabled. Please contact support.';
+          break;
+        case 'user-disabled':
+          errorMessage = 'This user account has been disabled.';
+          break;
+        case 'user-not-found':
+          errorMessage = 'No user found with these credentials.';
+          break;
+        case 'network-request-failed':
+          errorMessage = 'Network error. Please check your internet connection.';
+          break;
+        default:
+          errorMessage = 'Authentication failed: ${e.message}';
+      }
+      
+      throw Exception(errorMessage);
     } catch (e) {
-      throw Exception('Google Sign-in failed: $e');
+      print('Google Sign-In Exception: $e');
+      String errorMessage = 'Google Sign-in failed';
+      
+      if (e.toString().contains('network')) {
+        errorMessage = 'Network error. Please check your internet connection.';
+      } else if (e.toString().contains('cancelled')) {
+        errorMessage = 'Sign-in was cancelled.';
+      } else if (e.toString().contains('developer') || e.toString().contains('ApiException: 10')) {
+        errorMessage = 'Configuration error: Please verify your Firebase project settings, SHA-1 fingerprint, and package name.';
+      } else if (e.toString().contains('sign_in_failed')) {
+        errorMessage = 'Sign-in failed. Please check your internet connection and try again.';
+      } else {
+        errorMessage = 'Google Sign-in failed: $e';
+      }
+      
+      throw Exception(errorMessage);
     } finally {
       _setLoading(false);
     }

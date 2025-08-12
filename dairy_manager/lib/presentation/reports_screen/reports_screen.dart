@@ -256,8 +256,8 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
     final List<String> weekOptions = ['W1', 'W2', 'W3', 'W4'];
     final List<String> monthOptions = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     final List<String> yearOptions = ['2022', '2023', '2024'];
-    String _selectedPeriod = periodLabel == 'Select Week' ? weekOptions[0] : periodLabel == 'Month' ? monthOptions[0] : yearOptions[0];
-    String _selectedDate = dateLabel;
+    String selectedPeriod = periodLabel == 'Select Week' ? weekOptions[0] : periodLabel == 'Month' ? monthOptions[0] : yearOptions[0];
+    String selectedDate = dateLabel;
     return StatefulBuilder(
       builder: (context, setState) {
         return SingleChildScrollView(
@@ -276,7 +276,7 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
                       ),
                       child: DropdownButtonHideUnderline(
                         child: DropdownButton<String>(
-                          value: _selectedPeriod,
+                          value: selectedPeriod,
                           isExpanded: true,
                           isDense: true,
                           icon: const Icon(Icons.arrow_drop_down, color: Color(0xFF395364)),
@@ -298,7 +298,7 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
                             );
                           }).toList(),
                           onChanged: (value) {
-                            if (value != null) setState(() => _selectedPeriod = value);
+                            if (value != null) setState(() => selectedPeriod = value);
                           },
                         ),
                       ),
@@ -321,13 +321,13 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
                             lastDate: DateTime.now(),
                           );
                           if (picked != null) {
-                            setState(() => _selectedDate = '${picked.day.toString().padLeft(2, '0')}/${picked.month.toString().padLeft(2, '0')}/${picked.year}');
+                            setState(() => selectedDate = '${picked.day.toString().padLeft(2, '0')}/${picked.month.toString().padLeft(2, '0')}/${picked.year}');
                           }
                         },
                         child: Row(
                           children: [
                             Text(
-                              'Date: $_selectedDate',
+                              'Date: $selectedDate',
                               style: const TextStyle(
                                 color: Color(0xFF395364),
                                 fontWeight: FontWeight.w600,

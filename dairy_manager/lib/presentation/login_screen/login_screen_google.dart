@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../providers/auth_provider_google.dart';
+import 'login_screen.dart';
 
 
 class LoginScreenGoogle extends StatelessWidget {
@@ -10,11 +10,7 @@ class LoginScreenGoogle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-      ),
-      home: AuthGate(clientId: clientId),
-    );
+    // Use the custom LoginScreen UI
+    return const LoginScreen();
   }
 }
