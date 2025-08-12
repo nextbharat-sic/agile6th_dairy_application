@@ -52,6 +52,7 @@ class AuthProvider extends ChangeNotifier {
         email: email,
         password: password,
       );
+
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('auth_token', userCredential.user!.uid);
       // The authStateChanges listener will handle updating the UI
@@ -70,6 +71,7 @@ class AuthProvider extends ChangeNotifier {
         password: password,
       );
       await userCredential.user!.updateDisplayName(name);
+
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('auth_token', userCredential.user!.uid);
       // The authStateChanges listener will handle updating the UI
@@ -98,15 +100,8 @@ class AuthProvider extends ChangeNotifier {
         return;
       }
 
-      print('Google user obtained: ${googleUser.email}');
-      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
-      print('Google authentication tokens obtained');
-      
-      if (googleAuth.accessToken == null || googleAuth.idToken == null) {
-        print('Failed to get authentication tokens');
-        throw Exception('Failed to get Google authentication tokens');
-      }
-      
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
       final AuthCredential credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
