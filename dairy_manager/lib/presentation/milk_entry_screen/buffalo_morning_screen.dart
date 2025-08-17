@@ -1,5 +1,11 @@
-import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart' hide DateUtils;
+import '../../backend/repositories/income_repository.dart';
+import '../../backend/repositories/user_repository.dart';
+import '../../backend/services/income_service.dart';
+import '../../constants/constants.dart';
 import '../../theme/app_theme.dart';
+import '../../../utils/date_utils.dart';
 
 class BuffaloMorningScreen extends StatefulWidget {
   const BuffaloMorningScreen({super.key});
@@ -15,15 +21,29 @@ class _BuffaloMorningScreenState extends State<BuffaloMorningScreen> {
   final _snfController = TextEditingController();
   final _fatController = TextEditingController();
   final _costController = TextEditingController();
-  
+
+
   bool _isMorning = true;
   DateTime _selectedDate = DateTime.now();
   double _todayIncome = 0.0;
+
+  late IncomeService _incomeService;
+  late String _userId; // Set this appropriately in your authentication logic.
+
 
   @override
   void initState() {
     super.initState();
     _dateController.text = _formatDate(_selectedDate);
+    // Initialize services
+    final firestore = FirebaseFirestore.instance;
+    final incomeRepo = IncomeRepository(firestore);
+    final userRepo = UserRepository(firestore);
+    _incomeService = IncomeService(incomeRepo: incomeRepo, userRepo: userRepo);
+
+    // Set _userId from your authentication layer
+    _userId = 'user-id';/* fetch signed-in userId here */
+    _fetchTodayIncome();
   }
 
   @override
@@ -71,19 +91,67 @@ class _BuffaloMorningScreenState extends State<BuffaloMorningScreen> {
         _selectedDate = picked;
         _dateController.text = _formatDate(picked);
       });
+      await _fetchTodayIncome(); // Refresh today's income for new date
     }
   }
 
-  void _handleSubmit() {
-    if (_formKey.currentState!.validate()) {
+  Future<void> _fetchTodayIncome() async {
+    // Fetch total income for this animal and date
+    final dayStart = DateUtils.getStartOfDay(_selectedDate);
+    final dayEnd = DateUtils.getEndOfDay(_selectedDate);
+
+    try {
+      final double totalIncome = await _incomeService.incomeRepo.getTotalIncome(
+        _userId,
+        dayStart,
+        dayEnd,
+        AnimalType.buffalo,
+      );
+      setState(() { _todayIncome = totalIncome; });
+    } catch (e) {
+      setState(() { _todayIncome = 0.0; });
+    }
+  }
+
+  Future<void> _handleSubmit() async  {
+    if (!_formKey.currentState!.validate()) return;
+
+    final animalType = AnimalType.buffalo;
+    final session = _isMorning ? SessionType.morning : SessionType.evening;
+    final liters = double.tryParse(_milkController.text) ?? 0.0;
+    final snf = double.tryParse(_snfController.text) ?? 0.0;
+    final fat = double.tryParse(_fatController.text) ?? 0.0;
+    final costPerLiter = double.tryParse(_costController.text) ?? 0.0;
+
+    try {
+      final result = await _incomeService.addIncome(
+        userId: _userId,
+        dateTime: _selectedDate,
+        animalType: animalType,
+        session: session,
+        liters: liters,
+        snf: snf,
+        fat: fat,
+        newCostPerLiter: costPerLiter,
+      );
+      // Show success message and update daily income
+      await _fetchTodayIncome();
+
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Milk entry saved successfully!'),
+        SnackBar(
+          content: Text("Entry saved! Session income: ₹${result['totalIncomeSession'].toStringAsFixed(2)}, Day total: ₹${result['totalIncomeDay'].toStringAsFixed(2)}"),
           backgroundColor: AppTheme.accentColor,
         ),
       );
-      Navigator.pop(context);
-    }
+      Navigator.pop(context); // Clean navigation after success
+    }catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to save milk entry: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+  }
   }
 
   @override
