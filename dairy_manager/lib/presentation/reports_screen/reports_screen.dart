@@ -8,7 +8,8 @@ class ReportsScreen extends StatefulWidget {
   State<ReportsScreen> createState() => _ReportsScreenState();
 }
 
-class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProviderStateMixin {
+class _ReportsScreenState extends State<ReportsScreen>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
   String _selectedPeriod = 'Weekly';
 
@@ -80,7 +81,8 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
               alignment: Alignment.topCenter,
               child: Column(
                 children: [
-                  const SizedBox(height: 40), // reduced from 60 to move logo up by 20px
+                  const SizedBox(
+                      height: 40), // reduced from 60 to move logo up by 20px
                   // Reports logo in a white circle with shadow, with 'Reports' text inside
                   Material(
                     elevation: 6,
@@ -115,7 +117,9 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
                       ),
                     ),
                   ),
-                  const SizedBox(height: 30), // increased from 20 to move selector bar down by 10px
+                  const SizedBox(
+                      height:
+                          30), // increased from 20 to move selector bar down by 10px
                   // Selector tabs
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 24.0),
@@ -194,10 +198,12 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
             ),
           ),
           child: Center(
-          child: Text(
+            child: Text(
               label,
               style: TextStyle(
-                color: isSelected ? AppTheme.whiteColor : AppTheme.textPrimaryColor,
+                color: isSelected
+                    ? AppTheme.whiteColor
+                    : AppTheme.textPrimaryColor,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -219,7 +225,8 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
         },
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
-          padding: const EdgeInsets.symmetric(vertical: 4), // reduced from 6 to match date selector button size
+          padding: const EdgeInsets.symmetric(
+              vertical: 4), // reduced from 6 to match date selector button size
           decoration: BoxDecoration(
             color: isSelected ? const Color(0xFF395364) : Colors.transparent,
             borderRadius: BorderRadius.circular(32),
@@ -254,10 +261,27 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
   Widget _buildReportContent(String periodLabel, String dateLabel) {
     // State for selectors
     final List<String> weekOptions = ['W1', 'W2', 'W3', 'W4'];
-    final List<String> monthOptions = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    final List<String> monthOptions = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec'
+    ];
     final List<String> yearOptions = ['2022', '2023', '2024'];
-    String _selectedPeriod = periodLabel == 'Select Week' ? weekOptions[0] : periodLabel == 'Month' ? monthOptions[0] : yearOptions[0];
-    String _selectedDate = dateLabel;
+    String selectedPeriod = periodLabel == 'Select Week'
+        ? weekOptions[0]
+        : periodLabel == 'Month'
+            ? monthOptions[0]
+            : yearOptions[0];
+    String selectedDate = dateLabel;
     return StatefulBuilder(
       builder: (context, setState) {
         return SingleChildScrollView(
@@ -269,17 +293,19 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
                 children: [
                   Expanded(
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 12),
                       decoration: BoxDecoration(
                         color: const Color(0xFFD6D6D6),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: DropdownButtonHideUnderline(
                         child: DropdownButton<String>(
-                          value: _selectedPeriod,
+                          value: selectedPeriod,
                           isExpanded: true,
                           isDense: true,
-                          icon: const Icon(Icons.arrow_drop_down, color: Color(0xFF395364)),
+                          icon: const Icon(Icons.arrow_drop_down,
+                              color: Color(0xFF395364)),
                           items: (periodLabel == 'Select Week'
                                   ? weekOptions
                                   : periodLabel == 'Month'
@@ -298,7 +324,8 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
                             );
                           }).toList(),
                           onChanged: (value) {
-                            if (value != null) setState(() => _selectedPeriod = value);
+                            if (value != null)
+                              setState(() => selectedPeriod = value);
                           },
                         ),
                       ),
@@ -307,7 +334,8 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
                   const SizedBox(width: 12),
                   Expanded(
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 12),
                       decoration: BoxDecoration(
                         color: const Color(0xFFD6D6D6),
                         borderRadius: BorderRadius.circular(12),
@@ -321,20 +349,22 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
                             lastDate: DateTime.now(),
                           );
                           if (picked != null) {
-                            setState(() => _selectedDate = '${picked.day.toString().padLeft(2, '0')}/${picked.month.toString().padLeft(2, '0')}/${picked.year}');
+                            setState(() => selectedDate =
+                                '${picked.day.toString().padLeft(2, '0')}/${picked.month.toString().padLeft(2, '0')}/${picked.year}');
                           }
                         },
                         child: Row(
                           children: [
                             Text(
-                              'Date: $_selectedDate',
+                              'Date: $selectedDate',
                               style: const TextStyle(
                                 color: Color(0xFF395364),
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
                             const Spacer(),
-                            const Icon(Icons.calendar_today, color: Color(0xFF395364), size: 18),
+                            const Icon(Icons.calendar_today,
+                                color: Color(0xFF395364), size: 18),
                           ],
                         ),
                       ),
@@ -430,21 +460,23 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
   Widget _buildCalendarGrid() {
     final days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
     final dates = ['16', '17', '18', '19', '20', '21', '22'];
-    
+
     return Column(
-        children: [
+      children: [
         // Day headers
         Row(
-          children: days.map((day) => Expanded(
-            child: Text(
-              day,
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: AppTheme.textSecondaryColor,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          )).toList(),
+          children: days
+              .map((day) => Expanded(
+                    child: Text(
+                      day,
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: AppTheme.textSecondaryColor,
+                            fontWeight: FontWeight.w500,
+                          ),
+                    ),
+                  ))
+              .toList(),
         ),
         const SizedBox(height: 8),
         // Date grid
@@ -466,16 +498,21 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
                           : Colors.transparent,
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
-                    color: isToday ? AppTheme.primaryColor : AppTheme.textSecondaryColor.withValues(alpha: 0.2),
+                    color: isToday
+                        ? AppTheme.primaryColor
+                        : AppTheme.textSecondaryColor.withValues(alpha: 0.2),
                   ),
                 ),
                 child: Center(
                   child: Text(
                     date,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: isToday ? AppTheme.whiteColor : AppTheme.textPrimaryColor,
-                      fontWeight: isToday ? FontWeight.w600 : FontWeight.w400,
-                    ),
+                          color: isToday
+                              ? AppTheme.whiteColor
+                              : AppTheme.textPrimaryColor,
+                          fontWeight:
+                              isToday ? FontWeight.w600 : FontWeight.w400,
+                        ),
                   ),
                 ),
               ),
@@ -503,16 +540,16 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
           Text(
             title,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: AppTheme.textSecondaryColor,
-            ),
+                  color: AppTheme.textSecondaryColor,
+                ),
           ),
           const SizedBox(height: 4),
           Text(
             value,
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              color: color,
-              fontWeight: FontWeight.bold,
-            ),
+                  color: color,
+                  fontWeight: FontWeight.bold,
+                ),
           ),
         ],
       ),
@@ -524,46 +561,120 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
     final isWeek = periodLabel == 'Select Week';
     final isMonth = periodLabel == 'Month';
     final isYear = periodLabel == 'Select Year';
-    
+
     // Determine the first column header
-    final String firstColumnHeader = isWeek ? 'DAY' : isMonth ? 'Week' : 'Month';
-    
+    final String firstColumnHeader = isWeek
+        ? 'DAY'
+        : isMonth
+            ? 'Week'
+            : 'Month';
+
     // Sample data based on period type
     final List<Map<String, dynamic>> data = isWeek
         ? [
-            {'period': 'Mon', 'values': [20, 3.5, 4.2, 6, 8, 4.5]},
-            {'period': 'Tue', 'values': [23, 3.8, 4.1, 25, 4.2, 5.2]},
-            {'period': 'Wed', 'values': [25, 3.7, 4.0, 27, 4.1, 5.1]},
-            {'period': 'Thu', 'values': [19, 3.6, 3.9, 20, 3.9, 4.9]},
-            {'period': 'Fri', 'values': [24, 3.9, 4.2, 26, 4.3, 5.3]},
-            {'period': 'Sat', 'values': [22, 3.7, 4.0, 24, 4.1, 5.1]},
-            {'period': 'Sun', 'values': [20, 3.5, 4.0, 22, 4.0, 5.0]},
+            {
+              'period': 'Mon',
+              'values': [20, 3.5, 4.2, 6, 8, 4.5]
+            },
+            {
+              'period': 'Tue',
+              'values': [23, 3.8, 4.1, 25, 4.2, 5.2]
+            },
+            {
+              'period': 'Wed',
+              'values': [25, 3.7, 4.0, 27, 4.1, 5.1]
+            },
+            {
+              'period': 'Thu',
+              'values': [19, 3.6, 3.9, 20, 3.9, 4.9]
+            },
+            {
+              'period': 'Fri',
+              'values': [24, 3.9, 4.2, 26, 4.3, 5.3]
+            },
+            {
+              'period': 'Sat',
+              'values': [22, 3.7, 4.0, 24, 4.1, 5.1]
+            },
+            {
+              'period': 'Sun',
+              'values': [20, 3.5, 4.0, 22, 4.0, 5.0]
+            },
           ]
         : isMonth
             ? [
-                {'period': 'W1', 'values': [20, 3.5, 4.0, 22, 4.0, 5.0]},
-                {'period': 'W2', 'values': [23, 3.8, 4.1, 25, 4.2, 5.2]},
-                {'period': 'W3', 'values': [25, 3.7, 4.0, 27, 4.1, 5.1]},
-                {'period': 'W4', 'values': [19, 3.6, 3.9, 20, 3.9, 4.9]},
+                {
+                  'period': 'W1',
+                  'values': [20, 3.5, 4.0, 22, 4.0, 5.0]
+                },
+                {
+                  'period': 'W2',
+                  'values': [23, 3.8, 4.1, 25, 4.2, 5.2]
+                },
+                {
+                  'period': 'W3',
+                  'values': [25, 3.7, 4.0, 27, 4.1, 5.1]
+                },
+                {
+                  'period': 'W4',
+                  'values': [19, 3.6, 3.9, 20, 3.9, 4.9]
+                },
               ]
             : [
-                {'period': 'Jan', 'values': [20, 3.5, 4.0, 22, 4.0, 5.0]},
-                {'period': 'Feb', 'values': [23, 3.8, 4.1, 25, 4.2, 5.2]},
-                {'period': 'Mar', 'values': [25, 3.7, 4.0, 27, 4.1, 5.1]},
-                {'period': 'Apr', 'values': [19, 3.6, 3.9, 20, 3.9, 4.9]},
-                {'period': 'May', 'values': [20, 3.5, 4.0, 22, 4.0, 5.0]},
-                {'period': 'Jun', 'values': [23, 3.8, 4.1, 25, 4.2, 5.2]},
-                {'period': 'Jul', 'values': [25, 3.7, 4.0, 27, 4.1, 5.1]},
-                {'period': 'Aug', 'values': [19, 3.6, 3.9, 20, 3.9, 4.9]},
-                {'period': 'Sep', 'values': [20, 3.5, 4.0, 22, 4.0, 5.0]},
-                {'period': 'Oct', 'values': [23, 3.8, 4.1, 25, 4.2, 5.2]},
-                {'period': 'Nov', 'values': [25, 3.7, 4.0, 27, 4.1, 5.1]},
-                {'period': 'Dec', 'values': [19, 3.6, 3.9, 20, 3.9, 4.9]},
+                {
+                  'period': 'Jan',
+                  'values': [20, 3.5, 4.0, 22, 4.0, 5.0]
+                },
+                {
+                  'period': 'Feb',
+                  'values': [23, 3.8, 4.1, 25, 4.2, 5.2]
+                },
+                {
+                  'period': 'Mar',
+                  'values': [25, 3.7, 4.0, 27, 4.1, 5.1]
+                },
+                {
+                  'period': 'Apr',
+                  'values': [19, 3.6, 3.9, 20, 3.9, 4.9]
+                },
+                {
+                  'period': 'May',
+                  'values': [20, 3.5, 4.0, 22, 4.0, 5.0]
+                },
+                {
+                  'period': 'Jun',
+                  'values': [23, 3.8, 4.1, 25, 4.2, 5.2]
+                },
+                {
+                  'period': 'Jul',
+                  'values': [25, 3.7, 4.0, 27, 4.1, 5.1]
+                },
+                {
+                  'period': 'Aug',
+                  'values': [19, 3.6, 3.9, 20, 3.9, 4.9]
+                },
+                {
+                  'period': 'Sep',
+                  'values': [20, 3.5, 4.0, 22, 4.0, 5.0]
+                },
+                {
+                  'period': 'Oct',
+                  'values': [23, 3.8, 4.1, 25, 4.2, 5.2]
+                },
+                {
+                  'period': 'Nov',
+                  'values': [25, 3.7, 4.0, 27, 4.1, 5.1]
+                },
+                {
+                  'period': 'Dec',
+                  'values': [19, 3.6, 3.9, 20, 3.9, 4.9]
+                },
               ];
 
     return Container(
       decoration: BoxDecoration(
-        border: Border.all(color: Colors.black, width: 1), // changed from 2 to 1
+        border:
+            Border.all(color: Colors.black, width: 1), // changed from 2 to 1
         borderRadius: BorderRadius.circular(8),
         color: Colors.white,
       ),
@@ -593,11 +704,21 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
           Row(
             children: [
               // Period Header - White background, no bottom border
-              _buildHeaderCell(firstColumnHeader, flex: 15, backgroundColor: Colors.white, hasBottomBorder: false),
+              _buildHeaderCell(firstColumnHeader,
+                  flex: 15,
+                  backgroundColor: Colors.white,
+                  hasBottomBorder: false),
               // Cow Header (Spans 3 columns)
-              _buildHeaderCell('Cow', flex: 30, backgroundColor: Colors.white, hasBottomBorder: false),
+              _buildHeaderCell('Cow',
+                  flex: 30,
+                  backgroundColor: Colors.white,
+                  hasBottomBorder: false),
               // Buffalo Header (Spans 3 columns)
-              _buildHeaderCell('Buffalo', flex: 30, backgroundColor: Colors.white, hasRightBorder: false, hasBottomBorder: false),
+              _buildHeaderCell('Buffalo',
+                  flex: 30,
+                  backgroundColor: Colors.white,
+                  hasRightBorder: false,
+                  hasBottomBorder: false),
             ],
           ),
           // Horizontal separator row - only under Cow and Buffalo sections
@@ -629,13 +750,21 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
               // Empty space for first column
               Expanded(flex: 15, child: Container()),
               // Cow Sub-headers
-              _buildSubHeaderCell('Milk', flex: 10, backgroundColor: Colors.white, hasLeftBorder: true),
-              _buildSubHeaderCell('SNF', flex: 10, backgroundColor: Colors.white),
-              _buildSubHeaderCell('Fat', flex: 10, backgroundColor: Colors.white),
+              _buildSubHeaderCell('Milk',
+                  flex: 10, backgroundColor: Colors.white, hasLeftBorder: true),
+              _buildSubHeaderCell('SNF',
+                  flex: 10, backgroundColor: Colors.white),
+              _buildSubHeaderCell('Fat',
+                  flex: 10, backgroundColor: Colors.white),
               // Buffalo Sub-headers
-              _buildSubHeaderCell('Milk', flex: 10, backgroundColor: Colors.white, hasLeftBorder: true),
-              _buildSubHeaderCell('SNF', flex: 10, backgroundColor: Colors.white),
-              _buildSubHeaderCell('Fat', flex: 10, backgroundColor: Colors.white, hasRightBorder: false),
+              _buildSubHeaderCell('Milk',
+                  flex: 10, backgroundColor: Colors.white, hasLeftBorder: true),
+              _buildSubHeaderCell('SNF',
+                  flex: 10, backgroundColor: Colors.white),
+              _buildSubHeaderCell('Fat',
+                  flex: 10,
+                  backgroundColor: Colors.white,
+                  hasRightBorder: false),
             ],
           ),
           // Brackets row under subheaders
@@ -644,13 +773,18 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
               // Empty space for first column
               Expanded(flex: 15, child: Container()),
               // Cow brackets
-              _buildBracketCell('(L)', flex: 10, backgroundColor: Colors.white, hasLeftBorder: true),
+              _buildBracketCell('(L)',
+                  flex: 10, backgroundColor: Colors.white, hasLeftBorder: true),
               _buildBracketCell('(%)', flex: 10, backgroundColor: Colors.white),
               _buildBracketCell('(%)', flex: 10, backgroundColor: Colors.white),
               // Buffalo brackets
-              _buildBracketCell('(L)', flex: 10, backgroundColor: Colors.white, hasLeftBorder: true),
+              _buildBracketCell('(L)',
+                  flex: 10, backgroundColor: Colors.white, hasLeftBorder: true),
               _buildBracketCell('(%)', flex: 10, backgroundColor: Colors.white),
-              _buildBracketCell('(%)', flex: 10, backgroundColor: Colors.white, hasRightBorder: false),
+              _buildBracketCell('(%)',
+                  flex: 10,
+                  backgroundColor: Colors.white,
+                  hasRightBorder: false),
             ],
           ),
           // Horizontal separator between subheaders and data
@@ -664,16 +798,22 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
   }
 
   /// Builds a single cell for the main header row.
-  Widget _buildHeaderCell(String text, {required int flex, Color backgroundColor = Colors.grey, bool hasRightBorder = true, bool hasBottomBorder = true}) {
+  Widget _buildHeaderCell(String text,
+      {required int flex,
+      Color backgroundColor = Colors.grey,
+      bool hasRightBorder = true,
+      bool hasBottomBorder = true}) {
     return Expanded(
       flex: flex,
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12), // increased to accommodate merged cell height
+        padding: const EdgeInsets.symmetric(
+            vertical: 12), // increased to accommodate merged cell height
         decoration: BoxDecoration(
           color: backgroundColor,
           border: Border(
             right: hasRightBorder
-                ? const BorderSide(color: Colors.black, width: 1) // changed from 2 to 1
+                ? const BorderSide(
+                    color: Colors.black, width: 1) // changed from 2 to 1
                 : BorderSide.none,
             bottom: hasBottomBorder
                 ? const BorderSide(color: Colors.black, width: 1)
@@ -696,7 +836,11 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
   }
 
   /// Builds a single cell for the sub-header row.
-  Widget _buildSubHeaderCell(String text, {required int flex, required Color backgroundColor, bool hasLeftBorder = false, bool hasRightBorder = true}) {
+  Widget _buildSubHeaderCell(String text,
+      {required int flex,
+      required Color backgroundColor,
+      bool hasLeftBorder = false,
+      bool hasRightBorder = true}) {
     return Expanded(
       flex: flex,
       child: Container(
@@ -704,7 +848,9 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
         decoration: BoxDecoration(
           color: backgroundColor,
           border: Border(
-            left: hasLeftBorder ? BorderSide(color: Colors.black, width: 1) : BorderSide.none,
+            left: hasLeftBorder
+                ? BorderSide(color: Colors.black, width: 1)
+                : BorderSide.none,
             right: hasRightBorder
                 ? BorderSide(color: Colors.black, width: 1)
                 : BorderSide.none,
@@ -725,7 +871,11 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
   }
 
   /// Builds a single cell for the bracket row.
-  Widget _buildBracketCell(String text, {required int flex, required Color backgroundColor, bool hasLeftBorder = false, bool hasRightBorder = true}) {
+  Widget _buildBracketCell(String text,
+      {required int flex,
+      required Color backgroundColor,
+      bool hasLeftBorder = false,
+      bool hasRightBorder = true}) {
     return Expanded(
       flex: flex,
       child: Container(
@@ -733,7 +883,9 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
         decoration: BoxDecoration(
           color: backgroundColor,
           border: Border(
-            left: hasLeftBorder ? BorderSide(color: Colors.black, width: 1) : BorderSide.none,
+            left: hasLeftBorder
+                ? BorderSide(color: Colors.black, width: 1)
+                : BorderSide.none,
             right: hasRightBorder
                 ? BorderSide(color: Colors.black, width: 1)
                 : BorderSide.none,
@@ -770,13 +922,22 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
           ),
           child: Row(
             children: [
-              _buildDataCell((rowData['period'] as String), flex: 15, backgroundColor: Colors.white, isBold: true),
-              _buildDataCell(values[0].toString(), flex: 10, backgroundColor: Color(0xFFCBDFEB)), // Cow Milk
-              _buildDataCell(values[1].toString(), flex: 10, backgroundColor: Color(0xFFCBDFEB)), // Cow SNF
-              _buildDataCell(values[2].toString(), flex: 10, backgroundColor: Color(0xFFCBDFEB)), // Cow Fat
-              _buildDataCell(values[3].toString(), flex: 10, backgroundColor: Color(0xFFD6D6D6)), // Buffalo Milk
-              _buildDataCell(values[4].toString(), flex: 10, backgroundColor: Color(0xFFD6D6D6)), // Buffalo SNF
-              _buildDataCell(values[5].toString(), flex: 10, backgroundColor: Color(0xFFD6D6D6), hasRightBorder: false), // Buffalo Fat
+              _buildDataCell((rowData['period'] as String),
+                  flex: 15, backgroundColor: Colors.white, isBold: true),
+              _buildDataCell(values[0].toString(),
+                  flex: 10, backgroundColor: Color(0xFFCBDFEB)), // Cow Milk
+              _buildDataCell(values[1].toString(),
+                  flex: 10, backgroundColor: Color(0xFFCBDFEB)), // Cow SNF
+              _buildDataCell(values[2].toString(),
+                  flex: 10, backgroundColor: Color(0xFFCBDFEB)), // Cow Fat
+              _buildDataCell(values[3].toString(),
+                  flex: 10, backgroundColor: Color(0xFFD6D6D6)), // Buffalo Milk
+              _buildDataCell(values[4].toString(),
+                  flex: 10, backgroundColor: Color(0xFFD6D6D6)), // Buffalo SNF
+              _buildDataCell(values[5].toString(),
+                  flex: 10,
+                  backgroundColor: Color(0xFFD6D6D6),
+                  hasRightBorder: false), // Buffalo Fat
             ],
           ),
         ),
@@ -786,7 +947,11 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
   }
 
   /// Builds a single cell for a data row.
-  Widget _buildDataCell(String text, {required int flex, required Color backgroundColor, bool hasRightBorder = true, bool isBold = false}) {
+  Widget _buildDataCell(String text,
+      {required int flex,
+      required Color backgroundColor,
+      bool hasRightBorder = true,
+      bool isBold = false}) {
     return Expanded(
       flex: flex,
       child: Container(
@@ -814,15 +979,25 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
     );
   }
 
-  Widget _tableCell(String text, {Color color = Colors.white, Alignment align = Alignment.center, bool bold = false, double fontSize = 14, bool borderBottom = false, bool borderRight = false}) {
+  Widget _tableCell(String text,
+      {Color color = Colors.white,
+      Alignment align = Alignment.center,
+      bool bold = false,
+      double fontSize = 14,
+      bool borderBottom = false,
+      bool borderRight = false}) {
     return Container(
       alignment: align,
       padding: const EdgeInsets.symmetric(vertical: 8),
       decoration: BoxDecoration(
         color: color,
         border: Border(
-          bottom: borderBottom ? const BorderSide(color: Colors.black, width: 2) : BorderSide.none,
-          right: borderRight ? const BorderSide(color: Colors.black, width: 2) : BorderSide.none,
+          bottom: borderBottom
+              ? const BorderSide(color: Colors.black, width: 2)
+              : BorderSide.none,
+          right: borderRight
+              ? const BorderSide(color: Colors.black, width: 2)
+              : BorderSide.none,
         ),
       ),
       child: Text(
@@ -882,7 +1057,7 @@ class SimpleChartPainter extends CustomPainter {
 
     final path = Path();
     final fillPath = Path();
-    
+
     final points = [
       Offset(0, size.height * 0.8),
       Offset(size.width * 0.15, size.height * 0.6),

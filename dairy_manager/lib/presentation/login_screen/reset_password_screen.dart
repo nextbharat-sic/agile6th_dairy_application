@@ -14,7 +14,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   final _codeControllers = List.generate(6, (_) => TextEditingController());
   final _newPasswordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
-  bool _codeVerified = true; // For demo, always true
+  final bool _codeVerified = true; // For demo, always true
 
   @override
   void dispose() {
@@ -40,7 +40,8 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
               children: [
                 const SizedBox(height: 24),
                 IconButton(
-                  icon: const Icon(Icons.arrow_back, color: Colors.white, size: 28),
+                  icon: const Icon(Icons.arrow_back,
+                      color: Colors.white, size: 28),
                   onPressed: () => Navigator.pop(context),
                 ),
                 Padding(
@@ -57,7 +58,8 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                 Center(
                   child: Container(
                     margin: const EdgeInsets.symmetric(horizontal: 16),
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 32),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 32),
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(36),
@@ -76,7 +78,10 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                         children: [
                           Text(
                             'Username',
-                            style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                            style: Theme.of(context)
+                                .textTheme
+                                .labelLarge
+                                ?.copyWith(
                                   color: AppTheme.textPrimaryColor,
                                   fontWeight: FontWeight.w600,
                                 ),
@@ -89,10 +94,12 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                               filled: true,
                               fillColor: Colors.white,
                               border: OutlineInputBorder(
-                                borderRadius: BorderRadius.all(Radius.circular(20)),
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(20)),
                                 borderSide: BorderSide.none,
                               ),
-                              contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                              contentPadding: EdgeInsets.symmetric(
+                                  horizontal: 20, vertical: 16),
                             ),
                             validator: (value) {
                               if (value == null || value.isEmpty) {
@@ -104,7 +111,10 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                           const SizedBox(height: 16),
                           Text(
                             'Enter the code sent to the number 98765***** associated with your account to reset your password.',
-                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.copyWith(
                                   color: AppTheme.textSecondaryColor,
                                 ),
                           ),
@@ -124,7 +134,8 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                                     filled: true,
                                     fillColor: Colors.white,
                                     border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.all(Radius.circular(12)),
+                                      borderRadius:
+                                          BorderRadius.all(Radius.circular(12)),
                                       borderSide: BorderSide.none,
                                     ),
                                   ),
@@ -135,19 +146,24 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                           const SizedBox(height: 8),
                           Text(
                             'Enter the code sent to the number 98765***** to reset your password',
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: AppTheme.textSecondaryColor,
-                                ),
+                            style:
+                                Theme.of(context).textTheme.bodySmall?.copyWith(
+                                      color: AppTheme.textSecondaryColor,
+                                    ),
                           ),
                           const SizedBox(height: 8),
                           if (_codeVerified)
                             Row(
                               children: [
-                                const Icon(Icons.check_circle, color: Colors.green, size: 20),
+                                const Icon(Icons.check_circle,
+                                    color: Colors.green, size: 20),
                                 const SizedBox(width: 8),
                                 Text(
                                   'Code Verified',
-                                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodyMedium
+                                      ?.copyWith(
                                         color: Colors.green,
                                         fontWeight: FontWeight.w600,
                                       ),
@@ -157,7 +173,10 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                           const Divider(height: 32),
                           Text(
                             'New Password',
-                            style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                            style: Theme.of(context)
+                                .textTheme
+                                .labelLarge
+                                ?.copyWith(
                                   color: AppTheme.textPrimaryColor,
                                   fontWeight: FontWeight.w600,
                                 ),
@@ -171,10 +190,12 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                               filled: true,
                               fillColor: Colors.white,
                               border: OutlineInputBorder(
-                                borderRadius: BorderRadius.all(Radius.circular(20)),
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(20)),
                                 borderSide: BorderSide.none,
                               ),
-                              contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                              contentPadding: EdgeInsets.symmetric(
+                                  horizontal: 20, vertical: 16),
                             ),
                             validator: (value) {
                               if (value == null || value.isEmpty) {
@@ -189,7 +210,10 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                           const SizedBox(height: 16),
                           Text(
                             'Confirm Password',
-                            style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                            style: Theme.of(context)
+                                .textTheme
+                                .labelLarge
+                                ?.copyWith(
                                   color: AppTheme.textPrimaryColor,
                                   fontWeight: FontWeight.w600,
                                 ),
@@ -203,10 +227,12 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                               filled: true,
                               fillColor: Colors.white,
                               border: OutlineInputBorder(
-                                borderRadius: BorderRadius.all(Radius.circular(20)),
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(20)),
                                 borderSide: BorderSide.none,
                               ),
-                              contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                              contentPadding: EdgeInsets.symmetric(
+                                  horizontal: 20, vertical: 16),
                             ),
                             validator: (value) {
                               if (value == null || value.isEmpty) {
@@ -228,7 +254,8 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                                   // Handle reset logic
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(
-                                      content: Text('Password reset successful!'),
+                                      content:
+                                          Text('Password reset successful!'),
                                       backgroundColor: Colors.green,
                                     ),
                                   );
@@ -242,7 +269,8 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                                   borderRadius: BorderRadius.circular(20),
                                 ),
                                 elevation: 4,
-                                padding: const EdgeInsets.symmetric(vertical: 12),
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 12),
                               ),
                               child: const Text(
                                 'Reset',

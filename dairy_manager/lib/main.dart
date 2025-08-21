@@ -10,7 +10,6 @@ import 'l10n/app_localizations.dart';
 import 'providers/auth_provider.dart';
 import 'firebase_options.dart';
 
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
