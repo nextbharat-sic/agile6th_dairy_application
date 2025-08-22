@@ -28,7 +28,7 @@ class RegistrationHeaderWidget extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
               const SizedBox(height: 32),
-              SvgPicture.asset(
+              Image.asset(
                 'assets/images/joined_hands.svg',
                 height: 80,
                 width: 80,

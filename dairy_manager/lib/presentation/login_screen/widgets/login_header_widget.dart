@@ -28,8 +28,8 @@ class LoginHeaderWidget extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
               const SizedBox(height: 32),
-              SvgPicture.asset(
-                'assets/images/joined_hands.svg',
+              Image.asset(
+                'assets/images/joined-hands.png',
                 height: 80,
                 width: 80,
                 fit: BoxFit.contain,

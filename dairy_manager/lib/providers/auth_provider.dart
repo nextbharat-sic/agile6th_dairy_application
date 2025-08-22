@@ -12,6 +12,7 @@ class AuthProvider extends ChangeNotifier {
       'email',
       'profile',
     ],
+    serverClientId: '526058541371-1tsa6f523nt73mgsiktb4rarm8ltq5su.apps.googleusercontent.com',
   );
 
   bool _isAuthenticated = false;
@@ -93,6 +94,8 @@ class AuthProvider extends ChangeNotifier {
         await _googleSignIn.signOut();
       }
       
+      // Initialize Google Sign In
+      print('Initializing Google Sign-In...');
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
       if (googleUser == null) {
         print('User canceled Google Sign-In');
