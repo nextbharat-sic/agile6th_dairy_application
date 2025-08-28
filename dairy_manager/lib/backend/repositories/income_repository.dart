@@ -14,8 +14,7 @@ class IncomeRepository {
         .set(model.toMap());
   }
 
-  Future<double> getTotalIncome(String userId, DateTime startDateTime, DateTime endDateTime, AnimalType animalType) async {
-    double totalIncome = 0;
+  Future<QuerySnapshot<Map<String, dynamic>>> getIncomeForAnimalInDateRange (String userId, DateTime startDateTime, DateTime endDateTime, AnimalType animalType) async {
     final snapshot = await firestore.collection('users').doc(userId)
         .collection('income')
         .where('dateTime', isGreaterThanOrEqualTo: startDateTime)
@@ -23,9 +22,6 @@ class IncomeRepository {
         .where('animalType', isEqualTo: animalType.key)
         .get();
 
-    for (var doc in snapshot.docs) {
-      totalIncome += (doc.data()['totalIncome'] as num).toDouble();
-    }
-    return totalIncome;
+    return snapshot;
   }
 }

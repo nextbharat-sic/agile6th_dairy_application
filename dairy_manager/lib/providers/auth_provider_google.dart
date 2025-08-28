@@ -1,10 +1,12 @@
 // lib/providers/auth_provider_google.dart
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dairy_manager/presentation/dashboard_screen/dashboard_screen.dart';
-import 'package:firebase_auth/firebase_auth.dart' hide EmailAuthProvider;
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:firebase_ui_oauth_google/firebase_ui_oauth_google.dart';
 import 'package:flutter/material.dart';
-import 'package:dairy_manager/data/user_repository.dart';
+
+import '../backend/repositories/user_repository.dart';
 
 class AuthGate extends StatelessWidget {
   const AuthGate({super.key, required this.clientId});
@@ -23,13 +25,14 @@ class AuthGate extends StatelessWidget {
 
         return SignInScreen(
           providers: [
-            EmailAuthProvider(),
+            // EmailAuthProvider(),
             GoogleProvider(clientId: clientId),
           ],
           actions: [
             AuthStateChangeAction<SignedIn>((context, state) async {
               try {
-                await UserRepository().upsertUserOld();
+                FirebaseFirestore firestore = FirebaseFirestore.instance;
+                await UserRepository(firestore).upsertUserOld();
               } catch (e) {
                 debugPrint('upsertUserOld failed: $e');
               }

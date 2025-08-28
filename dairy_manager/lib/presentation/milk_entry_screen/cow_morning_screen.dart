@@ -1,4 +1,10 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import '../../backend/repositories/income_repository.dart';
+import '../../backend/repositories/user_repository.dart';
+import '../../backend/services/income_service.dart';
+import '../../constants/constants.dart';
 import '../../theme/app_theme.dart';
 
 class CowMorningScreen extends StatefulWidget {
@@ -20,10 +26,37 @@ class _CowMorningScreenState extends State<CowMorningScreen> {
   DateTime _selectedDate = DateTime.now();
   double _todayIncome = 0.0;
 
+  late IncomeService _incomeService;
+  late String _userId;
+
   @override
   void initState() {
     super.initState();
     _dateController.text = _formatDate(_selectedDate);
+    // Initialize services
+    final firestore = FirebaseFirestore.instance;
+    final FirebaseAuth auth = FirebaseAuth.instance;
+    final incomeRepo = IncomeRepository(firestore);
+    final userRepo = UserRepository(firestore); // Assuming UserRepository needs Firestore
+    _incomeService = IncomeService(incomeRepo: incomeRepo, userRepo: userRepo);
+
+    // Set _userId from your authentication layer
+    final User? user = auth.currentUser;
+    if (user != null) {
+      _userId = user.uid;
+    } else {
+      // TODO
+      // Handle the case where the user is not logged in,
+      // perhaps by redirecting to a login screen or showing an error.
+      // For now, we'll throw an error or assign a default/guest ID if applicable.
+      // This part depends on your app's authentication flow.
+      // For this example, let's assume _userId must be set.
+      // If a guest mode or default is needed, adjust accordingly.
+      print("User not logged in!"); // Or handle more gracefully
+      // As a fallback, if critical, you might prevent screen usage or pop
+      // Navigator.pop(context); 
+      // throw Exception("User ID not available"); // Or set a default/guest ID
+    }
   }
 
   @override
@@ -74,15 +107,59 @@ class _CowMorningScreenState extends State<CowMorningScreen> {
     }
   }
 
-  void _handleSubmit() {
-    if (_formKey.currentState!.validate()) {
+  Future<void> _handleSubmit() async {
+    if (!_formKey.currentState!.validate()) return;
+    if (_userId.isEmpty) { // Ensure userId is available
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Milk entry saved successfully!'),
+          content: Text('User information not available. Please log in again.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    final animalType = AnimalType.cow; // Changed to cow
+    final session = _isMorning ? SessionType.morning : SessionType.evening;
+    final liters = double.tryParse(_milkController.text) ?? 0.0;
+    final snf = double.tryParse(_snfController.text) ?? 0.0; // Allow null for snf/fat if not entered
+    final fat = double.tryParse(_fatController.text) ?? 0.0; // Allow null for snf/fat if not entered
+    final costPerLiter = double.tryParse(_costController.text) ?? 0.0;
+
+    try {
+      final result = await _incomeService.addIncome(
+        userId: _userId,
+        dateTime: _selectedDate,
+        animalType: animalType,
+        session: session,
+        liters: liters,
+        snf: snf,
+        fat: fat,
+        newCostPerLiter: costPerLiter,// Assuming this is the new cost to be potentially updated
+      );
+      
+
+      if (result.containsKey('totalIncomeDay')) {
+        setState(() {
+          _todayIncome = result['totalIncomeDay'];
+        });
+      }
+
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Entry saved! Session income: ₹${result['totalIncomeSession']?.toStringAsFixed(2) ?? 'N/A'}, Day total: ₹${result['totalIncomeDay']?.toStringAsFixed(2) ?? 'N/A'}"),
           backgroundColor: AppTheme.accentColor,
         ),
       );
-      Navigator.pop(context);
+      Navigator.pop(context); // Clean navigation after success
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to save milk entry: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
 
@@ -529,4 +606,4 @@ class _CowMorningScreenState extends State<CowMorningScreen> {
       ],
     );
   }
-} 
+}

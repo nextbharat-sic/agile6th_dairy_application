@@ -1,11 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart' hide DateUtils;
 import '../../backend/repositories/income_repository.dart';
 import '../../backend/repositories/user_repository.dart';
 import '../../backend/services/income_service.dart';
 import '../../constants/constants.dart';
 import '../../theme/app_theme.dart';
-import '../../../utils/date_utils.dart';
 
 class BuffaloMorningScreen extends StatefulWidget {
   const BuffaloMorningScreen({super.key});
@@ -37,13 +37,30 @@ class _BuffaloMorningScreenState extends State<BuffaloMorningScreen> {
     _dateController.text = _formatDate(_selectedDate);
     // Initialize services
     final firestore = FirebaseFirestore.instance;
+    final FirebaseAuth auth = FirebaseAuth.instance;
     final incomeRepo = IncomeRepository(firestore);
     final userRepo = UserRepository(firestore);
     _incomeService = IncomeService(incomeRepo: incomeRepo, userRepo: userRepo);
 
-    // Set _userId from your authentication layer
-    _userId = 'user-id';/* fetch signed-in userId here */
-    _fetchTodayIncome();
+     // Set _userId from your authentication layer
+    final User? user = auth.currentUser;
+
+    if (user != null) {
+      _userId = user.uid; // <-- This is the Firebase UID
+    }
+    else {
+      // TODO
+      // Handle the case where the user is not logged in,
+      // perhaps by redirecting to a login screen or showing an error.
+      // For now, we'll throw an error or assign a default/guest ID if applicable.
+      // This part depends on your app's authentication flow.
+      // For this example, let's assume _userId must be set.
+      // If a guest mode or default is needed, adjust accordingly.
+      print("User not logged in!"); // Or handle more gracefully
+      // As a fallback, if critical, you might prevent screen usage or pop
+      // Navigator.pop(context);
+      // throw Exception("User ID not available"); // Or set a default/guest ID
+    }
   }
 
   @override
@@ -91,25 +108,6 @@ class _BuffaloMorningScreenState extends State<BuffaloMorningScreen> {
         _selectedDate = picked;
         _dateController.text = _formatDate(picked);
       });
-      await _fetchTodayIncome(); // Refresh today's income for new date
-    }
-  }
-
-  Future<void> _fetchTodayIncome() async {
-    // Fetch total income for this animal and date
-    final dayStart = DateUtils.getStartOfDay(_selectedDate);
-    final dayEnd = DateUtils.getEndOfDay(_selectedDate);
-
-    try {
-      final double totalIncome = await _incomeService.incomeRepo.getTotalIncome(
-        _userId,
-        dayStart,
-        dayEnd,
-        AnimalType.buffalo,
-      );
-      setState(() { _todayIncome = totalIncome; });
-    } catch (e) {
-      setState(() { _todayIncome = 0.0; });
     }
   }
 
@@ -135,7 +133,6 @@ class _BuffaloMorningScreenState extends State<BuffaloMorningScreen> {
         newCostPerLiter: costPerLiter,
       );
       // Show success message and update daily income
-      await _fetchTodayIncome();
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
