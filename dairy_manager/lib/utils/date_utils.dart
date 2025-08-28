@@ -2,8 +2,8 @@ import 'package:intl/intl.dart';
 
 class DateUtils {
   /// Generates datetime in 'yyyyMMdd_HHmmss' format, local timezone.
-  static String convertToDatetimeString(DateTime dateTime) =>
-      DateFormat('yyyyMMdd_HHmmss').format(dateTime);
+  static String convertToDateString(DateTime dateTime) =>
+      DateFormat('yyyyMMdd').format(dateTime);
 
   /// Returns the start of the day for the given [dateTime].
   static DateTime getStartOfDay(DateTime dateTime) =>

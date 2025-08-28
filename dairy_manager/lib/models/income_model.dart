@@ -42,7 +42,7 @@ class IncomeModel {
 
   Map<String, dynamic> toMap() => {
     'id': id,
-    'dateTime': dateTime.toIso8601String(),
+    'dateTime': dateTime,
     'animalType': animalType.key,
     'session': session.key,
     'liters': liters,

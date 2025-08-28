@@ -1,4 +1,10 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import '../../backend/repositories/income_repository.dart';
+import '../../backend/repositories/user_repository.dart';
+import '../../backend/services/income_service.dart';
+import '../../constants/constants.dart';
 import '../../theme/app_theme.dart';
 import '../../backend/repositories/income_repository.dart';
 import '../../backend/repositories/user_repository.dart';
@@ -27,24 +33,10 @@ class _CowMorningScreenState extends State<CowMorningScreen> {
   DateTime _selectedDate = DateTime.now();
   double _todayIncome = 0.0;
 
-  late IncomeService _incomeService;
-  String? _userId;
-
   @override
   void initState() {
     super.initState();
     _dateController.text = _formatDate(_selectedDate);
-    final firestore = FirebaseFirestore.instance;
-    final incomeRepo = IncomeRepository(firestore);
-    final userRepo = UserRepository(firestore);
-    _incomeService = IncomeService(incomeRepo: incomeRepo, userRepo: userRepo);
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    _userId = authProvider.userId;
   }
 
   @override
@@ -95,60 +87,15 @@ class _CowMorningScreenState extends State<CowMorningScreen> {
     }
   }
 
-  Future<void> _handleSubmit() async {
-    if (_userId == null) {
+  void _handleSubmit() {
+    if (_formKey.currentState!.validate()) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Please sign in to submit milk entries.'),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
-
-    final isValid = _formKey.currentState!.validate();
-    if (!isValid) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Please fill Milk (L) and Cost/L fields.'),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
-
-    final animalType = AnimalType.cow;
-    final session = _isMorning ? SessionType.morning : SessionType.evening;
-    final liters = double.tryParse(_milkController.text) ?? 0.0;
-    final snf = double.tryParse(_snfController.text) ?? 0.0;
-    final fat = double.tryParse(_fatController.text) ?? 0.0;
-    final costPerLiter = double.tryParse(_costController.text) ?? 0.0;
-
-    try {
-      final result = await _incomeService.addIncome(
-        userId: _userId!,
-        dateTime: _selectedDate,
-        animalType: animalType,
-        session: session,
-        liters: liters,
-        snf: snf,
-        fat: fat,
-        newCostPerLiter: costPerLiter,
-      );
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("Entry saved!"),
+        const SnackBar(
+          content: Text('Milk entry saved successfully!'),
           backgroundColor: AppTheme.accentColor,
         ),
       );
       Navigator.pop(context);
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Failed to save milk entry: ${e.toString()}'),
-          backgroundColor: Colors.red,
-        ),
-      );
     }
   }
 
@@ -601,4 +548,4 @@ class _CowMorningScreenState extends State<CowMorningScreen> {
       ],
     );
   }
-} 
+}
