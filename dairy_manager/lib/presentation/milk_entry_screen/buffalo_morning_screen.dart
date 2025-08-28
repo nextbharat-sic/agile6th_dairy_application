@@ -6,6 +6,8 @@ import '../../backend/services/income_service.dart';
 import '../../constants/constants.dart';
 import '../../theme/app_theme.dart';
 import '../../../utils/date_utils.dart';
+import '../../providers/auth_provider.dart';
+import 'package:provider/provider.dart';
 
 class BuffaloMorningScreen extends StatefulWidget {
   const BuffaloMorningScreen({super.key});
@@ -28,8 +30,7 @@ class _BuffaloMorningScreenState extends State<BuffaloMorningScreen> {
   double _todayIncome = 0.0;
 
   late IncomeService _incomeService;
-  late String _userId; // Set this appropriately in your authentication logic.
-
+  String? _userId;
 
   @override
   void initState() {
@@ -40,10 +41,16 @@ class _BuffaloMorningScreenState extends State<BuffaloMorningScreen> {
     final incomeRepo = IncomeRepository(firestore);
     final userRepo = UserRepository(firestore);
     _incomeService = IncomeService(incomeRepo: incomeRepo, userRepo: userRepo);
+  }
 
-    // Set _userId from your authentication layer
-    _userId = 'user-id';/* fetch signed-in userId here */
-    _fetchTodayIncome();
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    _userId = authProvider.userId;
+    if (_userId != null) {
+      _fetchTodayIncome();
+    }
   }
 
   @override
@@ -102,7 +109,7 @@ class _BuffaloMorningScreenState extends State<BuffaloMorningScreen> {
 
     try {
       final double totalIncome = await _incomeService.incomeRepo.getTotalIncome(
-        _userId,
+        _userId!,
         dayStart,
         dayEnd,
         AnimalType.buffalo,
@@ -113,8 +120,27 @@ class _BuffaloMorningScreenState extends State<BuffaloMorningScreen> {
     }
   }
 
-  Future<void> _handleSubmit() async  {
-    if (!_formKey.currentState!.validate()) return;
+  Future<void> _handleSubmit() async {
+    if (_userId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Please sign in to submit milk entries.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    final isValid = _formKey.currentState!.validate();
+    if (!isValid) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Please fill Milk (L) and Cost/L fields.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
 
     final animalType = AnimalType.buffalo;
     final session = _isMorning ? SessionType.morning : SessionType.evening;
@@ -125,7 +151,7 @@ class _BuffaloMorningScreenState extends State<BuffaloMorningScreen> {
 
     try {
       final result = await _incomeService.addIncome(
-        userId: _userId,
+        userId: _userId!,
         dateTime: _selectedDate,
         animalType: animalType,
         session: session,
@@ -159,193 +185,191 @@ class _BuffaloMorningScreenState extends State<BuffaloMorningScreen> {
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
       body: SafeArea(
-        child: Column(
-          children: [
-            // Header section with back button, buffalo image, and settings
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
-              child: Row(
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.arrow_back, color: Colors.white, size: 28),
-                    onPressed: () => Navigator.pop(context),
-                  ),
-                  Expanded(
-                    child: Column(
-                      children: [
-                        Container(
-                          width: 80,
-                          height: 80,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            shape: BoxShape.circle,
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(16),
-                            child: Image.asset(
-                              'assets/images/buffalo.png',
-                              fit: BoxFit.contain,
-                              errorBuilder: (context, error, stackTrace) {
-                                return Icon(
-                                  Icons.pets,
-                                  size: 40,
-                                  color: AppTheme.textPrimaryColor,
-                                );
-                              },
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        Text(
-                          'Buffalo',
-                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 20,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.settings, color: Colors.white, size: 28),
-                    onPressed: () {
-                      Navigator.pushNamed(context, '/settings');
-                    },
-                  ),
-                ],
-              ),
-            ),
-            
-            // Toggle bar
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0),
-              child: SizedBox(
-                height: 80,
-                child: Stack(
-                  children: [
-                    // Background pill
-                    Container(
-                      height: 80,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFE4E5E6),
-                        borderRadius: BorderRadius.circular(40),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.08),
-                            blurRadius: 8,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
+        child: SingleChildScrollView(
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Header section
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(8, 8, 8, 16),
+                  child: Row(
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.arrow_back, color: Colors.white, size: 24),
+                        onPressed: () => Navigator.pop(context),
                       ),
-                    ),
-                    // Animated sliding white pill
-                    AnimatedAlign(
-                      duration: const Duration(milliseconds: 300),
-                      curve: Curves.easeInOut,
-                      alignment: _isMorning ? Alignment.centerLeft : Alignment.centerRight,
-                      child: Container(
-                        width: MediaQuery.of(context).size.width / 2 - 24,
-                        height: 72,
-                        margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(36),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.12),
-                              blurRadius: 12,
-                              offset: const Offset(0, 4),
+                      Expanded(
+                        child: Column(
+                          children: [
+                            Container(
+                              width: 48,
+                              height: 48,
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                shape: BoxShape.circle,
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.all(8),
+                                child: Image.asset(
+                                  'assets/images/buffalo.png',
+                                  fit: BoxFit.contain,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return Icon(
+                                      Icons.pets,
+                                      size: 24,
+                                      color: AppTheme.textPrimaryColor,
+                                    );
+                                  },
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Buffalo',
+                              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 16,
+                                  ),
                             ),
                           ],
                         ),
                       ),
-                    ),
-                    // Row with icons/text and tap handlers
-                    Row(
+                      IconButton(
+                        icon: const Icon(Icons.settings, color: Colors.white, size: 24),
+                        onPressed: () {
+                          Navigator.pushNamed(context, '/settings');
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+                // Toggle bar
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                  child: SizedBox(
+                    height: 48,
+                    child: Stack(
                       children: [
-                        Expanded(
-                          child: GestureDetector(
-                            onTap: () => setState(() => _isMorning = true),
-                            child: SizedBox(
-                              height: 80,
-                              child: Center(
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(Icons.wb_sunny, size: 32, color: _isMorning ? const Color(0xFF395364) : Colors.white),
-                                    const SizedBox(width: 12),
-                                    Text(
-                                      'Morning',
-                                      style: TextStyle(
-                                        color: _isMorning ? const Color(0xFF395364) : Colors.white,
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 22,
-                                      ),
-                                    ),
-                                  ],
-                                ),
+                        Container(
+                          height: 48,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFE4E5E6),
+                            borderRadius: BorderRadius.circular(24),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.08),
+                                blurRadius: 4,
+                                offset: const Offset(0, 2),
                               ),
+                            ],
+                          ),
+                        ),
+                        AnimatedAlign(
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.easeInOut,
+                          alignment: _isMorning ? Alignment.centerLeft : Alignment.centerRight,
+                          child: Container(
+                            width: MediaQuery.of(context).size.width / 2 - 24,
+                            height: 40,
+                            margin: const EdgeInsets.symmetric(horizontal: 2, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(20),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.12),
+                                  blurRadius: 6,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
                             ),
                           ),
                         ),
-                        Expanded(
-                          child: GestureDetector(
-                            onTap: () => setState(() => _isMorning = false),
-                            child: SizedBox(
-                              height: 80,
-                              child: Center(
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(Icons.nightlight_round, size: 32, color: !_isMorning ? const Color(0xFF395364) : Colors.white),
-                                    const SizedBox(width: 12),
-                                    Text(
-                                      'Evening',
-                                      style: TextStyle(
-                                        color: !_isMorning ? const Color(0xFF395364) : Colors.white,
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 22,
-                                      ),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: GestureDetector(
+                                onTap: () => setState(() => _isMorning = true),
+                                child: SizedBox(
+                                  height: 48,
+                                  child: Center(
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Icon(Icons.wb_sunny, size: 20, color: _isMorning ? const Color(0xFF395364) : Colors.white),
+                                        const SizedBox(width: 6),
+                                        Text(
+                                          'Morning',
+                                          style: TextStyle(
+                                            color: _isMorning ? const Color(0xFF395364) : Colors.white,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 14,
+                                          ),
+                                        ),
+                                      ],
                                     ),
-                                  ],
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
+                            Expanded(
+                              child: GestureDetector(
+                                onTap: () => setState(() => _isMorning = false),
+                                child: SizedBox(
+                                  height: 48,
+                                  child: Center(
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Icon(Icons.nightlight_round, size: 20, color: !_isMorning ? const Color(0xFF395364) : Colors.white),
+                                        const SizedBox(width: 6),
+                                        Text(
+                                          'Evening',
+                                          style: TextStyle(
+                                            color: !_isMorning ? const Color(0xFF395364) : Colors.white,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 14,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
-                  ],
+                  ),
                 ),
-              ),
-            ),
-            const SizedBox(height: 24),
-            // Main content card
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Container(
+                const SizedBox(height: 8),
+                // Main content card
+                Container(
                   width: double.infinity,
                   decoration: BoxDecoration(
                     color: _isMorning ? const Color(0xFFE4E5E6) : const Color(0xFF395364),
-                    borderRadius: BorderRadius.circular(32),
+                    borderRadius: BorderRadius.circular(20),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.08),
-                        blurRadius: 16,
-                        offset: const Offset(0, 8),
+                        color: Colors.black.withOpacity(0.08),
+                        blurRadius: 8,
+                        offset: const Offset(0, 4),
                       ),
                     ],
                   ),
                   child: Padding(
-                    padding: const EdgeInsets.all(24),
+                    padding: const EdgeInsets.all(12),
                     child: Form(
                       key: _formKey,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
+                        mainAxisSize: MainAxisSize.min,
                         children: [
-                          // Form fields (unchanged, but always white background)
                           _buildFormField(
                             controller: _dateController,
                             label: 'Date',
@@ -353,46 +377,47 @@ class _BuffaloMorningScreenState extends State<BuffaloMorningScreen> {
                             onTap: _selectDate,
                             readOnly: true,
                           ),
-                          const SizedBox(height: 20),
+                          const SizedBox(height: 10),
                           _buildFormField(
                             controller: _milkController,
                             label: 'Milk (L)',
                             hint: 'Input Text',
                             onChanged: (value) => _calculateIncome(),
+                            isRequired: true,
                           ),
-                          const SizedBox(height: 20),
+                          const SizedBox(height: 10),
                           _buildFormField(
                             controller: _snfController,
                             label: 'SNF',
                             hint: 'Input Text',
                           ),
-                          const SizedBox(height: 20),
+                          const SizedBox(height: 10),
                           _buildFormField(
                             controller: _fatController,
                             label: 'Fat',
                             hint: 'Input Text',
                           ),
-                          const SizedBox(height: 20),
+                          const SizedBox(height: 10),
                           _buildFormField(
                             controller: _costController,
                             label: 'Cost/L',
                             hint: 'Enter the cost',
                             suffixIcon: Icons.lock,
                             onChanged: (value) => _calculateIncome(),
+                            isRequired: true,
                           ),
-                          const Spacer(),
-                          // Submit button
+                          const SizedBox(height: 16),
                           Container(
                             width: double.infinity,
-                            height: 56,
+                            height: 44,
                             decoration: BoxDecoration(
                               color: Colors.white,
-                              borderRadius: BorderRadius.circular(16),
+                              borderRadius: BorderRadius.circular(12),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.08),
-                                  blurRadius: 8,
-                                  offset: const Offset(0, 4),
+                                  color: Colors.black.withOpacity(0.08),
+                                  blurRadius: 4,
+                                  offset: const Offset(0, 2),
                                 ),
                               ],
                             ),
@@ -400,12 +425,12 @@ class _BuffaloMorningScreenState extends State<BuffaloMorningScreen> {
                               color: Colors.transparent,
                               child: InkWell(
                                 onTap: _handleSubmit,
-                                borderRadius: BorderRadius.circular(16),
+                                borderRadius: BorderRadius.circular(12),
                                 child: Center(
                                   child: Text(
                                     'Submit',
                                     style: TextStyle(
-                                      fontSize: 18,
+                                      fontSize: 16,
                                       fontWeight: FontWeight.w600,
                                       color: _isMorning ? const Color(0xFF395364) : Colors.white,
                                     ),
@@ -419,56 +444,56 @@ class _BuffaloMorningScreenState extends State<BuffaloMorningScreen> {
                     ),
                   ),
                 ),
-              ),
-            ),
-            
-            // Today's Income section
-            Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    "Today's Income",
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                const SizedBox(height: 12),
+                // Today's Income section
+                Container(
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: AppTheme.backgroundColor,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
                       color: Colors.white,
-                      fontWeight: FontWeight.w600,
+                      width: 1.5,
                     ),
-                  ),
-                  const SizedBox(height: 12),
-                  Container(
-                    width: double.infinity,
-                    height: 60,
-                    decoration: BoxDecoration(
-                      color: AppTheme.backgroundColor,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(
-                        color: Colors.white,
-                        width: 2,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.15),
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
                       ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 50),
-                          blurRadius: 8,
-                          offset: const Offset(0, 4),
+                    ],
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Today's Income",
+                          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w600,
+                              ),
+                        ),
+                        const SizedBox(height: 6),
+                        Center(
+                          child: Text(
+                            '\u20b9${_todayIncome.toStringAsFixed(0)}/-',
+                            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 18,
+                                ),
+                          ),
                         ),
                       ],
                     ),
-                    child: Center(
-                      child: Text(
-                        '₹${_todayIncome.toStringAsFixed(0)}/-',
-                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 24,
-                        ),
-                      ),
-                    ),
                   ),
-                ],
-              ),
+                ),
+                const SizedBox(height: 8),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
@@ -527,6 +552,7 @@ class _BuffaloMorningScreenState extends State<BuffaloMorningScreen> {
     VoidCallback? onTap,
     IconData? suffixIcon,
     ValueChanged<String>? onChanged,
+    bool isRequired = false,
   }) {
     return Row(
       children: [
@@ -549,6 +575,12 @@ class _BuffaloMorningScreenState extends State<BuffaloMorningScreen> {
             readOnly: readOnly,
             onTap: onTap,
             onChanged: onChanged,
+            validator: (value) {
+              if (isRequired && (value == null || value.isEmpty)) {
+                return 'Required';
+              }
+              return null;
+            },
             decoration: InputDecoration(
               hintText: hint,
               hintStyle: TextStyle(

@@ -12,7 +12,6 @@ class AuthProvider extends ChangeNotifier {
       'email',
       'profile',
     ],
-    serverClientId: '526058541371-1tsa6f523nt73mgsiktb4rarm8ltq5su.apps.googleusercontent.com',
   );
 
   bool _isAuthenticated = false;
