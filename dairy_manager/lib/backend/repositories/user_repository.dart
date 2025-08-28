@@ -51,7 +51,7 @@ class UserRepository {
 
   /// Upserts user data to Firestore using Entity-Model pattern.
   /// Creates a new user document if one doesn't exist, otherwise updates existing document.
-  Future<void> upsertUser({
+  Future<void> upsertUserOld({
     String? name,
     String? phoneNumber,
     String? farmLocation,
