@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sizer/sizer.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../core/app_export.dart';
 import '../providers/navigation_provider.dart';
 import '../providers/auth_provider.dart';
+import '../providers/expenses_provider.dart';
+import '../backend/services/expense_service.dart';
+import '../backend/repositories/expense_repository.dart';
+import '../backend/repositories/user_repository.dart';
 import 'dashboard_screen/dashboard_screen.dart';
 import 'milk_entry_screen/milk_entry_screen.dart';
 import 'reports_screen/reports_screen.dart';
@@ -20,6 +25,13 @@ class MainNavigationScreen extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (_) => NavigationProvider()),
         ChangeNotifierProvider(create: (_) => AuthProvider()),
+        ChangeNotifierProvider(
+          create: (_) => ExpensesProvider(
+            ExpenseService(
+              expenseRepo: ExpenseRepository(FirebaseFirestore.instance),
+            ),
+          ),
+        ),
       ],
       child: const MainNavigationView(),
     );
