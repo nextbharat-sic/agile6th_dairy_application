@@ -97,4 +97,24 @@ class IncomeService {
       animalType,
     );
   }
+
+  Future<double> getTotalIncomeForDay({
+    required String userId,
+    required DateTime date,
+    required AnimalType animalType,
+  }) async {
+    final dayStart = DateUtils.getStartOfDay(date);
+    final dayEnd = DateUtils.getEndOfDay(date);
+    final snapshot = await getIncomeForAnimalInRange(
+      userId,
+      dayStart,
+      dayEnd,
+      animalType,
+    );
+    double total = 0.0;
+    for (final doc in snapshot.docs) {
+      total += (doc.data()['totalIncome'] as num).toDouble();
+    }
+    return total;
+  }
 }

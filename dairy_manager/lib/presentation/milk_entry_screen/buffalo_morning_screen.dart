@@ -99,14 +99,11 @@ class _BuffaloMorningScreenState extends State<BuffaloMorningScreen> {
   Future<void> _fetchTodayIncome() async {
     // Fetch total income for this animal and date
     final dayStart = DateUtils.getStartOfDay(_selectedDate);
-    final dayEnd = DateUtils.getEndOfDay(_selectedDate);
-
     try {
-      final double totalIncome = await _incomeService.incomeRepo.getTotalIncome(
-        _userId,
-        dayStart,
-        dayEnd,
-        AnimalType.buffalo,
+      final double totalIncome = await _incomeService.getTotalIncomeForDay(
+        userId: _userId!,
+        date: dayStart,
+        animalType: AnimalType.buffalo,
       );
       setState(() { _todayIncome = totalIncome; });
     } catch (e) {
