@@ -2,6 +2,10 @@ import 'package:intl/intl.dart';
 
 class DateUtils {
   /// Generates datetime in 'yyyyMMdd_HHmmss' format, local timezone.
+  static String convertToDatetimeString(DateTime dateTime) =>
+      DateFormat('yyyyMMdd_HHmmss').format(dateTime);
+
+  /// Generates datetime in 'yyyyMMdd' format, local timezone.
   static String convertToDateString(DateTime dateTime) =>
       DateFormat('yyyyMMdd').format(dateTime);
 
