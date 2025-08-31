@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 import '../../constants/constants.dart';
 import '../../models/income_model.dart';
 import '../../utils/date_utils.dart';
@@ -30,7 +32,7 @@ class IncomeService {
     double? currentCostPerLiter,
   }) async {
     // 1. Generate a unique ID
-    final incomeId = IdGenerator.generateIncomeId(dateTime);
+    final incomeId = IdGenerator.generateIncomeId(dateTime, session, animalType);
 
     // 2. Determine actual current cost-per-liter
     //    Fetch from userRepo only if not provided
@@ -64,12 +66,12 @@ class IncomeService {
     // 7. Compute day total across all sessions of that animal
     final dayStart = DateUtils.getStartOfDay(dateTime);
     final dayEnd   = DateUtils.getEndOfDay(dateTime);
-    final totalIncomeDay = await incomeRepo.getTotalIncome(
-      userId,
-      dayStart,
-      dayEnd,
-      animalType,
-    );
+    var totalIncomeDay = 0.0;
+    var todayIncomeRecords = await getIncomeForAnimalInRange(userId, dayStart, dayEnd, animalType);
+
+    for (var doc in todayIncomeRecords.docs) {
+      totalIncomeDay += (doc.data()['totalIncome'] as num).toDouble();
+    }
 
     // 8. Return summary
     return {
@@ -79,5 +81,20 @@ class IncomeService {
       'totalIncomeSession': totalIncomeSession,
       'totalIncomeDay': totalIncomeDay,
     };
+  }
+
+  /// Retrieves income records for a specific animal within a given date range.
+  Future<QuerySnapshot<Map<String, dynamic>>> getIncomeForAnimalInRange(
+    String userId,
+    DateTime startDate,
+    DateTime endDate,
+    AnimalType animalType,
+  ) async {
+    return await incomeRepo.getIncomeForAnimalInDateRange(
+      userId,
+      startDate,
+      endDate,
+      animalType,
+    );
   }
 }
