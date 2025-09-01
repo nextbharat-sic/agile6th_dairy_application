@@ -75,7 +75,7 @@ class _LoginScreenState extends State<LoginScreen> {
         decoration: const BoxDecoration(
           image: DecorationImage(
             image: AssetImage('assets/images/Login.png'),
-            fit: BoxFit.cover,
+            fit: BoxFit.fill,
           ),
         ),
         child: SafeArea(
@@ -210,7 +210,7 @@ class _LoginScreenState extends State<LoginScreen> {
       children: [
         // "Raku" in solid black
         const Text(
-          'Raku',
+          'RakuNo',
           style: TextStyle(
             color: Colors.black,
             fontSize: 54,
@@ -223,7 +223,7 @@ class _LoginScreenState extends State<LoginScreen> {
           children: [
             // Stroke text (black outline)
             Text(
-              'Diary',
+              'Te',
               style: TextStyle(
                 fontSize: 54,
                 fontWeight: FontWeight.bold,
@@ -236,7 +236,7 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
             // Fill text (white inside)
             const Text(
-              'Diary',
+              'Te',
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 54,

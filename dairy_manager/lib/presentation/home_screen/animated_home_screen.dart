@@ -205,7 +205,7 @@ class _AnimatedHomeScreenState extends State<AnimatedHomeScreen>
       children: [
         // "Raku" in solid white - reduced size
         const Text(
-          'Raku',
+          'RakuNo',
           style: TextStyle(
             color: Colors.white,
             fontSize: 40, // Reduced from 48 to 40
@@ -219,7 +219,7 @@ class _AnimatedHomeScreenState extends State<AnimatedHomeScreen>
           children: [
             // Stroke text (white outline)
             Text(
-              'Diary',
+              'Te',
               style: TextStyle(
                 fontSize: 40, // Reduced from 48 to 40
                 fontWeight: FontWeight.bold,
@@ -233,7 +233,7 @@ class _AnimatedHomeScreenState extends State<AnimatedHomeScreen>
             ),
             // Fill text (black inside)
             Text(
-              'Diary',
+              'Te',
               style: const TextStyle(
                 color: Colors.black,
                 fontSize: 40, // Reduced from 48 to 40
