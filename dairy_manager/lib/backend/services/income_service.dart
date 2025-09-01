@@ -64,14 +64,11 @@ class IncomeService {
     final totalIncomeSession = incomeEntity.totalIncome;
 
     // 7. Compute day total across all sessions of that animal
-    final dayStart = DateUtils.getStartOfDay(dateTime);
-    final dayEnd   = DateUtils.getEndOfDay(dateTime);
-    var totalIncomeDay = 0.0;
-    var todayIncomeRecords = await getIncomeForAnimalInRange(userId, dayStart, dayEnd, animalType);
-
-    for (var doc in todayIncomeRecords.docs) {
-      totalIncomeDay += (doc.data()['totalIncome'] as num).toDouble();
-    }
+    final totalIncomeDay = await getTotalIncomeForDay(
+      userId: userId,
+      date: dateTime,
+      animalType: animalType,
+    );
 
     // 8. Return summary
     return {
@@ -98,6 +95,7 @@ class IncomeService {
     );
   }
 
+  /// Computes the total income for a user for a specific day and animal.
   Future<double> getTotalIncomeForDay({
     required String userId,
     required DateTime date,

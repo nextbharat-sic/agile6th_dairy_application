@@ -6,6 +6,7 @@ import '../core/app_export.dart';
 import '../providers/navigation_provider.dart';
 import '../providers/auth_provider.dart';
 import 'dashboard_screen/dashboard_screen.dart';
+import 'home_screen/animated_home_screen.dart';
 import 'milk_entry_screen/milk_entry_screen.dart';
 import 'reports_screen/reports_screen.dart';
 import 'expenses_screen/expenses_screen.dart';
@@ -37,7 +38,7 @@ class MainNavigationView extends StatelessWidget {
           body: IndexedStack(
             index: navigationProvider.currentIndex,
             children: const [
-              DashboardScreen(),
+              AnimatedHomeScreen(),
               MilkEntryScreen(),
               ReportsScreen(),
               ExpensesScreen(),

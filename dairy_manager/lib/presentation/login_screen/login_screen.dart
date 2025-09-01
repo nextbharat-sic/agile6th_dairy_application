@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
-import '../../theme/app_theme.dart';
 import '../../routes/app_routes.dart';
-import 'widgets/login_header_widget.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -14,13 +12,13 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _emailController = TextEditingController();
+  final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isPasswordVisible = false;
 
   @override
   void dispose() {
-    _emailController.dispose();
+    _usernameController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
@@ -29,7 +27,7 @@ class _LoginScreenState extends State<LoginScreen> {
     if (_formKey.currentState!.validate()) {
       try {
         await context.read<AuthProvider>().login(
-          _emailController.text,
+          _usernameController.text,
           _passwordController.text,
         );
         
@@ -42,7 +40,7 @@ class _LoginScreenState extends State<LoginScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('Login failed: ${e.toString()}'),
-              backgroundColor: AppTheme.errorColor,
+              backgroundColor: Colors.red,
             ),
           );
         }
@@ -50,231 +48,269 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  void _handleGoogleSignIn() async {
+    try {
+      await context.read<AuthProvider>().signInWithGoogle();
+      if (mounted) {
+        Navigator.pushReplacementNamed(context, AppRoutes.dashboard);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Google Sign-in failed: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.primaryColor,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: EdgeInsets.zero,
-          child: Column(
-            children: [
-              // Header with milk drip and joined hands
-              const LoginHeaderWidget(),
-              // Main card with form fields and buttons
-              Container(
-                width: double.infinity,
-                color: AppTheme.primaryColor,
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: const BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage('assets/images/Login.png'),
+            fit: BoxFit.cover,
+          ),
+        ),
+        child: SafeArea(
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 60),
+              child: Form(
+                key: _formKey,
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          // Username
-                          const SizedBox(height: 24),
-                          Text(
-                            'Username',
-                            style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w600,
-                                ),
+                    // RakuDiary Logo/Title
+                    const SizedBox(height: 60),
+                    _buildRakuDiaryTitle(),
+                    const SizedBox(height: 80),
+                    
+                    // Username Field
+                    _buildInputField(
+                      label: 'Username',
+                      controller: _usernameController,
+                      placeholder: 'Enter Username',
+                      keyboardType: TextInputType.text,
+                    ),
+                    const SizedBox(height: 24),
+                    
+                    // Password Field
+                    _buildInputField(
+                      label: 'Password',
+                      controller: _passwordController,
+                      placeholder: 'Enter Password',
+                      isPassword: true,
+                    ),
+                    const SizedBox(height: 16),
+                    
+                    // Forgot Password Link
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: GestureDetector(
+                        onTap: () {
+                          Navigator.pushNamed(context, '/resetPassword');
+                        },
+                        child: const Text(
+                          'Forgot password?',
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
                           ),
-                          const SizedBox(height: 8),
-                          TextFormField(
-                            controller: _emailController,
-                            keyboardType: TextInputType.emailAddress,
-                            decoration: InputDecoration(
-                              hintText: 'Enter Username',
-                              filled: true,
-                              fillColor: Colors.white,
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(24),
-                                borderSide: BorderSide.none,
-                              ),
-                              contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                            ),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Please enter your username';
-                              }
-                              return null;
-                            },
-                          ),
-                          const SizedBox(height: 20),
-                          // Password
-                          Text(
-                            'Password',
-                            style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                          ),
-                          const SizedBox(height: 8),
-                          TextFormField(
-                            controller: _passwordController,
-                            obscureText: !_isPasswordVisible,
-                            decoration: InputDecoration(
-                              hintText: 'Enter Password',
-                              filled: true,
-                              fillColor: Colors.white,
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(24),
-                                borderSide: BorderSide.none,
-                              ),
-                              contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                              suffixIcon: IconButton(
-                                icon: Icon(
-                                  _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
-                                  color: AppTheme.textSecondaryColor,
-                                ),
-                                onPressed: () {
-                                  setState(() {
-                                    _isPasswordVisible = !_isPasswordVisible;
-                                  });
-                                },
-                              ),
-                            ),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Please enter your password';
-                              }
-                              if (value.length < 6) {
-                                return 'Password must be at least 6 characters';
-                              }
-                              return null;
-                            },
-                          ),
-                          const SizedBox(height: 8),
-                          Align(
-                            alignment: Alignment.centerLeft,
-                            child: TextButton(
-                              onPressed: () {
-                                Navigator.pushNamed(context, '/resetPassword');
-                              },
-                              style: TextButton.styleFrom(
-                                padding: EdgeInsets.zero,
-                                minimumSize: Size(0, 0),
-                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                alignment: Alignment.centerLeft,
-                              ),
-                              child: Text(
-                                'Forgot password?',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          // Login Button
-                          Consumer<AuthProvider>(
-                            builder: (context, authProvider, child) {
-                              return ElevatedButton(
-                                onPressed: authProvider.isLoading ? null : _handleLogin,
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.white,
-                                  foregroundColor: AppTheme.primaryColor,
-                                  padding: const EdgeInsets.symmetric(vertical: 16),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(24),
-                                  ),
-                                  elevation: 4,
-                                  shadowColor: Colors.black.withOpacity(0.15),
-                                ),
-                                child: authProvider.isLoading
-                                    ? const SizedBox(
-                                        height: 20,
-                                        width: 20,
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 2,
-                                          valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primaryColor),
-                                        ),
-                                      )
-                                    : const Text(
-                                        'Login',
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
-                              );
-                            },
-                          ),
-                          const SizedBox(height: 16),
-                          // Google Sign-In Button (unchanged logic)
-                          Consumer<AuthProvider>(
-                            builder: (context, authProvider, child) {
-                              return ElevatedButton.icon(
-                                icon: Icon(Icons.login, color: AppTheme.primaryColor),
-                                label: Text('Sign in with Google'),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.white,
-                                  foregroundColor: AppTheme.primaryColor,
-                                  padding: const EdgeInsets.symmetric(vertical: 16),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(20),
-                                  ),
-                                ),
-                                onPressed: authProvider.isLoading
-                                    ? null
-                                    : () async {
-                                        try {
-                                          await authProvider.signInWithGoogle();
-                                          if (context.mounted) {
-                                            Navigator.pushReplacementNamed(context, AppRoutes.dashboard);
-                                          }
-                                        } catch (e) {
-                                          ScaffoldMessenger.of(context).showSnackBar(
-                                            SnackBar(
-                                              content: Text('Google Sign-in failed: $e'),
-                                              backgroundColor: AppTheme.errorColor,
-                                            ),
-                                          );
-                                        }
-                                      },
-                              );
-                            },
-                          ),
-                          const SizedBox(height: 16),
-                          // Register link
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                'Not a member? ',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                ),
-                              ),
-                              GestureDetector(
-                                onTap: () {
-                                  Navigator.pushNamed(context, AppRoutes.registrationScreen);
-                                },
-                                child: Text(
-                                  'Register now',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                    decoration: TextDecoration.underline,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 32),
-                        ],
+                        ),
                       ),
+                    ),
+                    const SizedBox(height: 32),
+                    
+                    // Login Button with Google Sign-In
+                    Consumer<AuthProvider>(
+                      builder: (context, authProvider, child) {
+                        return SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            onPressed: authProvider.isLoading ? null : _handleGoogleSignIn,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.white,
+                              foregroundColor: Colors.black,
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              elevation: 2,
+                              shadowColor: Colors.black.withOpacity(0.1),
+                            ),
+                            child: authProvider.isLoading
+                                ? const SizedBox(
+                                    height: 20,
+                                    width: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      valueColor: AlwaysStoppedAnimation<Color>(Colors.black),
+                                    ),
+                                  )
+                                : const Text(
+                                    'Login',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                          ),
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 24),
+                    
+                    // Register Link
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Text(
+                          'Not a member? ',
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 14,
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.pushNamed(context, AppRoutes.registrationScreen);
+                          },
+                          child: const Text(
+                            'Register now',
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
               ),
-            ],
+            ),
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildRakuDiaryTitle() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        // "Raku" in solid black
+        const Text(
+          'Raku',
+          style: TextStyle(
+            color: Colors.black,
+            fontSize: 54,
+            fontWeight: FontWeight.bold,
+            fontFamily: 'Montserrat',
+          ),
+        ),
+        // "Diary" with black outline and white fill
+        Stack(
+          children: [
+            // Stroke text (black outline)
+            Text(
+              'Diary',
+              style: TextStyle(
+                fontSize: 54,
+                fontWeight: FontWeight.bold,
+                fontFamily: 'Montserrat',
+                foreground: Paint()
+                  ..style = PaintingStyle.stroke
+                  ..strokeWidth = 2
+                  ..color = Colors.black,
+              ),
+            ),
+            // Fill text (white inside)
+            const Text(
+              'Diary',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 54,
+                fontWeight: FontWeight.bold,
+                fontFamily: 'Montserrat',
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildInputField({
+    required String label,
+    required TextEditingController controller,
+    required String placeholder,
+    TextInputType? keyboardType,
+    bool isPassword = false,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            color: Colors.black,
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 8),
+        TextFormField(
+          controller: controller,
+          keyboardType: keyboardType,
+          obscureText: isPassword && !_isPasswordVisible,
+          decoration: InputDecoration(
+            hintText: placeholder,
+            hintStyle: const TextStyle(
+              color: Colors.grey,
+              fontSize: 14,
+            ),
+            filled: true,
+            fillColor: Colors.white,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide.none,
+            ),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            suffixIcon: isPassword
+                ? IconButton(
+                    icon: Icon(
+                      _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                      color: Colors.grey,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _isPasswordVisible = !_isPasswordVisible;
+                      });
+                    },
+                  )
+                : null,
+          ),
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'Please enter your $label.toLowerCase()';
+            }
+            if (isPassword && value.length < 6) {
+              return 'Password must be at least 6 characters';
+            }
+            return null;
+          },
+        ),
+      ],
     );
   }
 }

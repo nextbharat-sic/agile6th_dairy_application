@@ -6,7 +6,7 @@ import '../../backend/repositories/user_repository.dart';
 import '../../backend/services/income_service.dart';
 import '../../constants/constants.dart';
 import '../../theme/app_theme.dart';
-import '../../../utils/date_utils.dart';
+
 
 class BuffaloMorningScreen extends StatefulWidget {
   const BuffaloMorningScreen({super.key});
@@ -37,13 +37,12 @@ class _BuffaloMorningScreenState extends State<BuffaloMorningScreen> {
     _dateController.text = _formatDate(_selectedDate);
     // Initialize services
     final firestore = FirebaseFirestore.instance;
-    final FirebaseAuth auth = FirebaseAuth.instance;
     final incomeRepo = IncomeRepository(firestore);
     final userRepo = UserRepository(firestore);
     _incomeService = IncomeService(incomeRepo: incomeRepo, userRepo: userRepo);
 
     // Set _userId from your authentication layer
-    _userId = 'user-id';/* fetch signed-in userId here */
+    _userId = FirebaseAuth.instance.currentUser?.uid;
     _fetchTodayIncome();
   }
 
@@ -97,16 +96,18 @@ class _BuffaloMorningScreenState extends State<BuffaloMorningScreen> {
   }
 
   Future<void> _fetchTodayIncome() async {
-    // Fetch total income for this animal and date
-    final dayStart = DateUtils.getStartOfDay(_selectedDate);
+    if (_userId == null) {
+      setState(() { _todayIncome = 0.0; });
+      return;
+    }
     try {
-      final double totalIncome = await _incomeService.getTotalIncomeForDay(
+      final total = await _incomeService.getTotalIncomeForDay(
         userId: _userId!,
-        date: dayStart,
+        date: _selectedDate,
         animalType: AnimalType.buffalo,
       );
-      setState(() { _todayIncome = totalIncome; });
-    } catch (e) {
+      setState(() { _todayIncome = total; });
+    } catch (_) {
       setState(() { _todayIncome = 0.0; });
     }
   }
@@ -114,7 +115,7 @@ class _BuffaloMorningScreenState extends State<BuffaloMorningScreen> {
   Future<void> _handleSubmit() async {
     if (_userId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           content: Text('Please sign in to submit milk entries.'),
           backgroundColor: Colors.red,
         ),
@@ -122,10 +123,9 @@ class _BuffaloMorningScreenState extends State<BuffaloMorningScreen> {
       return;
     }
 
-    final isValid = _formKey.currentState!.validate();
-    if (!isValid) {
+    if (!_formKey.currentState!.validate()) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           content: Text('Please fill Milk (L) and Cost/L fields.'),
           backgroundColor: Colors.red,
         ),
@@ -151,23 +151,22 @@ class _BuffaloMorningScreenState extends State<BuffaloMorningScreen> {
         fat: fat,
         newCostPerLiter: costPerLiter,
       );
-      // Show success message and update daily income
-
+      await _fetchTodayIncome();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text("Entry saved! Session income: ₹${result['totalIncomeSession'].toStringAsFixed(2)}, Day total: ₹${result['totalIncomeDay'].toStringAsFixed(2)}"),
           backgroundColor: AppTheme.accentColor,
         ),
       );
-      Navigator.pop(context); // Clean navigation after success
-    }catch (e) {
+      if (mounted) Navigator.pop(context);
+    } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Failed to save milk entry: ${e.toString()}'),
           backgroundColor: Colors.red,
         ),
       );
-  }
+    }
   }
 
   @override
@@ -484,51 +483,6 @@ class _BuffaloMorningScreenState extends State<BuffaloMorningScreen> {
               ],
             ),
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildToggleButton(String text, IconData icon, bool isMorning, bool isSelected) {
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          _isMorning = isMorning;
-        });
-      },
-      child: Container(
-        height: 48,
-        decoration: BoxDecoration(
-          color: isSelected 
-            ? Colors.white 
-            : (_isMorning ? AppTheme.backgroundColor : const Color(0xFF585F65)),
-          borderRadius: BorderRadius.circular(12),
-          border: isSelected 
-            ? Border.all(color: AppTheme.primaryColor, width: 2)
-            : null,
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              icon,
-              size: 20,
-              color: isSelected 
-                ? const Color(0xFF395364)
-                : Colors.white,
-            ),
-            const SizedBox(width: 8),
-            Text(
-              text,
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: isSelected 
-                  ? const Color(0xFF395364)
-                  : Colors.white,
-              ),
-            ),
-          ],
         ),
       ),
     );

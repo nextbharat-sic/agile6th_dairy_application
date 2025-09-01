@@ -4,6 +4,7 @@ import '../presentation/login_screen/login_screen_google.dart';
 import '../providers/auth_provider.dart';
 import '../presentation/registration_screen/registration_screen.dart';
 import '../presentation/dashboard_screen/dashboard_screen.dart';
+import '../presentation/home_screen/animated_home_screen.dart';
 import '../presentation/milk_entry_screen/milk_entry_screen.dart';
 import '../presentation/milk_entry_screen/cow_morning_screen.dart';
 import '../presentation/milk_entry_screen/buffalo_morning_screen.dart';
@@ -36,7 +37,7 @@ class AppRoutes {
     // loginScreen: (context) => const LoginScreen(),
     loginScreen: (context) => const LoginScreenGoogle(clientId: clientId),
     registrationScreen: (context) => const RegistrationScreen(),
-    dashboard: (context) => const DashboardScreen(),
+    dashboard: (context) => const AnimatedHomeScreen(),
     milkEntry: (context) => const MilkEntryScreen(),
     cowMorning: (context) => const CowMorningScreen(),
     buffaloMorning: (context) => const BuffaloMorningScreen(),
@@ -52,7 +53,7 @@ class AppRoutes {
     return Consumer<AuthProvider>(
       builder: (context, authProvider, child) {
         if (authProvider.isAuthenticated) {
-          return const DashboardScreen();
+          return const AnimatedHomeScreen();
         } else {
           return const LoginScreenGoogle(clientId: clientId );
         }

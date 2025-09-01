@@ -1,98 +1,340 @@
 import 'package:flutter/material.dart';
-import '../../theme/app_theme.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import '../../backend/repositories/income_repository.dart';
+import '../../backend/repositories/user_repository.dart';
+import '../../backend/services/income_service.dart';
+import '../../constants/constants.dart';
+import '../../providers/auth_provider.dart';
+import 'package:provider/provider.dart';
 
-class MilkEntryScreen extends StatelessWidget {
-  const MilkEntryScreen({super.key});
+class MilkEntryScreen extends StatefulWidget {
+  const MilkEntryScreen({Key? key}) : super(key: key);
+
+  @override
+  _MilkEntryScreenState createState() => _MilkEntryScreenState();
+}
+
+class _MilkEntryScreenState extends State<MilkEntryScreen> {
+  String? _userId;
+  late IncomeService _incomeService;
+  
+  // Selector types
+  AnimalType selectedAnimal = AnimalType.buffalo;
+  SessionType selectedSession = SessionType.morning;
+
+  final TextEditingController dateController = TextEditingController();
+  final TextEditingController milkController = TextEditingController();
+  final TextEditingController snfController = TextEditingController();
+  final TextEditingController fatController = TextEditingController();
+  final TextEditingController costController = TextEditingController();
+
+  double cowIncome = 0.0;
+  double buffaloIncome = 0.0;
+
+  @override
+  void initState() {
+    super.initState();
+    _userId = FirebaseAuth.instance.currentUser?.uid;
+    
+    // Initialize repositories and service
+    final firestore = FirebaseFirestore.instance;
+    final incomeRepo = IncomeRepository(firestore);
+    final userRepo = UserRepository(firestore);
+    _incomeService = IncomeService(incomeRepo: incomeRepo, userRepo: userRepo);
+    
+    // Set today's date as default
+    final today = DateTime.now();
+    dateController.text = '${today.day.toString().padLeft(2, '0')}/${today.month.toString().padLeft(2, '0')}/${today.year}';
+  }
+
+  void calculateIncome() {
+    final milk = double.tryParse(milkController.text) ?? 0.0;
+    final costPerLitre = double.tryParse(costController.text) ?? 0.0;
+    final amount = milk * costPerLitre;
+
+    setState(() {
+      if (selectedAnimal == AnimalType.cow) {
+        cowIncome = amount;
+        buffaloIncome = 0.0; // Show zero for buffalo when cow is selected
+      } else {
+        buffaloIncome = amount;
+        cowIncome = 0.0; // Show zero for cow when buffalo is selected
+      }
+    });
+  }
+
+  void clearFields() {
+    milkController.clear();
+    snfController.clear();
+    fatController.clear();
+    costController.clear();
+    setState(() {
+      cowIncome = 0.0;
+      buffaloIncome = 0.0;
+    });
+  }
+
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2020),
+      lastDate: DateTime(2030),
+    );
+    if (picked != null) {
+      setState(() {
+        dateController.text = '${picked.day.toString().padLeft(2, '0')}/${picked.month.toString().padLeft(2, '0')}/${picked.year}';
+      });
+    }
+  }
+
+  Future<void> _handleSubmit() async {
+    if (_userId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('User not authenticated')),
+      );
+      return;
+    }
+
+    // Validate required fields
+    if (milkController.text.isEmpty || costController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please fill in Milk (L) and Cost/L fields')),
+      );
+      return;
+    }
+
+    try {
+      // Parse date
+      final dateParts = dateController.text.split('/');
+      final day = int.parse(dateParts[0]);
+      final month = int.parse(dateParts[1]);
+      final year = int.parse(dateParts[2]);
+      final selectedDate = DateTime(year, month, day);
+
+      // Submit to backend using the correct method signature
+      final result = await _incomeService.addIncome(
+        userId: _userId!,
+        dateTime: selectedDate,
+        animalType: selectedAnimal,
+        session: selectedSession,
+        liters: double.parse(milkController.text),
+        snf: double.tryParse(snfController.text) ?? 0.0,
+        fat: double.tryParse(fatController.text) ?? 0.0,
+        newCostPerLiter: double.parse(costController.text),
+      );
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Milk entry saved successfully! Session income: ${result['totalIncomeSession']}')),
+      );
+
+      // Clear fields after successful submission
+      clearFields();
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error saving entry: $e')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.backgroundColor,
-      body: SafeArea(
-        child: Column(
+      backgroundColor: Colors.grey[200],
+      appBar: AppBar(
+        backgroundColor: Colors.black,
+        toolbarHeight: 100, // Increased from default ~56 to 100
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(bottom: Radius.circular(30))
+        ),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white, size: 28),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Header section with back button, milk carton icon, and settings
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
-              child: Row(
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.arrow_back, color: Colors.white, size: 32),
-                    onPressed: () => Navigator.pop(context),
-                  ),
-                  Expanded(
-                    child: Column(
-                      children: [
-                        Container(
-                          width: 100,
-                          height: 100,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            shape: BoxShape.circle,
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(20),
-                            child: Image.asset(
-                              'assets/images/milk_entry.png',
-                              fit: BoxFit.contain,
-                              errorBuilder: (context, error, stackTrace) {
-                                return Icon(
-                                  Icons.local_drink_outlined,
-                                  size: 50,
-                                  color: AppTheme.textPrimaryColor,
-                                );
-                              },
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'Milk Entry',
-                          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 28,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.settings, color: Colors.white, size: 32),
-                    onPressed: () {
-                      Navigator.pushNamed(context, '/settings');
-                    },
-                  ),
-                ],
+            const Text(
+              'Milk Entry',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 24, // Increased from 18 to 24
+                fontWeight: FontWeight.w600, // Increased from w500 to w600
               ),
             ),
-            
-            // Content area with animal cards
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    // Cow Card
-                    _buildAnimalCard(
-                      context,
-                      title: 'Cow',
-                      imagePath: 'assets/images/cow.png',
-                      onTap: () => Navigator.pushNamed(context, '/cow-morning'),
-                    ),
-                    
-                    const SizedBox(height: 32),
-                    
-                    // Buffalo Card
-                    _buildAnimalCard(
-                      context,
-                      title: 'Buffalo',
-                      imagePath: 'assets/images/buffalo.png',
-                      onTap: () => Navigator.pushNamed(context, '/buffalo-morning'),
-                    ),
-                  ],
+            const SizedBox(height: 8), // Increased from 4 to 8
+            Image.asset(
+              'assets/images/milk_entry.png',
+              width: 32, // Increased from 24 to 32
+              height: 32, // Increased from 24 to 32
+              color: Colors.white,
+            ),
+          ],
+        ),
+        centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.settings, color: Colors.white, size: 28), // Increased from default to 28
+            onPressed: () {},
+          ),
+        ],
+      ),
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Choose Cattle',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(
+                  child: _cattleToggleButton(
+                    'Cow',
+                    'assets/images/cow.png',
+                    selectedAnimal == AnimalType.cow,
+                    () {
+                      setState(() {
+                        selectedAnimal = AnimalType.cow;
+                        clearFields();
+                      });
+                    },
+                  ),
                 ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: _cattleToggleButton(
+                    'Buffalo',
+                    'assets/images/buffalo.png',
+                    selectedAnimal == AnimalType.buffalo,
+                    () {
+                      setState(() {
+                        selectedAnimal = AnimalType.buffalo;
+                        clearFields();
+                      });
+                    },
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'Choose Session',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(
+                  child: _sessionToggleButton(
+                    'Morning',
+                    selectedSession == SessionType.morning,
+                    () {
+                      setState(() {
+                        selectedSession = SessionType.morning;
+                      });
+                    },
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: _sessionToggleButton(
+                    'Evening',
+                    selectedSession == SessionType.evening,
+                    () {
+                      setState(() {
+                        selectedSession = SessionType.evening;
+                      });
+                    },
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            // Input fields with labels on left and inputs on right
+            _inputFieldRow('Date', dateController, isDateField: true),
+            const SizedBox(height: 8),
+            _inputFieldRow('Milk (L)', milkController, onChanged: (value) => calculateIncome()),
+            const SizedBox(height: 8),
+            _inputFieldRow('SNF', snfController),
+            const SizedBox(height: 8),
+            _inputFieldRow('Fat', fatController),
+            const SizedBox(height: 8),
+            _inputFieldRow('Cost/L', costController, onChanged: (value) => calculateIncome()),
+            const SizedBox(height: 20),
+            Center(
+              child: ElevatedButton(
+                onPressed: _handleSubmit,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  foregroundColor: Colors.black,
+                  padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30),
+                    side: const BorderSide(color: Colors.black, width: 1),
+                  ),
+                ),
+                child: const Text(
+                  'SUBMIT',
+                  style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+            const Center(
+              child: Text(
+                'TODAY\'S INCOME',
+                style: TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                _incomeDisplay('Cow', cowIncome),
+                _incomeDisplay('Buffalo', buffaloIncome),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _cattleToggleButton(String label, String iconPath, bool selected, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        height: 70,
+        decoration: BoxDecoration(
+          color: selected ? Colors.white : Colors.black,
+          borderRadius: BorderRadius.circular(30),
+          border: Border.all(color: Colors.black, width: 1),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Image.asset(
+              iconPath,
+              width: 30,
+              height: 30,
+              color: selected ? Colors.black : Colors.white,
+            ),
+            const SizedBox(height: 6),
+            Text(
+              label,
+              style: TextStyle(
+                color: selected ? Colors.black : Colors.white,
+                fontWeight: FontWeight.w600,
+                fontSize: 14,
               ),
             ),
           ],
@@ -101,58 +343,91 @@ class MilkEntryScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildAnimalCard(
-    BuildContext context, {
-    required String title,
-    required String imagePath,
-    required VoidCallback onTap,
-  }) {
+  Widget _sessionToggleButton(String label, bool selected, VoidCallback onTap) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: double.infinity,
-        height: 220,
-        padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 20),
+        height: 50,
         decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.1),
-              blurRadius: 12,
-              offset: const Offset(0, 6),
-            ),
-          ],
+          color: selected ? Colors.white : Colors.black,
+          borderRadius: BorderRadius.circular(30),
+          border: Border.all(color: Colors.black, width: 1),
         ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              title,
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                color: AppTheme.textPrimaryColor,
-                fontWeight: FontWeight.w600,
-                fontSize: 26,
-              ),
+        child: Center(
+          child: Text(
+            label,
+            style: TextStyle(
+              color: selected ? Colors.black : Colors.white,
+              fontWeight: FontWeight.w600,
+              fontSize: 16,
             ),
-            const SizedBox(height: 20),
-            Expanded(
-              child: Image.asset(
-                imagePath,
-                fit: BoxFit.contain,
-                errorBuilder: (context, error, stackTrace) {
-                  print('Animal image not found: $imagePath - $error');
-                  return Icon(
-                    Icons.pets,
-                    size: 100,
-                    color: AppTheme.textSecondaryColor,
-                  );
-                },
-              ),
-            ),
-          ],
+          ),
         ),
       ),
+    );
+  }
+
+  Widget _inputFieldRow(String label, TextEditingController controller,
+      {bool obscureText = false, bool isDateField = false, Function(String)? onChanged}) {
+    return Row(
+      children: [
+        SizedBox(
+          width: 80,
+          child: Text(
+            label,
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: GestureDetector(
+            onTap: isDateField ? () => _selectDate(context) : null,
+            child: TextField(
+              controller: controller,
+              readOnly: isDateField,
+              keyboardType: TextInputType.number,
+              obscureText: false, // Always visible, never encrypted
+              decoration: InputDecoration(
+                hintText: isDateField ? 'dd/mm/yyyy' : 'Input Text',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: const BorderSide(color: Colors.grey),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: const BorderSide(color: Colors.grey),
+                ),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              ),
+              onChanged: onChanged,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _incomeDisplay(String label, double amount) {
+    return Column(
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          '${amount.toStringAsFixed(0)}/-',
+          style: const TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
+          ),
+        ),
+      ],
     );
   }
 }
