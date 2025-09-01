@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../presentation/login_screen/login_screen_google.dart';
 import '../providers/auth_provider.dart';
+import '../providers/expenses_provider.dart';
+import '../backend/services/expense_service.dart';
+import '../backend/repositories/expense_repository.dart';
+import '../backend/repositories/user_repository.dart';
 import '../presentation/registration_screen/registration_screen.dart';
 import '../presentation/dashboard_screen/dashboard_screen.dart';
 import '../presentation/home_screen/animated_home_screen.dart';
@@ -42,7 +47,7 @@ class AppRoutes {
     cowMorning: (context) => const CowMorningScreen(),
     buffaloMorning: (context) => const BuffaloMorningScreen(),
     reports: (context) => const ReportsScreen(),
-    expenses: (context) => const ExpensesScreen(),
+    expenses: (context) => _buildExpensesWrapper(context),
     settings: (context) => const SettingsScreen(),
     profile: (context) => const ProfileScreen(),
     community: (context) => const CommunityScreen(),
@@ -58,6 +63,17 @@ class AppRoutes {
           return const LoginScreenGoogle(clientId: clientId );
         }
       },
+    );
+  }
+
+  static Widget _buildExpensesWrapper(BuildContext context) {
+    return ChangeNotifierProvider(
+      create: (_) => ExpensesProvider(
+        ExpenseService(
+          expenseRepo: ExpenseRepository(FirebaseFirestore.instance),
+        ),
+      ),
+      child: const ExpensesScreen(),
     );
   }
 }
