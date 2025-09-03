@@ -176,7 +176,9 @@ class _MilkEntryScreenState extends State<MilkEntryScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.settings, color: Colors.white, size: 28), // Increased from default to 28
-            onPressed: () {},
+            onPressed: () {
+              Navigator.pushNamed(context, '/settings');
+            },
           ),
         ],
       ),
@@ -368,7 +370,7 @@ class _MilkEntryScreenState extends State<MilkEntryScreen> {
   }
 
   Widget _inputFieldRow(String label, TextEditingController controller,
-      {bool obscureText = false, bool isDateField = false, Function(String)? onChanged}) {
+      {bool isDateField = false, Function(String)? onChanged}) {
     return Row(
       children: [
         SizedBox(

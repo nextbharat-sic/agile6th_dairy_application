@@ -126,262 +126,181 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
     }
   }
 
-  @override
+    @override
   Widget build(BuildContext context) {
-
     return Scaffold(
-      backgroundColor: AppTheme.backgroundColor,
+      backgroundColor: Colors.grey[200],
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
+        backgroundColor: Colors.black,
+        toolbarHeight: 100,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(bottom: Radius.circular(30))
+        ),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppTheme.whiteColor),
+          icon: const Icon(Icons.arrow_back, color: Colors.white, size: 28),
           onPressed: () => Navigator.pop(context),
         ),
+        title: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text(
+              'Expenses',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 24,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Image.asset(
+              'assets/images/expenses.png',
+              width: 32,
+              height: 32,
+              color: Colors.white,
+            ),
+          ],
+        ),
+        centerTitle: true,
         actions: [
           IconButton(
-            icon: const Icon(Icons.settings, color: AppTheme.whiteColor),
+            icon: const Icon(Icons.settings, color: Colors.white, size: 28),
             onPressed: () {
               Navigator.pushNamed(context, '/settings');
             },
           ),
         ],
       ),
-      body: SafeArea(
-        child: Stack(
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Blue top background with rounded bottom edges
-            ClipRRect(
-              borderRadius: const BorderRadius.only(
-                bottomLeft: Radius.circular(40), // Increased from 32
-                bottomRight: Radius.circular(40), // Increased from 32
+            // Filter Section
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.black,
+                borderRadius: BorderRadius.circular(12),
               ),
-              child: Container(
-                height: 220,
-                width: double.infinity,
-                color: const Color(0xFF517186), // #517186
-              ),
-            ),
-            // Replace the lower background with a rounded top container that fills the lower half
-            Positioned(
-              top: 180,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              child: ClipRRect(
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(40),
-                  topRight: Radius.circular(40),
-                ),
-                child: Container(
-                  color: const Color(0xFFDEE4E8), // #DEE4E8
-                ),
-              ),
-            ),
-            // Main content
-            Align(
-              alignment: Alignment.topCenter,
-              child: Column(
+              child: Row(
                 children: [
-                  const SizedBox(height: 40), // Reduced from 60 to move logo up by 20px
-                  // Expenses logo in a white circle with shadow, with 'Expenses' text inside
-                  Material(
-                    elevation: 6,
-                    shape: const CircleBorder(),
-                    color: Colors.white,
-                    child: Container(
-                      width: 120, // Increased from 90
-                      height: 120, // Increased from 90
-                      alignment: Alignment.center,
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.white,
-                      ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Image.asset(
-                            'assets/images/expenses.png',
-                            height: 54, // Increased from 32
-                            fit: BoxFit.contain,
-                          ),
-                          const SizedBox(height: 8), // Increased spacing
-                          Text(
-                            'Expenses',
-                            style: TextStyle(
-                              color: Color(0xFF517186),
-                              fontWeight: FontWeight.bold,
-                              fontSize: 18, // Increased from 14
-                            ),
-                          ),
-                        ],
-                      ),
+                  Expanded(
+                    child: DropdownButton<String>(
+                      value: _selectedMonth,
+                      dropdownColor: Colors.black,
+                      style: const TextStyle(color: Colors.white, fontSize: 16),
+                      items: ['Month', ..._months].map((String value) {
+                        return DropdownMenuItem<String>(
+                          value: value,
+                          child: Text(value, style: const TextStyle(color: Colors.white)),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
+                        if (value != null) {
+                          setState(() => _selectedMonth = value);
+                          _loadExpensesForSelectedPeriod();
+                        }
+                      },
+                      underline: const SizedBox(),
                     ),
                   ),
-                  // After the logo, increase the spacing before the expenses section
-                  const SizedBox(height: 36),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFE4E5E6), // #E4E5E6
-                        borderRadius: BorderRadius.circular(40), // Match background section
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.08),
-                            blurRadius: 12,
-                            offset: const Offset(0, 4),
-                            
-                          ),
-                        ],
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              DropdownButton<String>(
-                                value: _selectedMonth,
-                                items: ['Month', ..._months].map((String value) {
-                                  return DropdownMenuItem<String>(
-                                    value: value,
-                                    child: Text(value),
-                                  );
-                                }).toList(),
-                                onChanged: (value) {
-                                  if (value != null) {
-                                    setState(() => _selectedMonth = value);
-                                    _loadExpensesForSelectedPeriod();
-                                  }
-                                },
-                                underline: SizedBox(),
-                              ),
-                              DropdownButton<String>(
-                                value: _selectedYear,
-                                items: ['Select Year', ..._years].map((String value) {
-                                  return DropdownMenuItem<String>(
-                                    value: value,
-                                    child: Text(value),
-                                  );
-                                }).toList(),
-                                onChanged: (value) {
-                                  if (value != null) {
-                                    setState(() => _selectedYear = value);
-                                    _loadExpensesForSelectedPeriod();
-                                  }
-                                },
-                                underline: SizedBox(),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            "This Month's Expenses",
-                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              color: AppTheme.textSecondaryColor,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          _isLoading 
-                            ? const CircularProgressIndicator(
-                                valueColor: AlwaysStoppedAnimation<Color>(Colors.black),
-                              )
-                            : Text(
-                                '\u20b9${_totalExpenses.toStringAsFixed(0)}',
-                                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                                  color: AppTheme.textPrimaryColor,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                          const SizedBox(height: 16),
-                          Wrap(
-                            spacing: 8,
-                            runSpacing: 8,
-                            children: _expensesByCategory.entries.map((entry) {
-                              return _buildExpenseChip(
-                                entry.key.displayName, 
-                                entry.value.toInt()
-                              );
-                            }).toList(),
-                          ),
-                          const SizedBox(height: 16),
-                          SizedBox(
-                            width: double.infinity,
-                            child: ElevatedButton.icon(
-                              onPressed: () => _showAddExpenseDialog(context),
-                              icon: const Icon(Icons.add, color: Colors.black),
-                              label: const Text('Add Expense', style: TextStyle(color: Colors.black)),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.white,
-                                foregroundColor: Colors.black,
-                                padding: const EdgeInsets.symmetric(vertical: 16),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                  side: BorderSide(color: Colors.black12),
-                                ),
-                                elevation: 4,
-                                shadowColor: Colors.black12,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: DropdownButton<String>(
+                      value: _selectedYear,
+                      dropdownColor: Colors.black,
+                      style: const TextStyle(color: Colors.white, fontSize: 16),
+                      items: ['Select Year', ..._years].map((String value) {
+                        return DropdownMenuItem<String>(
+                          value: value,
+                          child: Text(value, style: const TextStyle(color: Colors.white)),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
+                        if (value != null) {
+                          setState(() => _selectedYear = value);
+                          _loadExpensesForSelectedPeriod();
+                        }
+                      },
+                      underline: const SizedBox(),
                     ),
+                  ),
+                ],
+              ),
+            ),
+            
+            const SizedBox(height: 20),
+            
+            // Main Content Area
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.1),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "This Month's Expenses",
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      color: Colors.black,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  _isLoading 
+                    ? const CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.black),
+                      )
+                    : Text(
+                        '\u20b9${_totalExpenses.toStringAsFixed(0)}',
+                        style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                          color: Colors.black,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 32,
+                        ),
+                      ),
+                  const SizedBox(height: 20),
+                  
+                  // Expense Categories
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: _expensesByCategory.entries.map<Widget>((entry) {
+                      return _buildExpenseChip(
+                        entry.key.displayName, 
+                        entry.value.toInt()
+                      );
+                    }).toList(),
                   ),
                   
-                  // Recent Expenses Section
-                  const SizedBox(height: 24),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFE4E5E6),
-                        borderRadius: BorderRadius.circular(40),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.08),
-                            blurRadius: 12,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Recent Expenses',
-                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              color: AppTheme.textSecondaryColor,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          _isLoading
-                            ? const Center(
-                                child: CircularProgressIndicator(
-                                  valueColor: AlwaysStoppedAnimation<Color>(Colors.black),
-                                ),
-                              )
-                            : _expenses.isEmpty
-                              ? const Center(
-                                  child: Text(
-                                    'No expenses found for this period',
-                                    style: TextStyle(
-                                      color: Colors.grey,
-                                      fontStyle: FontStyle.italic,
-                                    ),
-                                  ),
-                                )
-                              : Column(
-                                  children: _expenses.take(5).map((expense) => _buildExpenseListItem(expense)).toList(),
-                                ),
-                        ],
+                  const SizedBox(height: 20),
+                  
+                  // Add Expense Button
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: () => _showAddExpenseDialog(context),
+                      icon: const Icon(Icons.add, color: Colors.black),
+                      label: const Text('ADD EXPENSE', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        foregroundColor: Colors.black,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          side: BorderSide(color: Colors.black, width: 1),
+                        ),
+                        elevation: 2,
                       ),
                     ),
                   ),
@@ -413,7 +332,7 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: Colors.blue, width: 2, style: BorderStyle.solid),
+            border: Border.all(color: Colors.black, width: 2, style: BorderStyle.solid),
           ),
           child: Padding(
             padding: const EdgeInsets.all(24.0),
@@ -423,10 +342,10 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    'Expense popup',
+                    'Add New Expense',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: AppTheme.textSecondaryColor,
-                      fontWeight: FontWeight.w500,
+                      color: Colors.black,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                   const SizedBox(height: 24),
@@ -497,7 +416,6 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
                                 color: AppTheme.secondaryColor,
                               ),
                             ),
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                           ),
                           items: ExpenseCategory.values.map((category) {
                             return DropdownMenuItem<ExpenseCategory>(
@@ -517,35 +435,36 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
                   const SizedBox(height: 16),
                   
                   // Utilities field
-                  _buildExpenseField(
-                    controller: descriptionController,
-                    label: 'Description',
-                    placeholder: 'Enter expense description',
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return 'Description is required';
-                      }
-                      return null;
-                    },
-                  ),
+                                     _buildExpenseField(
+                     controller: descriptionController,
+                     label: 'Description',
+                     placeholder: 'Enter expense description',
+                     validator: (value) {
+                       if (value == null || value.trim().isEmpty) {
+                         return 'Description is required';
+                       }
+                       return null;
+                     },
+                   ),
                   const SizedBox(height: 16),
                   
                   // Equipment field
-                  _buildExpenseField(
-                    controller: amountController,
-                    label: 'Amount',
-                    placeholder: '0.00',
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return 'Amount is required';
-                      }
-                      final amount = double.tryParse(value.replaceAll('/', ''));
-                      if (amount == null || amount <= 0) {
-                        return 'Please enter a valid amount';
-                      }
-                      return null;
-                    },
-                  ),
+                   _buildExpenseField(
+                     controller: amountController,
+                     label: 'Amount',
+                     placeholder: '0.00',
+                     validator: (value) {
+                       if (value == null || value.trim().isEmpty) {
+                         return 'Amount is required';
+                       }
+                       final amount = double.tryParse(value.replaceAll('/', ''));
+                       if (amount == null || amount <= 0) {
+                         return 'Please enter a valid amount';
+                       }
+                       return null;
+                     },
+                   ),
+
                   const SizedBox(height: 24),
                   
                   // Submit button
@@ -596,14 +515,11 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
                           }
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppTheme.cardColor,
-                          foregroundColor: AppTheme.textPrimaryColor,
+                           backgroundColor: Colors.black,
+                          foregroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
-                            side: BorderSide(
-                              color: AppTheme.textSecondaryColor.withValues(alpha: 0.3),
-                            ),
                           ),
                           elevation: 2,
                         ),
@@ -632,6 +548,7 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
     required String placeholder,
     bool readOnly = false,
     VoidCallback? onTap,
+    String? Function(String?)? validator,
   }) {
     return Row(
       children: [
@@ -652,6 +569,7 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
             controller: controller,
             readOnly: readOnly,
             onTap: onTap,
+            validator: validator,
             decoration: InputDecoration(
               hintText: placeholder,
               hintStyle: TextStyle(
@@ -672,13 +590,12 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
                   color: AppTheme.textSecondaryColor.withValues(alpha: 0.3),
                 ),
               ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(
-                  color: AppTheme.secondaryColor,
+                              focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(
+                    color: AppTheme.secondaryColor,
+                  ),
                 ),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              ),
             ),
           ),
         ),
@@ -686,42 +603,43 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
     );
   }
 
-  // Update _buildExpenseChip to look like a white button
+  // Update _buildExpenseChip to match the black and white theme
   Widget _buildExpenseChip(String label, int amount) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Colors.black,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black12,
+            color: Colors.black.withValues(alpha: 0.2),
             blurRadius: 4,
-            offset: Offset(0, 2),
+            offset: const Offset(0, 2),
           ),
         ],
-        border: Border.all(color: Colors.black12),
       ),
       child: Text(
         '$label: \u20b9$amount',
-        style: TextStyle(
-          color: Colors.black,
-          fontWeight: FontWeight.w500,
+        style: const TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.w600,
+          fontSize: 14,
         ),
       ),
     );
   }
 
-fl  Widget _buildExpenseListItem(ExpenseModel expense) {
+  Widget _buildExpenseListItem(ExpenseModel expense) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.black.withValues(alpha: 0.1)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black12,
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -733,12 +651,12 @@ fl  Widget _buildExpenseListItem(ExpenseModel expense) {
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: Colors.black.withValues(alpha: 0.1),
+              color: Colors.black,
               borderRadius: BorderRadius.circular(8),
             ),
             child: const Icon(
               Icons.receipt,
-              color: Colors.black,
+              color: Colors.white,
               size: 20,
             ),
           ),

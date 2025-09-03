@@ -56,7 +56,9 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
         actions: [
           IconButton(
             icon: const Icon(Icons.settings, color: Colors.white, size: 28),
-            onPressed: () {},
+            onPressed: () {
+              Navigator.pushNamed(context, '/settings');
+            },
           ),
         ],
       ),

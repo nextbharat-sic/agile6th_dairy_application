@@ -144,12 +144,12 @@ class _CowMorningScreenState extends State<CowMorningScreen> {
                           ],
                         ),
                       ),
-                      IconButton(
-                        icon: const Icon(Icons.settings, color: Colors.white, size: 24),
-                        onPressed: () {
-                          Navigator.pushNamed(context, '/settings');
-                        },
-                      ),
+                                              IconButton(
+                          icon: const Icon(Icons.settings, color: Colors.white, size: 24),
+                          onPressed: () {
+                            Navigator.pushNamed(context, '/settings');
+                          },
+                        ),
                     ],
                   ),
                 ),
