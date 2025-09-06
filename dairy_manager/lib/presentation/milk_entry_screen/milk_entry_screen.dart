@@ -5,8 +5,6 @@ import '../../backend/repositories/income_repository.dart';
 import '../../backend/repositories/user_repository.dart';
 import '../../backend/services/income_service.dart';
 import '../../constants/constants.dart';
-import '../../providers/auth_provider.dart';
-import 'package:provider/provider.dart';
 
 class MilkEntryScreen extends StatefulWidget {
   const MilkEntryScreen({Key? key}) : super(key: key);
@@ -111,7 +109,9 @@ class _MilkEntryScreenState extends State<MilkEntryScreen> {
       final day = int.parse(dateParts[0]);
       final month = int.parse(dateParts[1]);
       final year = int.parse(dateParts[2]);
-      final selectedDate = DateTime(year, month, day);
+      // Use current time for hour, minute, second, etc
+      final now = DateTime.now();
+      final selectedDate = DateTime(year, month, day, now.hour, now.minute, now.second, now.millisecond, now.microsecond);
 
       // Submit to backend using the correct method signature
       final result = await _incomeService.addIncome(
@@ -182,7 +182,7 @@ class _MilkEntryScreenState extends State<MilkEntryScreen> {
           ),
         ],
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -196,12 +196,12 @@ class _MilkEntryScreenState extends State<MilkEntryScreen> {
               children: [
                 Expanded(
                   child: _cattleToggleButton(
-                    'Cow',
-                    'assets/images/cow.png',
-                    selectedAnimal == AnimalType.cow,
+                    'Buffalo',
+                    'assets/images/buffalo.png',
+                    selectedAnimal == AnimalType.buffalo,
                     () {
                       setState(() {
-                        selectedAnimal = AnimalType.cow;
+                        selectedAnimal = AnimalType.buffalo;
                         clearFields();
                       });
                     },
@@ -210,12 +210,12 @@ class _MilkEntryScreenState extends State<MilkEntryScreen> {
                 const SizedBox(width: 8),
                 Expanded(
                   child: _cattleToggleButton(
-                    'Buffalo',
-                    'assets/images/buffalo.png',
-                    selectedAnimal == AnimalType.buffalo,
+                    'Cow',
+                    'assets/images/cow.png',
+                    selectedAnimal == AnimalType.cow,
                     () {
                       setState(() {
-                        selectedAnimal = AnimalType.buffalo;
+                        selectedAnimal = AnimalType.cow;
                         clearFields();
                       });
                     },
@@ -257,7 +257,6 @@ class _MilkEntryScreenState extends State<MilkEntryScreen> {
               ],
             ),
             const SizedBox(height: 16),
-            // Input fields with labels on left and inputs on right
             _inputFieldRow('Date', dateController, isDateField: true),
             const SizedBox(height: 8),
             _inputFieldRow('Milk (L)', milkController, onChanged: (value) => calculateIncome()),
@@ -286,6 +285,8 @@ class _MilkEntryScreenState extends State<MilkEntryScreen> {
                 ),
               ),
             ),
+            const SizedBox(height: 32),
+            Divider(thickness: 2, color: Colors.black26),
             const SizedBox(height: 24),
             const Center(
               child: Text(
@@ -305,6 +306,7 @@ class _MilkEntryScreenState extends State<MilkEntryScreen> {
                 _incomeDisplay('Buffalo', buffaloIncome),
               ],
             ),
+            const SizedBox(height: 24),
           ],
         ),
       ),
@@ -312,102 +314,105 @@ class _MilkEntryScreenState extends State<MilkEntryScreen> {
   }
 
   Widget _cattleToggleButton(String label, String iconPath, bool selected, VoidCallback onTap) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        height: 70,
-        decoration: BoxDecoration(
-          color: selected ? Colors.white : Colors.black,
-          borderRadius: BorderRadius.circular(30),
-          border: Border.all(color: Colors.black, width: 1),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Image.asset(
-              iconPath,
-              width: 30,
-              height: 30,
-              color: selected ? Colors.black : Colors.white,
-            ),
-            const SizedBox(height: 6),
-            Text(
-              label,
-              style: TextStyle(
-                color: selected ? Colors.black : Colors.white,
-                fontWeight: FontWeight.w600,
-                fontSize: 14,
-              ),
-            ),
-          ],
-        ),
+  return GestureDetector(
+    onTap: onTap,
+    child: Container(
+      height: 70,
+      decoration: BoxDecoration(
+        color: selected ? Colors.black : Colors.white, // SWAPPED: black when selected
+        borderRadius: BorderRadius.circular(30),
+        border: Border.all(color: Colors.black, width: 1),
       ),
-    );
-  }
-
-  Widget _sessionToggleButton(String label, bool selected, VoidCallback onTap) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        height: 50,
-        decoration: BoxDecoration(
-          color: selected ? Colors.white : Colors.black,
-          borderRadius: BorderRadius.circular(30),
-          border: Border.all(color: Colors.black, width: 1),
-        ),
-        child: Center(
-          child: Text(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Image.asset(
+            iconPath,
+            width: 30,
+            height: 30,
+            color: selected ? Colors.white : Colors.black, // SWAPPED: white icon when selected
+          ),
+          const SizedBox(height: 6),
+          Text(
             label,
             style: TextStyle(
-              color: selected ? Colors.black : Colors.white,
+              color: selected ? Colors.white : Colors.black, // SWAPPED: white text when selected
               fontWeight: FontWeight.w600,
-              fontSize: 16,
+              fontSize: 14,
             ),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+
+  Widget _sessionToggleButton(String label, bool selected, VoidCallback onTap) {
+  return GestureDetector(
+    onTap: onTap,
+    child: Container(
+      height: 50,
+      decoration: BoxDecoration(
+        color: selected ? Colors.black : Colors.white, // CHANGED: black when selected
+        borderRadius: BorderRadius.circular(30),
+        border: Border.all(color: Colors.black, width: 1),
+      ),
+      child: Center(
+        child: Text(
+          label,
+          style: TextStyle(
+            color: selected ? Colors.white : Colors.black, // CHANGED: white text when selected
+            fontWeight: FontWeight.w600,
+            fontSize: 16,
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _inputFieldRow(String label, TextEditingController controller,
-      {bool isDateField = false, Function(String)? onChanged}) {
-    return Row(
-      children: [
-        SizedBox(
-          width: 80,
-          child: Text(
-            label,
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-          ),
+    {bool isDateField = false, Function(String)? onChanged}) {
+  return Row(
+    children: [
+      SizedBox(
+        width: 80,
+        child: Text(
+          label,
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
         ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: GestureDetector(
-            onTap: isDateField ? () => _selectDate(context) : null,
-            child: TextField(
-              controller: controller,
-              readOnly: isDateField,
-              keyboardType: TextInputType.number,
-              obscureText: false, // Always visible, never encrypted
-              decoration: InputDecoration(
-                hintText: isDateField ? 'dd/mm/yyyy' : 'Input Text',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: const BorderSide(color: Colors.grey),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: const BorderSide(color: Colors.grey),
-                ),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      ),
+      const SizedBox(width: 12),
+      Expanded(
+        child: GestureDetector(
+          onTap: isDateField ? () => _selectDate(context) : null,
+          child: TextField(
+            controller: controller,
+            readOnly: isDateField,
+            keyboardType: TextInputType.number,
+            obscureText: false, // Always visible, never encrypted
+            decoration: InputDecoration(
+              hintText: isDateField ? 'dd/mm/yyyy' : 'Input Text',
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: const BorderSide(color: Colors.grey),
               ),
-              onChanged: onChanged,
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: const BorderSide(color: Colors.grey),
+              ),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             ),
+            onChanged: onChanged,
           ),
         ),
-      ],
-    );
-  }
+      ),
+    ],
+  );
+}
+
+
 
   Widget _incomeDisplay(String label, double amount) {
     return Column(

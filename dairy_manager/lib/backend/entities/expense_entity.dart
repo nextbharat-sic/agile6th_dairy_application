@@ -36,9 +36,9 @@ class ExpenseEntity {
       throw ArgumentError('Expense date cannot be in the future');
     }
     
-    if (description.trim().isEmpty) {
-      throw ArgumentError('Expense description cannot be empty');
-    }
+    // if (description.trim().isEmpty) {
+    //   throw ArgumentError('Expense description cannot be empty');
+    // }
     
     if (amount <= 0) {
       throw ArgumentError('Expense amount must be greater than zero');

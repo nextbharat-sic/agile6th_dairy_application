@@ -123,7 +123,7 @@ class _AnimatedHomeScreenState extends State<AnimatedHomeScreen>
                           animation: _buttonsAnimation,
                           builder: (context, child) {
                             return SizedBox(
-                              height: 135 - (_buttonsAnimation.value * 40),
+                              height: 175 - (_buttonsAnimation.value * 40),
                             );
                           },
                         ),
@@ -155,7 +155,7 @@ class _AnimatedHomeScreenState extends State<AnimatedHomeScreen>
                         const SizedBox(height: 35),
                         // Infinite Glass Morphism Carousel
                         const InfiniteGlassCarousel(),
-                        const SizedBox(height: 80),
+                        const SizedBox(height: 40),
                         // Navigation Buttons (animated)
                         AnimatedBuilder(
                           animation: _buttonsAnimation,
@@ -475,7 +475,7 @@ class _InfiniteGlassCarouselState extends State<InfiniteGlassCarousel> {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 300,
+      height: 280,
       child: PageView.builder(
         controller: _pageController,
         onPageChanged: (index) {
@@ -584,7 +584,7 @@ class _InfiniteGlassCarouselState extends State<InfiniteGlassCarousel> {
                   monthData['name']!,
                   style: TextStyle(
                     color: isCurrentMonth ? Colors.white : Colors.white.withOpacity(0.9),
-                    fontSize: isCurrentMonth ? 16 : 14,
+                    fontSize: isCurrentMonth ? 28 : 24,
                     fontWeight: FontWeight.bold,
                     letterSpacing: 1.0,
                     fontFamily: 'Montserrat',
