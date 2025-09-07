@@ -441,9 +441,9 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
                      placeholder: 'Enter expense description',
                      validator: (value) {
                        if (value == null || value.trim().isEmpty) {
-                         return 'Description is required';
+                         return null;
                        }
-                       return null;
+                       
                      },
                    ),
                   const SizedBox(height: 16),
@@ -480,7 +480,13 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
                               final day = int.parse(dateParts[0]);
                               final month = int.parse(dateParts[1]);
                               final year = int.parse(dateParts[2]);
-                              final expenseDate = DateTime(year, month, day);
+                              
+
+                              final now = DateTime.now();
+                              final expenseDate = DateTime(
+                                year, month, day,
+                                now.hour, now.minute, now.second, now.millisecond, now.microsecond
+                              );
                               
                               // Parse amount
                               final amount = double.parse(amountController.text.replaceAll('/', ''));
