@@ -10,33 +10,39 @@ extension SessionTypeExtension on SessionType {
   String get key => toString().split('.').last;
 }
 
+enum GroupByFrequency { year, quarter, month, week, day }
+
+extension GroupByExtension on GroupByFrequency {
+  String get key => toString().split('.').last;
+}
+
 /// Categories for expense tracking in the dairy management system
-/// 
+///
 /// Each category represents a different type of expense that dairy farmers
 /// commonly encounter in their operations.
-enum ExpenseCategory { 
+enum ExpenseCategory {
   /// Animal feed and nutrition costs
-  feed, 
-  
+  feed,
+
   /// Labor and staffing costs
-  labour, 
-  
+  labour,
+
   /// Veterinary care and animal health expenses
-  healthcare, 
-  
+  healthcare,
+
   /// Electricity, water, and other utility costs
-  utilities, 
-  
+  utilities,
+
   /// Equipment, machinery, and maintenance costs
-  equipment, 
-  
+  equipment,
+
   /// Miscellaneous and other expenses
-  other 
+  other
 }
 
 extension ExpenseCategoryExtension on ExpenseCategory {
   String get key => toString().split('.').last;
-  
+
   String get displayName {
     switch (this) {
       case ExpenseCategory.feed:

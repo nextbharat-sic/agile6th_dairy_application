@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 import '../backend/entities/income_entity.dart';
 import '../constants/constants.dart';
 
@@ -40,15 +42,31 @@ class IncomeModel {
     );
   }
 
+  /// Create a model from a map, likely from a database record.
+  factory IncomeModel.fromMap(Map<String, dynamic> map) {
+    return IncomeModel(
+      id: map['id'] as String,
+      dateTime: map['dateTime'] is String
+          ? DateTime.parse(map['dateTime'] as String)
+          : (map['dateTime'] as Timestamp).toDate(),
+      animalType: AnimalType.values.byName(map['animalType'] as String),
+      session: SessionType.values.byName(map['session'] as String),
+      liters: (map['liters'] as num).toDouble(),
+      snf: (map['snf'] as num).toDouble(),
+      fat: (map['fat'] as num).toDouble(),
+      costPerLiter: (map['costPerLiter'] as num).toDouble(),
+      totalIncome: (map['totalIncome'] as num).toDouble(),
+    );
+  }
   Map<String, dynamic> toMap() => {
-    'id': id,
-    'dateTime': dateTime,
-    'animalType': animalType.key,
-    'session': session.key,
-    'liters': liters,
-    'snf': snf,
-    'fat': fat,
-    'costPerLiter': costPerLiter,
-    'totalIncome': totalIncome,
-  };
+        'id': id,
+        'dateTime': dateTime,
+        'animalType': animalType.key,
+        'session': session.key,
+        'liters': liters,
+        'snf': snf,
+        'fat': fat,
+        'costPerLiter': costPerLiter,
+        'totalIncome': totalIncome,
+      };
 }
