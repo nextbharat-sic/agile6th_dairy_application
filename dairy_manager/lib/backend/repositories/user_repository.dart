@@ -8,7 +8,6 @@ import '../entities/user_entity.dart';
 
 class UserRepository {
   final FirebaseFirestore firestore;
-  final _auth = FirebaseAuth.instance;
 
   UserRepository(this.firestore);
 
@@ -52,15 +51,13 @@ class UserRepository {
   /// Upserts user data to Firestore using Entity-Model pattern.
   /// Creates a new user document if one doesn't exist, otherwise updates existing document.
   Future<void> upsertUserOld({
+    required User user,
     String? name,
     String? phoneNumber,
     String? farmLocation,
     double? costCow,
     double? costBuffalo,
   }) async {
-    final user = _auth.currentUser;
-    if (user == null) throw StateError('upsertUser: no signed-in user');
-
     final docRef = firestore.collection('users').doc(user.uid);
 
     await firestore.runTransaction((tx) async {
@@ -82,6 +79,7 @@ class UserRepository {
         final model = UserModel.fromEntity(entity);
         tx.set(docRef, model.toMap());
         dev.log('Created user doc for ${user.uid}', name: 'UserRepository');
+        // Removed creation of placeholder subcollection documents to comply with rules
       } else {
         // Get existing user data
         final existingModel = UserModel.fromMap(snap.data() ?? const <String, dynamic>{});

@@ -31,8 +31,10 @@ class AuthGate extends StatelessWidget {
           actions: [
             AuthStateChangeAction<SignedIn>((context, state) async {
               try {
-                FirebaseFirestore firestore = FirebaseFirestore.instance;
-                await UserRepository(firestore).upsertUserOld();
+                if (state.user != null) {
+                  FirebaseFirestore firestore = FirebaseFirestore.instance;
+                  await UserRepository(firestore).upsertUserOld(user: state.user!);
+                }
               } catch (e) {
                 debugPrint('upsertUserOld failed: $e');
               }

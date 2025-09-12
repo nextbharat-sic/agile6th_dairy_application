@@ -25,21 +25,21 @@ class _AnimatedHomeScreenState extends State<AnimatedHomeScreen>
     super.initState();
     
     _milkDripController = AnimationController(
-      duration: const Duration(milliseconds: 400),
+      duration: const Duration(milliseconds: 600),
       vsync: this,
     );
     
     _buttonsController = AnimationController(
-      duration: const Duration(milliseconds: 400),
+      duration: const Duration(milliseconds: 600),
       vsync: this,
     );
 
     _milkDripAnimation = Tween<double>(
       begin: 0.0,
-      end: -1.0,
+      end: -1.5, // Move further up so it becomes fully invisible
     ).animate(CurvedAnimation(
       parent: _milkDripController,
-      curve: Curves.easeOutCubic,
+      curve: Curves.easeInOutExpo,
     ));
 
     _buttonsAnimation = Tween<double>(
@@ -47,7 +47,7 @@ class _AnimatedHomeScreenState extends State<AnimatedHomeScreen>
       end: 1.0,
     ).animate(CurvedAnimation(
       parent: _buttonsController,
-      curve: Curves.easeOutCubic,
+      curve: Curves.easeInOutExpo,
     ));
   }
 
@@ -85,16 +85,7 @@ class _AnimatedHomeScreenState extends State<AnimatedHomeScreen>
       backgroundColor: Colors.black,
       body: Stack(
         children: [
-          // Top color fill for milk drip area
-          Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            height: MediaQuery.of(context).size.height * 0.15,
-            child: Container(
-              color: const Color(0xFFF8F8F8),
-            ),
-          ),
+          // Removed top light background to avoid white rectangle during swipe
           // Main content with DraggableScrollableSheet
           DraggableScrollableSheet(
             initialChildSize: 0.75,
@@ -183,16 +174,19 @@ class _AnimatedHomeScreenState extends State<AnimatedHomeScreen>
             animation: _milkDripAnimation,
             builder: (context, child) {
               return Positioned(
-                top: 120 + (_milkDripAnimation.value * MediaQuery.of(context).size.height * 0.4),
+                // Raise initial position so drips are visible in collapsed state
+                top: 32 + (_milkDripAnimation.value * MediaQuery.of(context).size.height * 0.45),
                 left: 0,
                 right: 0,
                 child: SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.3,
+                  // Slightly reduce to frame the drip shape better
+                  height: MediaQuery.of(context).size.height * 0.5,
                   child: Image.asset(
-                    'assets/images/milk_drip.png',
+                    'assets/images/milkdrip-.png',
                     width: double.infinity,
                     height: double.infinity,
-                    fit: BoxFit.cover,
+                    alignment: Alignment.topCenter,
+                    fit: BoxFit.fitWidth,
                   ),
                 ),
               );
@@ -331,8 +325,8 @@ class _AnimatedHomeScreenState extends State<AnimatedHomeScreen>
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Container(
-                        width: 70,
-                        height: 70,
+                        width: 80,
+                        height: 80,
                         decoration: const BoxDecoration(
                           color: Colors.black,
                           shape: BoxShape.circle,
@@ -380,14 +374,14 @@ class _AnimatedHomeScreenState extends State<AnimatedHomeScreen>
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Container(
-                        width: 70,
-                        height: 70,
+                        width: 80,
+                        height: 80,
                         decoration: const BoxDecoration(
                           color: Colors.black,
                           shape: BoxShape.circle,
                         ),
                         child: Padding(
-                          padding: const EdgeInsets.all(18.0),
+                          padding: const EdgeInsets.all(8.0),
                           child: Image.asset(
                             'assets/images/expenses.png',
                             fit: BoxFit.contain,
