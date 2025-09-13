@@ -1,8 +1,16 @@
 import 'dart:ui';
-import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart' hide AuthProvider;
+import 'package:flutter/material.dart' hide DateUtils;
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import '../../backend/repositories/expense_repository.dart';
+import '../../backend/repositories/income_repository.dart';
+import '../../backend/services/report_service.dart';
+import '../../constants/constants.dart';
+import '../../models/report_models.dart';
 import '../../providers/auth_provider.dart';
+import '../../utils/date_utils.dart';
 
 class AnimatedHomeScreen extends StatefulWidget {
   const AnimatedHomeScreen({super.key});
@@ -17,18 +25,19 @@ class _AnimatedHomeScreenState extends State<AnimatedHomeScreen>
   late AnimationController _buttonsController;
   late Animation<double> _milkDripAnimation;
   late Animation<double> _buttonsAnimation;
-  
+
   bool _isExpanded = false;
 
   @override
   void initState() {
     super.initState();
-    
+
+
     _milkDripController = AnimationController(
       duration: const Duration(milliseconds: 400),
       vsync: this,
     );
-    
+
     _buttonsController = AnimationController(
       duration: const Duration(milliseconds: 400),
       vsync: this,
@@ -80,7 +89,7 @@ class _AnimatedHomeScreenState extends State<AnimatedHomeScreen>
   Widget build(BuildContext context) {
     final authProvider = context.watch<AuthProvider>();
     final userName = authProvider.userName ?? 'User';
-    
+
     return Scaffold(
       backgroundColor: Colors.black,
       body: Stack(
@@ -135,7 +144,8 @@ class _AnimatedHomeScreenState extends State<AnimatedHomeScreen>
                             children: [
                               _buildRakuDiaryTitle(),
                               GestureDetector(
-                                onTap: () => Navigator.pushNamed(context, '/settings'),
+                                onTap: () =>
+                                    Navigator.pushNamed(context, '/settings'),
                                 child: Container(
                                   padding: const EdgeInsets.all(8),
                                   decoration: BoxDecoration(
@@ -162,7 +172,8 @@ class _AnimatedHomeScreenState extends State<AnimatedHomeScreen>
                           child: _buildNavigationButtons(),
                           builder: (context, child) {
                             return Transform.translate(
-                              offset: Offset(0, (1 - _buttonsAnimation.value) * 100),
+                              offset: Offset(
+                                  0, (1 - _buttonsAnimation.value) * 100),
                               child: Opacity(
                                 opacity: _buttonsAnimation.value,
                                 child: child,
@@ -183,7 +194,10 @@ class _AnimatedHomeScreenState extends State<AnimatedHomeScreen>
             animation: _milkDripAnimation,
             builder: (context, child) {
               return Positioned(
-                top: 120 + (_milkDripAnimation.value * MediaQuery.of(context).size.height * 0.4),
+                top: 120 +
+                    (_milkDripAnimation.value *
+                        MediaQuery.of(context).size.height *
+                        0.4),
                 left: 0,
                 right: 0,
                 child: SizedBox(
@@ -308,7 +322,7 @@ class _AnimatedHomeScreenState extends State<AnimatedHomeScreen>
             ),
           ),
         ),
-        
+
         // Row of two smaller buttons
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20.0),
@@ -360,9 +374,9 @@ class _AnimatedHomeScreenState extends State<AnimatedHomeScreen>
                   ),
                 ),
               ),
-              
+
               const SizedBox(width: 12),
-              
+
               // Expenses Button
               Expanded(
                 child: ElevatedButton(
@@ -426,38 +440,92 @@ class InfiniteGlassCarousel extends StatefulWidget {
 }
 
 class _InfiniteGlassCarouselState extends State<InfiniteGlassCarousel> {
-  late PageController _pageController;
+  late final PageController _pageController;
   int _currentPage = 0;
+  late final ReportService _reportService;
+  String? _userId;
 
-  final List<Map<String, String>> _monthsData = [
-    {'name': 'JANUARY', 'expense': '1234', 'revenue': '2468', 'profit': '1234'},
-    {'name': 'FEBRUARY', 'expense': '1500', 'revenue': '2800', 'profit': '1300'},
-    {'name': 'MARCH', 'expense': '1100', 'revenue': '2200', 'profit': '1100'},
-    {'name': 'APRIL', 'expense': '1800', 'revenue': '3200', 'profit': '1400'},
-    {'name': 'MAY', 'expense': '1600', 'revenue': '2900', 'profit': '1300'},
-    {'name': 'JUNE', 'expense': '1400', 'revenue': '2600', 'profit': '1200'},
-    {'name': 'JULY', 'expense': '1900', 'revenue': '3400', 'profit': '1500'},
-    {'name': 'AUGUST', 'expense': '1700', 'revenue': '3100', 'profit': '1400'},
-    {'name': 'SEPTEMBER', 'expense': '1300', 'revenue': '2400', 'profit': '1100'},
-    {'name': 'OCTOBER', 'expense': '2000', 'revenue': '3600', 'profit': '1600'},
-    {'name': 'NOVEMBER', 'expense': '1800', 'revenue': '3200', 'profit': '1400'},
-    {'name': 'DECEMBER', 'expense': '2200', 'revenue': '4000', 'profit': '1800'},
-  ];
+
+  List<Map<String, String>> _monthsData = [];
+  // final List<Map<String, String>> _monthsData = const [
+  //   {'name': 'JANUARY', 'expense': '1234', 'revenue': '2468', 'profit': '1234'},
+  //   {'name': 'FEBRUARY', 'expense': '1500', 'revenue': '2800', 'profit': '1300'},
+  //   {'name': 'MARCH', 'expense': '1100', 'revenue': '2200', 'profit': '1100'},
+  //   {'name': 'APRIL', 'expense': '1800', 'revenue': '3200', 'profit': '1400'},
+  //   {'name': 'MAY', 'expense': '1600', 'revenue': '2900', 'profit': '1300'},
+  //   {'name': 'JUNE', 'expense': '1400', 'revenue': '2600', 'profit': '1200'},
+  //   {'name': 'JULY', 'expense': '1900', 'revenue': '3400', 'profit': '1500'},
+  //   {'name': 'AUGUST', 'expense': '1700', 'revenue': '3100', 'profit': '1400'},
+  //   {'name': 'SEPTEMBER', 'expense': '1300', 'revenue': '2400', 'profit': '1100'},
+  //   {'name': 'OCTOBER', 'expense': '2000', 'revenue': '3600', 'profit': '1600'},
+  //   {'name': 'NOVEMBER', 'expense': '1800', 'revenue': '3200', 'profit': '1400'},
+  //   {'name': 'DECEMBER', 'expense': '2200', 'revenue': '4000', 'profit': '1800'},
+  // ];
 
   @override
   void initState() {
     super.initState();
-    
-    // Get current month (0-11) and set it as the initial page
-    final currentMonth = DateTime.now().month - 1;
+
+
+    final firestore = FirebaseFirestore.instance;
+    final incomeRepo = IncomeRepository(firestore);
+    final expenseRepo = ExpenseRepository(firestore);
+    _reportService = ReportService(
+      incomeRepository: incomeRepo,
+      expenseRepository: expenseRepo,
+    );
+
+
+    final currentMonth = DateTime.now().month - 1; // 0..11
     final initialPage = (_monthsData.length * 1000) + currentMonth;
-    
     _pageController = PageController(
       viewportFraction: 0.6,
       initialPage: initialPage,
     );
-    
     _currentPage = currentMonth;
+
+
+    _loadReport();
+  }
+
+  // Transform dataBreakdown into UI-friendly format
+  List<Map<String, String>> getMonthDataList(Report report) {
+    if (report.dataBreakdown == null) return [];
+
+    return report.dataBreakdown!.entries.map((entry) {
+      final String monthName = entry.key; // e.g., "January", "Feb 2025"
+      final ReportMetrics metrics = entry.value;
+
+      return {
+        'name': monthName,
+        'expense': metrics.expense.toString(),
+        'profit': metrics.profit.toStringAsFixed(2),
+        'revenue': metrics.yield.income.toStringAsFixed(2),
+      };
+    }).toList();
+  }
+
+
+  Future<void> _loadReport() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+
+      return;
+    }
+    _userId = user.uid;
+
+    final result = await _reportService.generateReport(
+      userId: _userId!,
+      startDate: DateUtils.getFirstDayOfYear(),
+      endDate: DateUtils.getToday(),
+      groupByFrequency: GroupByFrequency.month,
+      animalTypes: [AnimalType.buffalo, AnimalType.cow],
+    );
+
+    if (!mounted) return;
+    setState(() {
+      _monthsData = getMonthDataList(result);
+    });
   }
 
   @override
@@ -490,10 +558,12 @@ class _InfiniteGlassCarouselState extends State<InfiniteGlassCarousel> {
             builder: (context, child) {
               double value = 1.0;
               if (_pageController.position.haveDimensions) {
-                value = ((_pageController.page ?? _pageController.initialPage) - index).toDouble();
+                value = ((_pageController.page ?? _pageController.initialPage) -
+                        index)
+                    .toDouble();
                 value = (1 - (value.abs() * 0.3)).clamp(0.6, 1.0);
               }
-              
+
               return Transform.scale(
                 scale: value,
                 child: Opacity(
@@ -511,7 +581,7 @@ class _InfiniteGlassCarouselState extends State<InfiniteGlassCarousel> {
 
   Widget _buildGlassCard(Map<String, String> monthData, int monthIndex) {
     final isCurrentMonth = _isCurrentMonth(monthIndex);
-    
+
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
       child: ClipRRect(
@@ -532,7 +602,7 @@ class _InfiniteGlassCarouselState extends State<InfiniteGlassCarousel> {
               ),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: isCurrentMonth 
+                color: isCurrentMonth
                     ? Colors.white.withOpacity(0.6)
                     : Colors.white.withValues(alpha: 0.2),
                 width: isCurrentMonth ? 2.0 : 1.5,
@@ -583,7 +653,9 @@ class _InfiniteGlassCarouselState extends State<InfiniteGlassCarousel> {
                 Text(
                   monthData['name']!,
                   style: TextStyle(
-                    color: isCurrentMonth ? Colors.white : Colors.white.withOpacity(0.9),
+                    color: isCurrentMonth
+                        ? Colors.white
+                        : Colors.white.withOpacity(0.9),
                     fontSize: isCurrentMonth ? 28 : 24,
                     fontWeight: FontWeight.bold,
                     letterSpacing: 1.0,
@@ -591,11 +663,14 @@ class _InfiniteGlassCarouselState extends State<InfiniteGlassCarousel> {
                   ),
                 ),
                 const SizedBox(height: 8),
-                _buildDataRow('EXPENSE', monthData['expense']!, isCurrentMonth: isCurrentMonth),
+                _buildDataRow('EXPENSE', monthData['expense']!,
+                    isCurrentMonth: isCurrentMonth),
                 const SizedBox(height: 4),
-                _buildDataRow('REVENUE', monthData['revenue']!, isCurrentMonth: isCurrentMonth),
+                _buildDataRow('REVENUE', monthData['revenue']!,
+                    isCurrentMonth: isCurrentMonth),
                 const SizedBox(height: 4),
-                _buildDataRow('PROFIT', monthData['profit']!, isProfit: true, isCurrentMonth: isCurrentMonth),
+                _buildDataRow('PROFIT', monthData['profit']!,
+                    isProfit: true, isCurrentMonth: isCurrentMonth),
               ],
             ),
           ),
@@ -604,16 +679,18 @@ class _InfiniteGlassCarouselState extends State<InfiniteGlassCarousel> {
     );
   }
 
-  Widget _buildDataRow(String label, String value, {bool isProfit = false, bool isCurrentMonth = false}) {
+  Widget _buildDataRow(String label, String value,
+      {bool isProfit = false, bool isCurrentMonth = false}) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      crossAxisAlignment: isProfit ? CrossAxisAlignment.end : CrossAxisAlignment.center,
+      crossAxisAlignment:
+          isProfit ? CrossAxisAlignment.end : CrossAxisAlignment.center,
       children: [
         Text(
           label,
           style: TextStyle(
-            color: isCurrentMonth 
-                ? Colors.white 
+            color: isCurrentMonth
+                ? Colors.white
                 : Colors.white.withValues(alpha: 0.9),
             fontSize: 18,
             fontWeight: FontWeight.w600,
@@ -624,8 +701,8 @@ class _InfiniteGlassCarouselState extends State<InfiniteGlassCarousel> {
         Text(
           '$value/-',
           style: TextStyle(
-            color: isCurrentMonth 
-                ? Colors.white 
+            color: isCurrentMonth
+                ? Colors.white
                 : Colors.white.withValues(alpha: 0.95),
             fontSize: isProfit ? (isCurrentMonth ? 28 : 26) : 14,
             fontWeight: isProfit ? FontWeight.bold : FontWeight.w800,

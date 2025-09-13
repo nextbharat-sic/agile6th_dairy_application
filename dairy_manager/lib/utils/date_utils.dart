@@ -80,4 +80,10 @@ class DateUtils {
         return DateTime(date.year + 1, 1, 1);
     }
   }
+
+  /// Returns the current date (today).
+  static DateTime getToday() => DateTime.now();
+
+  /// Returns the first day of the current year.
+  static DateTime getFirstDayOfYear() => DateTime(DateTime.now().year, 1, 1);
 }
