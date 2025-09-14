@@ -62,6 +62,12 @@ class IncomeModel {
       fat: (map['fat'] as num).toDouble(),
       costPerLiter: (map['costPerLiter'] as num).toDouble(),
       totalIncome: (map['totalIncome'] as num).toDouble(),
+      createdAt: map['createdAt'] is String
+          ? DateTime.parse(map['createdAt'] as String)
+          : (map['createdAt'] as Timestamp).toDate(),
+      updatedAt: map['updatedAt'] is String
+          ? DateTime.parse(map['updatedAt'] as String)
+          : (map['updatedAt'] as Timestamp).toDate(),
     );
   }
   Map<String, dynamic> toMap() => {
