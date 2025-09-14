@@ -6,6 +6,7 @@ import '../../backend/services/expense_service.dart';
 import '../../backend/repositories/expense_repository.dart';
 import '../../constants/constants.dart';
 import '../../models/expense_model.dart';
+import '../../l10n/app_localizations.dart';
 
 class ExpensesScreen extends StatefulWidget {
   const ExpensesScreen({super.key});
@@ -25,13 +26,42 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
   double _totalExpenses = 0.0;
   
   // UI state
-  String _selectedMonth = 'Month';
-  String _selectedYear = 'Select Year';
+  String _selectedMonth = 'January';
+  String _selectedYear = '2024';
   
   final List<String> _months = [
     'January', 'February', 'March', 'April', 'May', 'June',
     'July', 'August', 'September', 'October', 'November', 'December'
   ];
+
+  String _getTranslatedMonthName(String monthName, AppLocalizations l10n) {
+    switch (monthName) {
+      case 'January': return l10n.january;
+      case 'February': return l10n.february;
+      case 'March': return l10n.march;
+      case 'April': return l10n.april;
+      case 'May': return l10n.may;
+      case 'June': return l10n.june;
+      case 'July': return l10n.july;
+      case 'August': return l10n.august;
+      case 'September': return l10n.september;
+      case 'October': return l10n.october;
+      case 'November': return l10n.november;
+      case 'December': return l10n.december;
+      default: return monthName;
+    }
+  }
+
+  String _getTranslatedCategoryName(ExpenseCategory category, AppLocalizations l10n) {
+    switch (category) {
+      case ExpenseCategory.feed: return l10n.feed;
+      case ExpenseCategory.labour: return l10n.labour;
+      case ExpenseCategory.healthcare: return l10n.healthcare;
+      case ExpenseCategory.utilities: return l10n.utilities;
+      case ExpenseCategory.equipment: return l10n.equipment;
+      case ExpenseCategory.other: return l10n.other;
+    }
+  }
   final List<String> _years = [
     '2020', '2021', '2022', '2023', '2024', '2025'
   ];
@@ -40,7 +70,7 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
   void initState() {
     super.initState();
     _initializeServices();
-    _loadExpenses();
+    _loadExpensesForSelectedPeriod();
   }
 
   void _initializeServices() {
@@ -88,7 +118,7 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
   }
 
   Future<void> _loadExpensesForSelectedPeriod() async {
-    if (_userId == null || _selectedMonth == 'Month' || _selectedYear == 'Select Year') return;
+    if (_userId == null) return;
     
     setState(() => _isLoading = true);
     
@@ -128,6 +158,8 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
 
     @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    
     return Scaffold(
       backgroundColor: Colors.grey[200],
       appBar: AppBar(
@@ -143,9 +175,9 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
         title: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text(
-              'Expenses',
-              style: TextStyle(
+            Text(
+              l10n.expenses,
+              style: const TextStyle(
                 color: Colors.white,
                 fontSize: 24,
                 fontWeight: FontWeight.w600,
@@ -185,14 +217,20 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
               child: Row(
                 children: [
                   Expanded(
+                    flex: 2,
                     child: DropdownButton<String>(
                       value: _selectedMonth,
                       dropdownColor: Colors.black,
-                      style: const TextStyle(color: Colors.white, fontSize: 16),
-                      items: ['Month', ..._months].map((String value) {
+                      style: const TextStyle(color: Colors.white, fontSize: 14),
+                      isExpanded: true,
+                      items: [l10n.month, ..._months].map((String value) {
                         return DropdownMenuItem<String>(
                           value: value,
-                          child: Text(value, style: const TextStyle(color: Colors.white)),
+                          child: Text(
+                            value == l10n.month ? value : _getTranslatedMonthName(value, l10n),
+                            style: const TextStyle(color: Colors.white, fontSize: 14),
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         );
                       }).toList(),
                       onChanged: (value) {
@@ -204,16 +242,22 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
                       underline: const SizedBox(),
                     ),
                   ),
-                  const SizedBox(width: 16),
+                  const SizedBox(width: 12),
                   Expanded(
+                    flex: 1,
                     child: DropdownButton<String>(
                       value: _selectedYear,
                       dropdownColor: Colors.black,
-                      style: const TextStyle(color: Colors.white, fontSize: 16),
-                      items: ['Select Year', ..._years].map((String value) {
+                      style: const TextStyle(color: Colors.white, fontSize: 14),
+                      isExpanded: true,
+                      items: [l10n.selectYear, ..._years].map((String value) {
                         return DropdownMenuItem<String>(
                           value: value,
-                          child: Text(value, style: const TextStyle(color: Colors.white)),
+                          child: Text(
+                            value, 
+                            style: const TextStyle(color: Colors.white, fontSize: 14),
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         );
                       }).toList(),
                       onChanged: (value) {
@@ -250,7 +294,7 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    "This Month's Expenses",
+                    l10n.thisMonthsExpenses,
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
                       color: Colors.black,
                       fontWeight: FontWeight.bold,
@@ -291,7 +335,7 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
                     child: ElevatedButton.icon(
                       onPressed: () => _showAddExpenseDialog(context),
                       icon: const Icon(Icons.add, color: Colors.black),
-                      label: const Text('ADD EXPENSE', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+                      label: Text(l10n.addExpense.toUpperCase(), style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.white,
                         foregroundColor: Colors.black,
@@ -316,6 +360,7 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
 
 
   void _showAddExpenseDialog(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final formKey = GlobalKey<FormState>();
     final dateController = TextEditingController();
     final descriptionController = TextEditingController();
@@ -342,7 +387,7 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    'Add New Expense',
+                    l10n.addNewExpense,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       color: Colors.black,
                       fontWeight: FontWeight.bold,
@@ -351,8 +396,8 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
                   const SizedBox(height: 24),
                   _buildExpenseField(
                     controller: dateController,
-                    label: 'Date',
-                    placeholder: 'dd/mm/yyyy',
+                    label: l10n.date,
+                    placeholder: l10n.ddmmyyyy,
                     readOnly: true,
                     onTap: () async {
                       final DateTime? picked = await showDatePicker(
@@ -380,11 +425,11 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
                   // Category dropdown
                   Row(
                     children: [
-                      const SizedBox(
+                      SizedBox(
                         width: 80,
                         child: Text(
-                          'Category',
-                          style: TextStyle(
+                          l10n.category,
+                          style: const TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 14,
                             color: Colors.black,
@@ -420,7 +465,7 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
                           items: ExpenseCategory.values.map((category) {
                             return DropdownMenuItem<ExpenseCategory>(
                               value: category,
-                              child: Text(category.displayName),
+                              child: Text(_getTranslatedCategoryName(category, l10n)),
                             );
                           }).toList(),
                           onChanged: (value) {
@@ -437,8 +482,8 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
                   // Utilities field
                                      _buildExpenseField(
                      controller: descriptionController,
-                     label: 'Description',
-                     placeholder: 'Enter expense description',
+                     label: l10n.description,
+                     placeholder: l10n.enterExpenseDescription,
                      validator: (value) {
                        if (value == null || value.trim().isEmpty) {
                          return null;
@@ -451,8 +496,8 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
                   // Equipment field
                    _buildExpenseField(
                      controller: amountController,
-                     label: 'Amount',
-                     placeholder: '0.00',
+                     label: l10n.amount,
+                     placeholder: l10n.enterAmount,
                      validator: (value) {
                        if (value == null || value.trim().isEmpty) {
                          return 'Amount is required';
@@ -529,9 +574,9 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
                           ),
                           elevation: 2,
                         ),
-                        child: const Text(
-                          'Submit',
-                          style: TextStyle(
+                        child: Text(
+                          l10n.addExpense,
+                          style: const TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
                           ),

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
+import '../../l10n/app_localizations.dart';
 
 class AnimatedHomeScreen extends StatefulWidget {
   const AnimatedHomeScreen({super.key});
@@ -80,6 +81,7 @@ class _AnimatedHomeScreenState extends State<AnimatedHomeScreen>
   Widget build(BuildContext context) {
     final authProvider = context.watch<AuthProvider>();
     final userName = authProvider.userName ?? 'User';
+    final l10n = AppLocalizations.of(context)!;
     
     return Scaffold(
       backgroundColor: Colors.black,
@@ -154,12 +156,12 @@ class _AnimatedHomeScreenState extends State<AnimatedHomeScreen>
                         ),
                         const SizedBox(height: 35),
                         // Infinite Glass Morphism Carousel
-                        const InfiniteGlassCarousel(),
+                        InfiniteGlassCarousel(l10n: l10n),
                         const SizedBox(height: 40),
                         // Navigation Buttons (animated)
                         AnimatedBuilder(
                           animation: _buttonsAnimation,
-                          child: _buildNavigationButtons(),
+                          child: _buildNavigationButtons(l10n),
                           builder: (context, child) {
                             return Transform.translate(
                               offset: Offset(0, (1 - _buttonsAnimation.value) * 100),
@@ -248,7 +250,7 @@ class _AnimatedHomeScreenState extends State<AnimatedHomeScreen>
     );
   }
 
-  Widget _buildNavigationButtons() {
+  Widget _buildNavigationButtons(AppLocalizations l10n) {
     return Column(
       children: [
         // Large Milk Entry Button with icon in center
@@ -268,9 +270,9 @@ class _AnimatedHomeScreenState extends State<AnimatedHomeScreen>
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Text(
-                  'Milk',
-                  style: TextStyle(
+                Text(
+                  l10n.milk,
+                  style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 26,
                     color: Colors.black,
@@ -295,9 +297,9 @@ class _AnimatedHomeScreenState extends State<AnimatedHomeScreen>
                   ),
                 ),
                 const SizedBox(width: 12),
-                const Text(
-                  'Entry',
-                  style: TextStyle(
+                Text(
+                  l10n.entry,
+                  style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 26,
                     color: Colors.black,
@@ -347,9 +349,9 @@ class _AnimatedHomeScreenState extends State<AnimatedHomeScreen>
                         ),
                       ),
                       const SizedBox(height: 8),
-                      const Text(
-                        'Reports',
-                        style: TextStyle(
+                      Text(
+                        l10n.reports,
+                        style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 22,
                           color: Colors.black,
@@ -396,9 +398,9 @@ class _AnimatedHomeScreenState extends State<AnimatedHomeScreen>
                         ),
                       ),
                       const SizedBox(height: 8),
-                      const Text(
-                        'Expenses',
-                        style: TextStyle(
+                      Text(
+                        l10n.expenses,
+                        style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 22,
                           color: Colors.black,
@@ -419,7 +421,9 @@ class _AnimatedHomeScreenState extends State<AnimatedHomeScreen>
 }
 
 class InfiniteGlassCarousel extends StatefulWidget {
-  const InfiniteGlassCarousel({super.key});
+  final AppLocalizations l10n;
+  
+  const InfiniteGlassCarousel({super.key, required this.l10n});
 
   @override
   State<InfiniteGlassCarousel> createState() => _InfiniteGlassCarouselState();
@@ -502,14 +506,32 @@ class _InfiniteGlassCarouselState extends State<InfiniteGlassCarousel> {
                 ),
               );
             },
-            child: _buildGlassCard(_monthsData[actualIndex], actualIndex),
+            child: _buildGlassCard(_monthsData[actualIndex], actualIndex, widget.l10n),
           );
         },
       ),
     );
   }
 
-  Widget _buildGlassCard(Map<String, String> monthData, int monthIndex) {
+  String _getTranslatedMonthName(String monthName, AppLocalizations l10n) {
+    switch (monthName) {
+      case 'JANUARY': return l10n.january;
+      case 'FEBRUARY': return l10n.february;
+      case 'MARCH': return l10n.march;
+      case 'APRIL': return l10n.april;
+      case 'MAY': return l10n.may;
+      case 'JUNE': return l10n.june;
+      case 'JULY': return l10n.july;
+      case 'AUGUST': return l10n.august;
+      case 'SEPTEMBER': return l10n.september;
+      case 'OCTOBER': return l10n.october;
+      case 'NOVEMBER': return l10n.november;
+      case 'DECEMBER': return l10n.december;
+      default: return monthName;
+    }
+  }
+
+  Widget _buildGlassCard(Map<String, String> monthData, int monthIndex, AppLocalizations l10n) {
     final isCurrentMonth = _isCurrentMonth(monthIndex);
     
     return Container(
@@ -581,7 +603,7 @@ class _InfiniteGlassCarouselState extends State<InfiniteGlassCarousel> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  monthData['name']!,
+                  _getTranslatedMonthName(monthData['name']!, l10n),
                   style: TextStyle(
                     color: isCurrentMonth ? Colors.white : Colors.white.withOpacity(0.9),
                     fontSize: isCurrentMonth ? 28 : 24,
@@ -591,11 +613,11 @@ class _InfiniteGlassCarouselState extends State<InfiniteGlassCarousel> {
                   ),
                 ),
                 const SizedBox(height: 8),
-                _buildDataRow('EXPENSE', monthData['expense']!, isCurrentMonth: isCurrentMonth),
+                _buildDataRow(l10n.expense, monthData['expense']!, isCurrentMonth: isCurrentMonth),
                 const SizedBox(height: 4),
-                _buildDataRow('REVENUE', monthData['revenue']!, isCurrentMonth: isCurrentMonth),
+                _buildDataRow(l10n.revenue, monthData['revenue']!, isCurrentMonth: isCurrentMonth),
                 const SizedBox(height: 4),
-                _buildDataRow('PROFIT', monthData['profit']!, isProfit: true, isCurrentMonth: isCurrentMonth),
+                _buildDataRow(l10n.profit, monthData['profit']!, isProfit: true, isCurrentMonth: isCurrentMonth),
               ],
             ),
           ),

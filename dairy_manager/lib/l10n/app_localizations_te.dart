@@ -33,4 +33,240 @@ class AppLocalizationsTe extends AppLocalizations {
 
   @override
   String get welcomeBack => 'మళ్లీ స్వాగతం!';
+
+  @override
+  String get milk => 'పాలు';
+
+  @override
+  String get entry => 'ఎంట్రీ';
+
+  @override
+  String get reports => 'రిపోర్టులు';
+
+  @override
+  String get expenses => 'ఖర్చులు';
+
+  @override
+  String get expense => 'ఖర్చు';
+
+  @override
+  String get revenue => 'ఆదాయం';
+
+  @override
+  String get profit => 'లాభం';
+
+  // Milk Entry Screen Translations
+  @override
+  String get chooseCattle => 'పశువులను ఎంచుకోండి';
+
+  @override
+  String get buffalo => 'ఎద్దు';
+
+  @override
+  String get cow => 'ఆవు';
+
+  @override
+  String get chooseSession => 'సెషన్‌ను ఎంచుకోండి';
+
+  @override
+  String get morning => 'ఉదయం';
+
+  @override
+  String get evening => 'సాయంత్రం';
+
+  @override
+  String get date => 'తేదీ';
+
+  @override
+  String get milkL => 'పాలు (లీ)';
+
+  @override
+  String get snf => 'SNF';
+
+  @override
+  String get fat => 'కొవ్వు';
+
+  @override
+  String get costL => 'ఖర్చు/లీ';
+
+  @override
+  String get enterCost => 'ఖర్చును నమోదు చేయండి';
+
+  @override
+  String get inputText => 'టెక్స్ట్‌ను నమోదు చేయండి';
+
+  @override
+  String get required => 'అవసరం';
+
+  @override
+  String get ddmmyyyy => 'dd/mm/yyyy';
+
+  // Reports Screen Translations
+  @override
+  String get weekly => 'వారంలో';
+
+  @override
+  String get monthly => 'నెలలో';
+
+  @override
+  String get yearly => 'సంవత్సరంలో';
+
+  @override
+  String get selectWeek => 'వారాన్ని ఎంచుకోండి';
+
+  @override
+  String get milkWeeklyAverage => 'పాల వారంలో సగటు : 148 లీ\nSNF వారంలో సగటు : 12\nకొవ్వు% వారంలో సగటు : 20%';
+
+  @override
+  String get milkMonthlyAverage => 'పాల నెలలో సగటు : 520 లీ\nSNF నెలలో సగటు : 20\nకొవ్వు% నెలలో సగటు : 20%';
+
+  @override
+  String get milkYearlyAverage => 'పాల సంవత్సరంలో సగటు : 6000 లీ\nSNF సంవత్సరంలో సగటు : 20\nకొవ్వు% సంవత్సరంలో సగటు : 20%';
+
+  @override
+  String get milkLHeader => 'పాలు(లీ)';
+
+  @override
+  String get snfHeader => 'SNF';
+
+  @override
+  String get fatHeader => 'కొవ్వు%';
+
+  @override
+  String get incomeHeader => 'ఆదాయం';
+
+  @override
+  String get expenseHeader => 'ఖర్చు';
+
+  @override
+  String get profitHeader => 'లాభం';
+
+  @override
+  String get yearlyIncome => 'సంవత్సర ఆదాయం';
+
+  // Month Names
+  @override
+  String get january => 'జనవరి';
+
+  @override
+  String get february => 'ఫిబ్రవరి';
+
+  @override
+  String get march => 'మార్చి';
+
+  @override
+  String get april => 'ఏప్రిల్';
+
+  @override
+  String get may => 'మే';
+
+  @override
+  String get june => 'జూన్';
+
+  @override
+  String get july => 'జులై';
+
+  @override
+  String get august => 'ఆగస్ట్';
+
+  @override
+  String get september => 'సెప్టెంబర్';
+
+  @override
+  String get october => 'అక్టోబర్';
+
+  @override
+  String get november => 'నవంబర్';
+
+  @override
+  String get december => 'డిసెంబర్';
+
+  // Income Labels
+  @override
+  String get weeklyIncome => 'వారపు ఆదాయం';
+
+  @override
+  String get monthlyIncome => 'నెలవారీ ఆదాయం';
+
+  // Dropdown Labels
+  @override
+  String get selectMonth => 'నెల';
+
+  @override
+  String get selectYear => 'సంవత్సరాన్ని ఎంచుకోండి';
+
+  @override
+  String get month => 'నెల';
+
+  // Expense Categories
+  @override
+  String get feed => 'ఆహారం';
+
+  @override
+  String get labour => 'కార్మికులు';
+
+  @override
+  String get healthcare => 'ఆరోగ్య సంరక్షణ';
+
+  @override
+  String get utilities => 'ఉపయోగాలు';
+
+  @override
+  String get equipment => 'పరికరాలు';
+
+  @override
+  String get other => 'ఇతర';
+
+  // Settings Screen Translations
+  @override
+  String get profile => 'ప్రొఫైల్';
+
+  @override
+  String get aboutUs => 'మా గురించి';
+
+  @override
+  String get logout => 'లాగౌట్';
+
+  @override
+  String get english => 'ఇంగ్లీష్';
+
+  @override
+  String get telugu => 'తెలుగు';
+
+  @override
+  String get memberSince => 'సభ్యుడైన తేదీ';
+
+  @override
+  String get accountCreated => 'ఖాతా సృష్టించబడిన తేదీ';
+
+  // Expenses Screen Translations
+  @override
+  String get thisMonthsExpenses => 'ఈ నెల ఖర్చులు';
+
+  @override
+  String get addNewExpense => 'కొత్త ఖర్చును జోడించండి';
+
+  @override
+  String get description => 'వివరణ';
+
+  @override
+  String get enterExpenseDescription => 'ఖర్చు వివరణను నమోదు చేయండి';
+
+  @override
+  String get amount => 'మొత్తం';
+
+  @override
+  String get enterAmount => 'మొత్తాన్ని నమోదు చేయండి';
+
+  @override
+  String get category => 'వర్గం';
+
+  @override
+  String get selectCategory => 'వర్గాన్ని ఎంచుకోండి';
+
+  @override
+  String get addExpense => 'ఖర్చును జోడించండి';
+
+  @override
+  String get cancel => 'రద్దు చేయండి';
 }

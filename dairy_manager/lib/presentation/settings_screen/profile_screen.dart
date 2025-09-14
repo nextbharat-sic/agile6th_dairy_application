@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../theme/app_theme.dart';
+import '../../l10n/app_localizations.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -11,6 +12,8 @@ class ProfileScreen extends StatelessWidget {
     final authProvider = context.watch<AuthProvider>();
     final userName = authProvider.userName ?? 'User';
     final userEmail = authProvider.userEmail ?? 'user@example.com';
+    final l10n = AppLocalizations.of(context);
+    if (l10n == null) return const SizedBox.shrink();
 
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
@@ -22,7 +25,7 @@ class ProfileScreen extends StatelessWidget {
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          'Profile',
+          l10n.profile,
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
             color: AppTheme.whiteColor,
             fontWeight: FontWeight.w600,
@@ -132,7 +135,7 @@ class ProfileScreen extends StatelessWidget {
                 child: ElevatedButton.icon(
                   onPressed: () => _showLogoutDialog(context),
                   icon: const Icon(Icons.logout),
-                  label: const Text('Logout'),
+                  label: Text(l10n.logout),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppTheme.errorColor,
                     foregroundColor: AppTheme.whiteColor,
@@ -206,6 +209,9 @@ class ProfileScreen extends StatelessWidget {
   }
 
   void _showLogoutDialog(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    if (l10n == null) return;
+    
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -214,7 +220,7 @@ class ProfileScreen extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
         ),
         title: Text(
-          'Logout',
+          l10n.logout,
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
             color: AppTheme.textPrimaryColor,
             fontWeight: FontWeight.w600,
@@ -246,7 +252,7 @@ class ProfileScreen extends StatelessWidget {
               backgroundColor: AppTheme.errorColor,
               foregroundColor: AppTheme.whiteColor,
             ),
-            child: const Text('Logout'),
+            child: Text(l10n.logout),
           ),
         ],
       ),

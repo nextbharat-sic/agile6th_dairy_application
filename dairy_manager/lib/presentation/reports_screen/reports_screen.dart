@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../l10n/app_localizations.dart';
 
 class ReportsScreen extends StatefulWidget {
   const ReportsScreen({super.key});
@@ -25,6 +26,9 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    if (l10n == null) return const SizedBox.shrink();
+    
     return Scaffold(
       backgroundColor: Colors.grey[200],
       appBar: AppBar(
@@ -40,9 +44,9 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
         title: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text(
-              'Reports',
-              style: TextStyle(
+            Text(
+              l10n.reports,
+              style: const TextStyle(
                 color: Colors.white,
                 fontSize: 24,
                 fontWeight: FontWeight.w600,
@@ -78,9 +82,9 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
                   ),
                   child: Row(
                     children: [
-                      _buildTabButton('Weekly', 0),
-                      _buildTabButton('Monthly', 1),
-                      _buildTabButton('Yearly', 2),
+                      _buildTabButton(l10n.weekly, 0),
+                      _buildTabButton(l10n.monthly, 1),
+                      _buildTabButton(l10n.yearly, 2),
                     ],
                   ),
                 ),
@@ -94,9 +98,9 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
                     controller: _tabController,
                     physics: const NeverScrollableScrollPhysics(),
                     children: [
-                      _buildReportContent('Select Week', 'dd/mm/yy'),
-                      _buildReportContent('Month', 'dd/mm/yy'),
-                      _buildReportContent('Select Year', 'dd/mm/yy'),
+                      _buildReportContent(l10n.selectWeek, 'dd/mm/yy', l10n),
+                      _buildReportContent(l10n.monthly, 'dd/mm/yy', l10n),
+                      _buildReportContent(l10n.yearly, 'dd/mm/yy', l10n),
                     ],
                   ),
                 ),
@@ -141,7 +145,7 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
     );
   }
 
-  Widget _buildReportContent(String periodLabel, String dateLabel) {
+  Widget _buildReportContent(String periodLabel, String dateLabel, AppLocalizations l10n) {
     final List<String> weekOptions = ['W1', 'W2', 'W3', 'W4'];
     final List<String> monthOptions = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     final List<String> yearOptions = ['2022', '2023', '2024'];
@@ -260,7 +264,7 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
                             ? 'Milk Weekly Average : 148 L\nSNF Weekly Average : 12\nFat% Weekly Average : 20%'
                             : periodLabel == 'Month'
                                 ? 'Milk Monthly Average : 520 L\nSNF Monthly Average : 20\nFat% Monthly Average : 20%'
-                                : 'Milk Yearly Average : 6000 L\nSNF Yearly Average : 20\nFat% Yearly Average : 20%',
+                                : l10n.milkYearlyAverage,
                         style: const TextStyle(
                           color: Colors.black,
                           fontWeight: FontWeight.w500,
@@ -284,10 +288,10 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
                     children: [
                       Text(
                         periodLabel == 'Select Week'
-                            ? 'WEEKLY INCOME'
+                            ? l10n.weeklyIncome
                             : periodLabel == 'Month'
-                                ? 'MONTHLY INCOME'
-                                : 'YEARLY INCOME',
+                                ? l10n.monthlyIncome
+                                : l10n.yearlyIncome,
                         style: const TextStyle(
                           color: Colors.black,
                           fontWeight: FontWeight.bold,
@@ -295,11 +299,11 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
                         ),
                       ),
                       const SizedBox(height: 8),
-                      _buildIncomeRow('Expense', '1234/-'),
+                      _buildIncomeRow(l10n.expenseHeader, '1234/-'),
                       const SizedBox(height: 8),
-                      _buildIncomeRow('Income', '1234/-'),
+                      _buildIncomeRow(l10n.incomeHeader, '1234/-'),
                       const SizedBox(height: 8),
-                      _buildIncomeRow('Profit', '1234/-'),
+                      _buildIncomeRow(l10n.profitHeader, '1234/-'),
                     ],
                   ),
                 ),
