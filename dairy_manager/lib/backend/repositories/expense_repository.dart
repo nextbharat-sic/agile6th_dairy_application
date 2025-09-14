@@ -25,12 +25,19 @@ class ExpenseRepository {
         final userDocRef = firestore.collection('users').doc(userId);
         final userDoc = await transaction.get(userDocRef);
         
-        // If user document doesn't exist, create a basic one
+        // If user document doesn't exist, create a basic one (must match rules)
         if (!userDoc.exists) {
+          final nowIso = DateTime.now().toIso8601String();
           final basicUserData = {
             'uid': userId,
-            'createdAt': DateTime.now().toIso8601String(),
-            'updatedAt': DateTime.now().toIso8601String(),
+            'name': '',
+            'email': '',
+            'phoneNumber': '',
+            'farmLocation': '',
+            'costPerLiterCow': 50.0,
+            'costPerLiterBuffalo': 55.0,
+            'createdAt': nowIso,
+            'updatedAt': nowIso,
           };
           transaction.set(userDocRef, basicUserData);
         }

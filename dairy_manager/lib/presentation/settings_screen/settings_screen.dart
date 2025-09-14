@@ -13,160 +13,85 @@ class SettingsScreen extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     
     return Scaffold(
-      backgroundColor: AppTheme.backgroundColor,
+      backgroundColor: Colors.grey[200],
       appBar: AppBar(
-        backgroundColor: AppTheme.backgroundColor,
-        elevation: 0,
+        backgroundColor: Colors.black,
+        toolbarHeight: 100,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(bottom: Radius.circular(30)),
+        ),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppTheme.whiteColor),
+          icon: const Icon(Icons.arrow_back, color: Colors.white, size: 28),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text(
-          l10n.settings,
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-            color: AppTheme.whiteColor,
-            fontWeight: FontWeight.w600,
-          ),
+        title: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              l10n.settings,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 24,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 8),
+            const Icon(Icons.settings, color: Colors.white, size: 32),
+          ],
         ),
+        centerTitle: true,
         actions: [
           IconButton(
-            icon: const Icon(Icons.settings, color: AppTheme.whiteColor),
-            onPressed: () {
-              // Already in settings
-            },
+            icon: const Icon(Icons.settings, color: Colors.white, size: 28),
+            onPressed: () {},
           ),
         ],
       ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            children: [
-              const SizedBox(height: 40),
-              
-              // Settings Icon
-              Center(
-                child: Container(
-                  width: 100,
-                  height: 100,
-                  decoration: BoxDecoration(
-                    color: AppTheme.primaryColor.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(25),
-                  ),
-                  child: Icon(
-                    Icons.settings,
-                    size: 50,
-                    color: AppTheme.primaryColor,
-                  ),
-                ),
-              ),
-              
-              const SizedBox(height: 40),
-              
-              // Settings Options
-              _buildSettingsOption(
-                context,
-                icon: Icons.person,
-                title: l10n.profile,
-                onTap: () => Navigator.pushNamed(context, '/profile'),
-              ),
-              
-              _buildSettingsOption(
-                context,
-                icon: Icons.tune,
-                title: 'Configuration',
-                onTap: () {
-                  // Handle configuration
-                },
-              ),
-              
-              _buildSettingsOption(
-                context,
-                icon: Icons.language,
-                title: l10n.language,
-                onTap: () => _showLanguageDialog(context),
-              ),
-              
-              _buildSettingsOption(
-                context,
-                icon: Icons.info,
-                title: l10n.aboutUs,
-                onTap: () {
-                  // Handle about us
-                },
-              ),
-              
-              const SizedBox(height: 20),
-              
-              _buildSettingsOption(
-                context,
-                icon: Icons.logout,
-                title: l10n.logout,
-                onTap: () => _showLogoutDialog(context),
-                isDestructive: true,
-              ),
-            ],
-          ),
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+        child: Column(
+          children: [
+            const SizedBox(height: 24),
+            _pillButton(
+              context,
+              label: l10n.profile,
+              onTap: () => Navigator.pushNamed(context, '/profile'),
+            ),
+            const SizedBox(height: 16),
+            _pillButton(
+              context,
+              label: l10n.language,
+              onTap: () => _showLanguageDialog(context),
+            ),
+            const SizedBox(height: 16),
+            _pillButton(
+              context,
+              label: l10n.logout,
+              onTap: () => _showLogoutDialog(context),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildSettingsOption(
-    BuildContext context, {
-    required IconData icon,
-    required String title,
-    required VoidCallback onTap,
-    bool isDestructive = false,
-  }) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(12),
-          child: Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: AppTheme.cardColor,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Row(
-              children: [
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: isDestructive 
-                        ? AppTheme.errorColor.withValues(alpha: 0.1)
-                        : AppTheme.primaryColor.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Icon(
-                    icon,
-                    size: 20,
-                    color: isDestructive ? AppTheme.errorColor : AppTheme.primaryColor,
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Text(
-                    title,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: isDestructive ? AppTheme.errorColor : AppTheme.textPrimaryColor,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
-                Icon(
-                  Icons.arrow_forward_ios,
-                  size: 16,
-                  color: AppTheme.textSecondaryColor,
-                ),
-              ],
-            ),
+  Widget _pillButton(BuildContext context, {required String label, required VoidCallback onTap}) {
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton(
+        onPressed: onTap,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.white,
+          foregroundColor: Colors.black,
+          elevation: 3,
+          padding: const EdgeInsets.symmetric(vertical: 14),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(30),
           ),
+        ),
+        child: Text(
+          label,
+          style: const TextStyle(fontWeight: FontWeight.w700),
         ),
       ),
     );
