@@ -12,6 +12,8 @@ class IncomeModel {
   final double fat;
   final double costPerLiter;
   final double totalIncome;
+  final DateTime createdAt;
+  final DateTime updatedAt;
 
   IncomeModel({
     required this.id,
@@ -23,6 +25,8 @@ class IncomeModel {
     required this.fat,
     required this.costPerLiter,
     required this.totalIncome,
+    required this.createdAt,
+    required this.updatedAt,
   });
 
   /// Create a model from an entity, reusing entity’s computed totalIncome.
@@ -37,12 +41,14 @@ class IncomeModel {
       fat: entity.fat,
       costPerLiter: entity.costPerLiter,
       totalIncome: entity.totalIncome,
+      createdAt: entity.createdAt,
+      updatedAt: entity.updatedAt,
     );
   }
 
   Map<String, dynamic> toMap() => {
     'id': id,
-    'dateTime': dateTime,
+    'dateTime': dateTime.toIso8601String(),
     'animalType': animalType.key,
     'session': session.key,
     'liters': liters,
@@ -50,5 +56,7 @@ class IncomeModel {
     'fat': fat,
     'costPerLiter': costPerLiter,
     'totalIncome': totalIncome,
+    'createdAt': createdAt.toIso8601String(),
+    'updatedAt': updatedAt.toIso8601String(),
   };
 }

@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import '../backend/repositories/user_repository.dart';
 
 class AuthProvider extends ChangeNotifier {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -55,6 +57,9 @@ class AuthProvider extends ChangeNotifier {
 
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('auth_token', userCredential.user!.uid);
+      // Ensure Firestore user document exists
+      final firestore = FirebaseFirestore.instance;
+      await UserRepository(firestore).upsertUserOld(user: userCredential.user!);
       // The authStateChanges listener will handle updating the UI
     } on FirebaseAuthException catch (e) {
       throw Exception(_getFirebaseErrorMessage(e.code));
@@ -74,6 +79,9 @@ class AuthProvider extends ChangeNotifier {
 
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('auth_token', userCredential.user!.uid);
+      // Ensure Firestore user document exists
+      final firestore = FirebaseFirestore.instance;
+      await UserRepository(firestore).upsertUserOld(user: userCredential.user!, name: name);
       // The authStateChanges listener will handle updating the UI
     } on FirebaseAuthException catch (e) {
       throw Exception(_getFirebaseErrorMessage(e.code));
@@ -115,6 +123,9 @@ class AuthProvider extends ChangeNotifier {
 
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('auth_token', userCredential.user!.uid);
+      // Ensure Firestore user document exists
+      final firestore = FirebaseFirestore.instance;
+      await UserRepository(firestore).upsertUserOld(user: userCredential.user!);
 
       // The authStateChanges listener will handle updating the UI
     } on FirebaseAuthException catch (e) {

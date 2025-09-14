@@ -267,24 +267,58 @@ class _MilkEntryScreenState extends State<MilkEntryScreen> {
             const SizedBox(height: 8),
             _inputFieldRow('Cost/L', costController, onChanged: (value) => calculateIncome()),
             const SizedBox(height: 20),
-            Center(
-              child: ElevatedButton(
-                onPressed: _handleSubmit,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  foregroundColor: Colors.black,
-                  padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 14),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30),
-                    side: const BorderSide(color: Colors.black, width: 1),
+            Container(
+            width: double.infinity,
+            height: 60, // Set fixed height for proper alignment
+            child: Stack(
+              children: [
+                // Perfectly centered Submit button
+                Center(
+                  child: SizedBox(
+                    width: 200, // Fixed button width - adjust as needed
+                    child: ElevatedButton(
+                      onPressed: _handleSubmit,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        foregroundColor: Colors.black,
+                        padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30),
+                          side: const BorderSide(color: Colors.black, width: 1),
+                        ),
+                      ),
+                      child: const Text(
+                        'SUBMIT',
+                        style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+                      ),
+                    ),
                   ),
                 ),
-                child: const Text(
-                  'SUBMIT',
-                  style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+                // Edit icon positioned absolutely to the right
+                Positioned(
+                  right: 10, // Distance from right edge - adjust as needed
+                  top: 0,
+                  bottom: 0,
+                  child: Center(
+                    child: IconButton(
+                      onPressed: () => Navigator.pushNamed(context, '/milk-entry-edit'),
+                      icon: const Icon(Icons.edit, color: Colors.black),
+                      style: ButtonStyle(
+                        backgroundColor: WidgetStateProperty.all(Colors.white),
+                        shape: WidgetStateProperty.all(
+                          RoundedRectangleBorder(
+                            side: const BorderSide(color: Colors.black, width: 1),
+                            borderRadius: BorderRadius.circular(22),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
-              ),
+              ],
             ),
+          ),
+
             const SizedBox(height: 32),
             Divider(thickness: 2, color: Colors.black26),
             const SizedBox(height: 24),
