@@ -80,18 +80,18 @@ class IncomeService {
     };
   }
 
-  /// Retrieves income records for a specific animal within a given date range.
+  /// Retrieves income records for the given animals within a given date range.
   Future<QuerySnapshot<Map<String, dynamic>>> getIncomeForAnimalInRange(
     String userId,
     DateTime startDate,
     DateTime endDate,
     AnimalType animalType,
   ) async {
-    return await incomeRepo.getIncomeForAnimalInDateRange(
+    return await incomeRepo.getIncomeForAnimalsInDateRange(
       userId,
       startDate,
       endDate,
-      animalType,
+      [animalType],
     );
   }
 

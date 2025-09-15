@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
+import '../../providers/language_provider.dart';
+import '../../l10n/app_localizations.dart';
 import '../../theme/app_theme.dart';
 
 class SettingsScreen extends StatelessWidget {
@@ -8,6 +10,8 @@ class SettingsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    
     return Scaffold(
       backgroundColor: Colors.grey[200],
       appBar: AppBar(
@@ -22,17 +26,17 @@ class SettingsScreen extends StatelessWidget {
         ),
         title: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: const [
+          children: [
             Text(
-              'Settings',
-              style: TextStyle(
+              l10n.settings,
+              style: const TextStyle(
                 color: Colors.white,
                 fontSize: 24,
                 fontWeight: FontWeight.w600,
               ),
             ),
-            SizedBox(height: 8),
-            Icon(Icons.settings, color: Colors.white, size: 32),
+            const SizedBox(height: 8),
+            const Icon(Icons.settings, color: Colors.white, size: 32),
           ],
         ),
         centerTitle: true,
@@ -50,23 +54,19 @@ class SettingsScreen extends StatelessWidget {
             const SizedBox(height: 24),
             _pillButton(
               context,
-              label: 'Profile',
+              label: l10n.profile,
               onTap: () => Navigator.pushNamed(context, '/profile'),
             ),
             const SizedBox(height: 16),
             _pillButton(
               context,
-              label: 'Languages',
-              onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Language settings coming soon')),
-                );
-              },
+              label: l10n.language,
+              onTap: () => _showLanguageDialog(context),
             ),
             const SizedBox(height: 16),
             _pillButton(
               context,
-              label: 'Logout',
+              label: l10n.logout,
               onTap: () => _showLogoutDialog(context),
             ),
           ],
@@ -97,7 +97,11 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
-  void _showLogoutDialog(BuildContext context) {
+  void _showLanguageDialog(BuildContext context) {
+    final languageProvider = context.read<LanguageProvider>();
+    final l10n = AppLocalizations.of(context);
+    if (l10n == null) return;
+    
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -106,7 +110,105 @@ class SettingsScreen extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
         ),
         title: Text(
-          'Logout',
+          AppLocalizations.of(context)!.language,
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+            color: AppTheme.textPrimaryColor,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _buildLanguageOption(
+              context,
+              l10n.english,
+              'en',
+              languageProvider.locale.languageCode == 'en',
+              () {
+                languageProvider.setLocale(const Locale('en'));
+                Navigator.pop(context);
+              },
+            ),
+            const SizedBox(height: 8),
+            _buildLanguageOption(
+              context,
+              l10n.telugu,
+              'te',
+              languageProvider.locale.languageCode == 'te',
+              () {
+                languageProvider.setLocale(const Locale('te'));
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLanguageOption(
+    BuildContext context,
+    String languageName,
+    String languageCode,
+    bool isSelected,
+    VoidCallback onTap,
+  ) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(8),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          decoration: BoxDecoration(
+            color: isSelected 
+                ? AppTheme.primaryColor.withValues(alpha: 0.1)
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: isSelected 
+                  ? AppTheme.primaryColor
+                  : AppTheme.textSecondaryColor.withValues(alpha: 0.3),
+            ),
+          ),
+          child: Row(
+            children: [
+              Text(
+                languageName,
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  color: isSelected 
+                      ? AppTheme.primaryColor
+                      : AppTheme.textPrimaryColor,
+                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                ),
+              ),
+              const Spacer(),
+              if (isSelected)
+                Icon(
+                  Icons.check,
+                  color: AppTheme.primaryColor,
+                  size: 20,
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showLogoutDialog(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    if (l10n == null) return;
+    
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppTheme.cardColor,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        title: Text(
+          l10n.logout,
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
             color: AppTheme.textPrimaryColor,
             fontWeight: FontWeight.w600,
@@ -138,7 +240,7 @@ class SettingsScreen extends StatelessWidget {
               backgroundColor: AppTheme.errorColor,
               foregroundColor: AppTheme.whiteColor,
             ),
-            child: const Text('Logout'),
+            child: Text(l10n.logout),
           ),
         ],
       ),

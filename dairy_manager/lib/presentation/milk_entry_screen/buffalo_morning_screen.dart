@@ -217,7 +217,7 @@ class _BuffaloMorningScreenState extends State<BuffaloMorningScreen> {
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              'Buffalo',
+                              'ఎద్దు',
                               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                                     color: Colors.white,
                                     fontWeight: FontWeight.w600,
@@ -292,7 +292,7 @@ class _BuffaloMorningScreenState extends State<BuffaloMorningScreen> {
                                         Icon(Icons.wb_sunny, size: 20, color: _isMorning ? const Color(0xFF395364) : Colors.white),
                                         const SizedBox(width: 6),
                                         Text(
-                                          'Morning',
+                                          'ఉదయం',
                                           style: TextStyle(
                                             color: _isMorning ? const Color(0xFF395364) : Colors.white,
                                             fontWeight: FontWeight.bold,
@@ -317,7 +317,7 @@ class _BuffaloMorningScreenState extends State<BuffaloMorningScreen> {
                                         Icon(Icons.nightlight_round, size: 20, color: !_isMorning ? const Color(0xFF395364) : Colors.white),
                                         const SizedBox(width: 6),
                                         Text(
-                                          'Evening',
+                                          'సాయంత్రం',
                                           style: TextStyle(
                                             color: !_isMorning ? const Color(0xFF395364) : Colors.white,
                                             fontWeight: FontWeight.bold,
@@ -361,7 +361,7 @@ class _BuffaloMorningScreenState extends State<BuffaloMorningScreen> {
                         children: [
                           _buildFormField(
                             controller: _dateController,
-                            label: 'Date',
+                            label: 'తేదీ',
                             hint: 'dd/mm/yyyy',
                             onTap: _selectDate,
                             readOnly: true,
@@ -369,7 +369,7 @@ class _BuffaloMorningScreenState extends State<BuffaloMorningScreen> {
                           const SizedBox(height: 10),
                           _buildFormField(
                             controller: _milkController,
-                            label: 'Milk (L)',
+                            label: 'పాలు (లీ)',
                             hint: 'Input Text',
                             onChanged: (value) => _calculateIncome(),
                             isRequired: true,
@@ -383,14 +383,14 @@ class _BuffaloMorningScreenState extends State<BuffaloMorningScreen> {
                           const SizedBox(height: 10),
                           _buildFormField(
                             controller: _fatController,
-                            label: 'Fat',
+                            label: 'కొవ్వు',
                             hint: 'Input Text',
                           ),
                           const SizedBox(height: 10),
                           _buildFormField(
                             controller: _costController,
-                            label: 'Cost/L',
-                            hint: 'Enter the cost',
+                            label: 'ఖర్చు/లీ',
+                            hint: 'ఖర్చును నమోదు చేయండి',
                             suffixIcon: Icons.lock,
                             onChanged: (value) => _calculateIncome(),
                             isRequired: true,
@@ -521,7 +521,7 @@ class _BuffaloMorningScreenState extends State<BuffaloMorningScreen> {
             onChanged: onChanged,
             validator: (value) {
               if (isRequired && (value == null || value.isEmpty)) {
-                return 'Required';
+                return 'అవసరం';
               }
               return null;
             },

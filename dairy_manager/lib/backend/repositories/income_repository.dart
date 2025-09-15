@@ -8,18 +8,28 @@ class IncomeRepository {
 
   IncomeRepository(this.firestore);
 
-  Future<void> addIncome(String userId, String incomeId, IncomeModel model) async {
-    await firestore.collection('users').doc(userId)
-        .collection('income').doc(incomeId)
+  Future<void> addIncome(
+      String userId, String incomeId, IncomeModel model) async {
+    await firestore
+        .collection('users')
+        .doc(userId)
+        .collection('income')
+        .doc(incomeId)
         .set(model.toMap());
   }
 
-  Future<QuerySnapshot<Map<String, dynamic>>> getIncomeForAnimalInDateRange (String userId, DateTime startDateTime, DateTime endDateTime, AnimalType animalType) async {
-    final snapshot = await firestore.collection('users').doc(userId)
+  Future<QuerySnapshot<Map<String, dynamic>>> getIncomeForAnimalsInDateRange(
+      String userId,
+      DateTime startDateTime,
+      DateTime endDateTime,
+      List<AnimalType> animalTypes) async {
+    final snapshot = await firestore
+        .collection('users')
+        .doc(userId)
         .collection('income')
         .where('dateTime', isGreaterThanOrEqualTo: startDateTime)
         .where('dateTime', isLessThanOrEqualTo: endDateTime)
-        .where('animalType', isEqualTo: animalType.key)
+        .where('animalType', whereIn: animalTypes.map((t) => t.key).toList())
         .get();
 
     return snapshot;

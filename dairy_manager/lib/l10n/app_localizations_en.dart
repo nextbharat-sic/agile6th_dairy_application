@@ -33,4 +33,240 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get welcomeBack => 'Welcome back!';
+
+  @override
+  String get milk => 'Milk';
+
+  @override
+  String get entry => 'Entry';
+
+  @override
+  String get reports => 'Reports';
+
+  @override
+  String get expenses => 'Expenses';
+
+  @override
+  String get expense => 'EXPENSE';
+
+  @override
+  String get revenue => 'REVENUE';
+
+  @override
+  String get profit => 'PROFIT';
+
+  // Milk Entry Screen Translations
+  @override
+  String get chooseCattle => 'Choose Cattle';
+
+  @override
+  String get buffalo => 'Buffalo';
+
+  @override
+  String get cow => 'Cow';
+
+  @override
+  String get chooseSession => 'Choose Session';
+
+  @override
+  String get morning => 'Morning';
+
+  @override
+  String get evening => 'Evening';
+
+  @override
+  String get date => 'Date';
+
+  @override
+  String get milkL => 'Milk (L)';
+
+  @override
+  String get snf => 'SNF';
+
+  @override
+  String get fat => 'Fat';
+
+  @override
+  String get costL => 'Cost/L';
+
+  @override
+  String get enterCost => 'Enter the cost';
+
+  @override
+  String get inputText => 'Input Text';
+
+  @override
+  String get required => 'Required';
+
+  @override
+  String get ddmmyyyy => 'dd/mm/yyyy';
+
+  // Reports Screen Translations
+  @override
+  String get weekly => 'Weekly';
+
+  @override
+  String get monthly => 'Monthly';
+
+  @override
+  String get yearly => 'Yearly';
+
+  @override
+  String get selectWeek => 'Select Week';
+
+  @override
+  String get milkWeeklyAverage => 'Milk Weekly Average : 148 L\nSNF Weekly Average : 12\nFat% Weekly Average : 20%';
+
+  @override
+  String get milkMonthlyAverage => 'Milk Monthly Average : 520 L\nSNF Monthly Average : 20\nFat% Monthly Average : 20%';
+
+  @override
+  String get milkYearlyAverage => 'Milk Yearly Average : 6000 L\nSNF Yearly Average : 20\nFat% Yearly Average : 20%';
+
+  @override
+  String get milkLHeader => 'Milk(L)';
+
+  @override
+  String get snfHeader => 'SNF';
+
+  @override
+  String get fatHeader => 'Fat%';
+
+  @override
+  String get incomeHeader => 'Income';
+
+  @override
+  String get expenseHeader => 'Expense';
+
+  @override
+  String get profitHeader => 'Profit';
+
+  @override
+  String get yearlyIncome => 'YEARLY INCOME';
+
+  // Month Names
+  @override
+  String get january => 'JANUARY';
+
+  @override
+  String get february => 'FEBRUARY';
+
+  @override
+  String get march => 'MARCH';
+
+  @override
+  String get april => 'APRIL';
+
+  @override
+  String get may => 'MAY';
+
+  @override
+  String get june => 'JUNE';
+
+  @override
+  String get july => 'JULY';
+
+  @override
+  String get august => 'AUGUST';
+
+  @override
+  String get september => 'SEPTEMBER';
+
+  @override
+  String get october => 'OCTOBER';
+
+  @override
+  String get november => 'NOVEMBER';
+
+  @override
+  String get december => 'DECEMBER';
+
+  // Income Labels
+  @override
+  String get weeklyIncome => 'WEEKLY INCOME';
+
+  @override
+  String get monthlyIncome => 'MONTHLY INCOME';
+
+  // Dropdown Labels
+  @override
+  String get selectMonth => 'Month';
+
+  @override
+  String get selectYear => 'Select Year';
+
+  @override
+  String get month => 'Month';
+
+  // Expense Categories
+  @override
+  String get feed => 'Feed';
+
+  @override
+  String get labour => 'Labour';
+
+  @override
+  String get healthcare => 'Healthcare';
+
+  @override
+  String get utilities => 'Utilities';
+
+  @override
+  String get equipment => 'Equipment';
+
+  @override
+  String get other => 'Other';
+
+  // Settings Screen Translations
+  @override
+  String get profile => 'Profile';
+
+  @override
+  String get aboutUs => 'About Us';
+
+  @override
+  String get logout => 'Logout';
+
+  @override
+  String get english => 'English';
+
+  @override
+  String get telugu => 'Telugu';
+
+  @override
+  String get memberSince => 'Member since';
+
+  @override
+  String get accountCreated => 'Account Created';
+
+  // Expenses Screen Translations
+  @override
+  String get thisMonthsExpenses => 'This Month\'s Expenses';
+
+  @override
+  String get addNewExpense => 'Add New Expense';
+
+  @override
+  String get description => 'Description';
+
+  @override
+  String get enterExpenseDescription => 'Enter expense description';
+
+  @override
+  String get amount => 'Amount';
+
+  @override
+  String get enterAmount => 'Enter amount';
+
+  @override
+  String get category => 'Category';
+
+  @override
+  String get selectCategory => 'Select Category';
+
+  @override
+  String get addExpense => 'Add Expense';
+
+  @override
+  String get cancel => 'Cancel';
 }

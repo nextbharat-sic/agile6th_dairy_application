@@ -5,6 +5,7 @@ import '../../backend/repositories/income_repository.dart';
 import '../../backend/repositories/user_repository.dart';
 import '../../backend/services/income_service.dart';
 import '../../constants/constants.dart';
+import '../../l10n/app_localizations.dart';
 
 class MilkEntryScreen extends StatefulWidget {
   const MilkEntryScreen({Key? key}) : super(key: key);
@@ -140,6 +141,8 @@ class _MilkEntryScreenState extends State<MilkEntryScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    
     return Scaffold(
       backgroundColor: Colors.grey[200],
       appBar: AppBar(
@@ -155,9 +158,9 @@ class _MilkEntryScreenState extends State<MilkEntryScreen> {
         title: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text(
-              'Milk Entry',
-              style: TextStyle(
+            Text(
+              l10n.milk + ' ' + l10n.entry,
+              style: const TextStyle(
                 color: Colors.white,
                 fontSize: 24, // Increased from 18 to 24
                 fontWeight: FontWeight.w600, // Increased from w500 to w600
@@ -187,16 +190,16 @@ class _MilkEntryScreenState extends State<MilkEntryScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Choose Cattle',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            Text(
+              l10n.chooseCattle,
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
             ),
             const SizedBox(height: 8),
             Row(
               children: [
                 Expanded(
                   child: _cattleToggleButton(
-                    'Buffalo',
+                    l10n.buffalo,
                     'assets/images/buffalo.png',
                     selectedAnimal == AnimalType.buffalo,
                     () {
@@ -210,7 +213,7 @@ class _MilkEntryScreenState extends State<MilkEntryScreen> {
                 const SizedBox(width: 8),
                 Expanded(
                   child: _cattleToggleButton(
-                    'Cow',
+                    l10n.cow,
                     'assets/images/cow.png',
                     selectedAnimal == AnimalType.cow,
                     () {
@@ -224,16 +227,16 @@ class _MilkEntryScreenState extends State<MilkEntryScreen> {
               ],
             ),
             const SizedBox(height: 16),
-            const Text(
-              'Choose Session',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            Text(
+              l10n.chooseSession,
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
             ),
             const SizedBox(height: 8),
             Row(
               children: [
                 Expanded(
                   child: _sessionToggleButton(
-                    'Morning',
+                    l10n.morning,
                     selectedSession == SessionType.morning,
                     () {
                       setState(() {
@@ -245,7 +248,7 @@ class _MilkEntryScreenState extends State<MilkEntryScreen> {
                 const SizedBox(width: 8),
                 Expanded(
                   child: _sessionToggleButton(
-                    'Evening',
+                    l10n.evening,
                     selectedSession == SessionType.evening,
                     () {
                       setState(() {
@@ -257,15 +260,15 @@ class _MilkEntryScreenState extends State<MilkEntryScreen> {
               ],
             ),
             const SizedBox(height: 16),
-            _inputFieldRow('Date', dateController, isDateField: true),
+            _inputFieldRow(l10n.date, dateController, isDateField: true),
             const SizedBox(height: 8),
-            _inputFieldRow('Milk (L)', milkController, onChanged: (value) => calculateIncome()),
+            _inputFieldRow(l10n.milkL, milkController, onChanged: (value) => calculateIncome()),
             const SizedBox(height: 8),
-            _inputFieldRow('SNF', snfController),
+            _inputFieldRow(l10n.snf, snfController),
             const SizedBox(height: 8),
-            _inputFieldRow('Fat', fatController),
+            _inputFieldRow(l10n.fat, fatController),
             const SizedBox(height: 8),
-            _inputFieldRow('Cost/L', costController, onChanged: (value) => calculateIncome()),
+            _inputFieldRow(l10n.costL, costController, onChanged: (value) => calculateIncome()),
             const SizedBox(height: 20),
             Container(
             width: double.infinity,
@@ -408,6 +411,8 @@ class _MilkEntryScreenState extends State<MilkEntryScreen> {
 
   Widget _inputFieldRow(String label, TextEditingController controller,
     {bool isDateField = false, Function(String)? onChanged}) {
+  final l10n = AppLocalizations.of(context)!;
+  
   return Row(
     children: [
       SizedBox(
@@ -427,7 +432,7 @@ class _MilkEntryScreenState extends State<MilkEntryScreen> {
             keyboardType: TextInputType.number,
             obscureText: false, // Always visible, never encrypted
             decoration: InputDecoration(
-              hintText: isDateField ? 'dd/mm/yyyy' : 'Input Text',
+              hintText: isDateField ? l10n.ddmmyyyy : l10n.inputText,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
                 borderSide: const BorderSide(color: Colors.grey),
