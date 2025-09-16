@@ -133,18 +133,29 @@ class AppLocalizationsTe extends AppLocalizations {
   String get fatHeader => 'కొవ్వు%';
 
   @override
-  String get incomeHeader => 'ఆదాయం';
+  String get dayHeader => 'రోజు';
 
   @override
-  String get expenseHeader => 'ఖర్చు';
+  String get monday => 'సోమవారం';
 
   @override
-  String get profitHeader => 'లాభం';
+  String get tuesday => 'మంగళవారం';
 
   @override
-  String get yearlyIncome => 'సంవత్సర ఆదాయం';
+  String get wednesday => 'బుధవారం';
 
-  // Month Names
+  @override
+  String get thursday => 'గురువారం';
+
+  @override
+  String get friday => 'శుక్రవారం';
+
+  @override
+  String get saturday => 'శనివారం';
+
+  @override
+  String get sunday => 'ఆదివారం';
+
   @override
   String get january => 'జనవరి';
 
@@ -167,7 +178,7 @@ class AppLocalizationsTe extends AppLocalizations {
   String get july => 'జులై';
 
   @override
-  String get august => 'ఆగస్ట్';
+  String get august => 'ఆగస్టు';
 
   @override
   String get september => 'సెప్టెంబర్';
@@ -180,6 +191,19 @@ class AppLocalizationsTe extends AppLocalizations {
 
   @override
   String get december => 'డిసెంబర్';
+
+  @override
+  String get incomeHeader => 'ఆదాయం';
+
+  @override
+  String get expenseHeader => 'ఖర్చు';
+
+  @override
+  String get profitHeader => 'లాభం';
+
+  @override
+  String get yearlyIncome => 'సంవత్సర ఆదాయం';
+
 
   // Income Labels
   @override

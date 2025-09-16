@@ -84,6 +84,40 @@ class DateUtils {
   /// Returns the current date (today).
   static DateTime getToday() => DateTime.now();
 
-  /// Returns the first day of the current year.
-  static DateTime getFirstDayOfYear() => DateTime(DateTime.now().year, 1, 1);
+  /// Returns the first day of the current year for a given date.
+  static DateTime getFirstDayOfYear(DateTime date) => DateTime(date.year, 1, 1);
+
+  /// Returns the last day of the current year for a given date.
+  static DateTime getLastDayOfYear(DateTime date) => DateTime(date.year, 12, 31);
+
+  /// Returns the first day of the current month for a given date.
+  static DateTime getFirstDayOfMonth(DateTime date) => DateTime(date.year, date.month, 1);
+
+  /// Returns the last day of the current month for a given date.
+  static DateTime getLastDayOfMonth(DateTime date) => DateTime(date.year, date.month + 1, 0);
+
+  /// Returns the first day of the current week for a given date (Monday).
+  static DateTime getFirstDayOfWeek(DateTime date) {
+    final weekday = date.weekday;
+    return date.subtract(Duration(days: weekday - 1));
+  }
+
+  /// Returns the last day of the current week for a given date (Sunday).
+  static DateTime getLastDayOfWeek(DateTime date) {
+    final weekday = date.weekday;
+    return date.add(Duration(days: 7 - weekday));
+  }
+
+  /// Formats a date as 'yyyy-MM-dd'.
+  static String formatDate(DateTime date) => DateFormat('yyyy-MM-dd').format(date);
+
+  /// Gets the week number for a given date.
+  static int getWeekNumber(DateTime date) {
+    final firstDayOfYear = DateTime(date.year, 1, 1);
+    final daysSinceFirstDay = date.difference(firstDayOfYear).inDays;
+    return (daysSinceFirstDay / 7).floor() + 1;
+  }
+
+  /// Gets the full month name for a given date.
+  static String getMonthName(DateTime date) => DateFormat('MMMM').format(date);
 }

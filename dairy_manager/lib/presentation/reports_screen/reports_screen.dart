@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../l10n/app_localizations.dart';
+import 'package:provider/provider.dart';
+import '../../providers/reports_provider.dart';
+import '../../models/report_data.dart';
 
 class ReportsScreen extends StatefulWidget {
   const ReportsScreen({super.key});
@@ -11,11 +14,40 @@ class ReportsScreen extends StatefulWidget {
 class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProviderStateMixin {
   late TabController _tabController;
   String _selectedPeriod = 'Weekly';
+  
+  AppLocalizations get l10n => AppLocalizations.of(context)!;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
+    
+    // Load initial data
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadReportsData();
+    });
+  }
+
+  void _loadReportsData() {
+    final reportsProvider = Provider.of<ReportsProvider>(context, listen: false);
+    
+    switch (_selectedPeriod) {
+      case 'Weekly':
+      case 'వారంలో': // Telugu for Weekly
+        final now = DateTime.now();
+        final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
+        reportsProvider.fetchWeeklyReports(startOfWeek, now);
+        break;
+      case 'Monthly':
+      case 'నెలలో': // Telugu for Monthly
+        final now = DateTime.now();
+        reportsProvider.fetchMonthlyReports(now.month, now.year);
+        break;
+      case 'Yearly':
+      case 'సంవత్సరంలో': // Telugu for Yearly
+        reportsProvider.fetchYearlyReports(DateTime.now().year);
+        break;
+    }
   }
 
   @override
@@ -53,7 +85,7 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
               ),
             ),
             const SizedBox(height: 8),
-            Icon(Icons.bar_chart, color: Colors.white, size: 32),
+            const Icon(Icons.bar_chart, color: Colors.white, size: 32),
           ],
         ),
         centerTitle: true,
@@ -66,48 +98,82 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
           ),
         ],
       ),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
-          child: Column(
-            children: [
-              const SizedBox(height: 24),
-              // Tabs
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(32),
-                  ),
-                  child: Row(
-                    children: [
-                      _buildTabButton(l10n.weekly, 0),
-                      _buildTabButton(l10n.monthly, 1),
-                      _buildTabButton(l10n.yearly, 2),
-                    ],
-                  ),
-                ),
+      body: Consumer<ReportsProvider>(
+        builder: (context, reportsProvider, child) {
+          if (reportsProvider.isLoading) {
+            return const Center(
+              child: CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.black),
               ),
-              const SizedBox(height: 18),
-              // Main content
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 0),
-                  child: TabBarView(
-                    controller: _tabController,
-                    physics: const NeverScrollableScrollPhysics(),
-                    children: [
-                      _buildReportContent(l10n.selectWeek, 'dd/mm/yy', l10n),
-                      _buildReportContent(l10n.monthly, 'dd/mm/yy', l10n),
-                      _buildReportContent(l10n.yearly, 'dd/mm/yy', l10n),
-                    ],
+            );
+          }
+
+          if (reportsProvider.error != null) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.error_outline, size: 64, color: Colors.red),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Error: ${reportsProvider.error}',
+                    style: const TextStyle(color: Colors.red, fontSize: 16),
+                    textAlign: TextAlign.center,
                   ),
-                ),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: _loadReportsData,
+                    child: const Text('Retry'),
+                  ),
+                ],
               ),
-            ],
-          ),
-        ),
+            );
+          }
+
+          return SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
+              child: Column(
+                children: [
+                  const SizedBox(height: 24),
+                  // Tabs
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(32),
+                      ),
+                      child: Row(
+                        children: [
+                          _buildTabButton(l10n.weekly, 0),
+                          _buildTabButton(l10n.monthly, 1),
+                          _buildTabButton(l10n.yearly, 2),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 18),
+                  // Main content
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 0),
+                      child: TabBarView(
+                        controller: _tabController,
+                        physics: const NeverScrollableScrollPhysics(),
+                        children: [
+                          _buildReportContent(l10n.selectWeek, 'dd/mm/yy', reportsProvider.weeklyReports, reportsProvider.weeklyIncome),
+                          _buildReportContent(l10n.monthly, 'dd/mm/yy', reportsProvider.monthlyReports, reportsProvider.monthlyIncome),
+                          _buildReportContent(l10n.yearly, 'dd/mm/yy', reportsProvider.yearlyReports, reportsProvider.yearlyIncome),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
       ),
     );
   }
@@ -121,6 +187,7 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
             _selectedPeriod = label;
             _tabController.index = tabIndex;
           });
+          _loadReportsData();
         },
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
@@ -145,12 +212,18 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
     );
   }
 
-  Widget _buildReportContent(String periodLabel, String dateLabel, AppLocalizations l10n) {
+  Widget _buildReportContent(String periodLabel, String dateLabel, List<ReportData> reports, IncomeSummary incomeSummary) {
     final List<String> weekOptions = ['W1', 'W2', 'W3', 'W4'];
     final List<String> monthOptions = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    final List<String> yearOptions = ['2022', '2023', '2024'];
-    String selectedPeriod = periodLabel == 'Select Week' ? weekOptions[0] : periodLabel == 'Month' ? monthOptions[0] : yearOptions[0];
+    final List<String> yearOptions = ['2022', '2023', '2024', '2025'];
+    
+    String selectedPeriod = periodLabel == 'Select Week' 
+        ? weekOptions[0] 
+        : periodLabel == 'Month' 
+            ? monthOptions[0] 
+            : yearOptions[0];
     String selectedDate = dateLabel;
+    
     return StatefulBuilder(
       builder: (context, setState) {
         return SingleChildScrollView(
@@ -241,9 +314,9 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
                 ),
                 const SizedBox(height: 18),
                 // Table
-                _buildReportTable(periodLabel),
+                _buildReportTable(reports),
                 const SizedBox(height: 18),
-                // Chart
+                // Chart placeholder
                 Container(
                   width: double.infinity,
                   decoration: BoxDecoration(
@@ -254,17 +327,13 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
                   padding: const EdgeInsets.all(12),
                   child: Column(
                     children: [
-                      SizedBox(
+                      const SizedBox(
                         height: 120,
                         child: Placeholder(), // Replace with your chart widget
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        periodLabel == 'Select Week'
-                            ? 'Milk Weekly Average : 148 L\nSNF Weekly Average : 12\nFat% Weekly Average : 20%'
-                            : periodLabel == 'Month'
-                                ? 'Milk Monthly Average : 520 L\nSNF Monthly Average : 20\nFat% Monthly Average : 20%'
-                                : l10n.milkYearlyAverage,
+                        _getAverageText(periodLabel, reports),
                         style: const TextStyle(
                           color: Colors.black,
                           fontWeight: FontWeight.w500,
@@ -299,11 +368,11 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
                         ),
                       ),
                       const SizedBox(height: 8),
-                      _buildIncomeRow(l10n.expenseHeader, '1234/-'),
+                      _buildIncomeRow(l10n.expenseHeader, '${incomeSummary.expense.toStringAsFixed(0)}/-'),
                       const SizedBox(height: 8),
-                      _buildIncomeRow(l10n.incomeHeader, '1234/-'),
+                      _buildIncomeRow(l10n.incomeHeader, '${incomeSummary.income.toStringAsFixed(0)}/-'),
                       const SizedBox(height: 8),
-                      _buildIncomeRow(l10n.profitHeader, '1234/-'),
+                      _buildIncomeRow(l10n.profitHeader, '${incomeSummary.profit.toStringAsFixed(0)}/-'),
                     ],
                   ),
                 ),
@@ -316,42 +385,98 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
     );
   }
 
-  Widget _buildReportTable(String periodLabel) {
-    final isWeek = periodLabel == 'Select Week';
-    final isMonth = periodLabel == 'Month';
-    final isYear = periodLabel == 'Select Year';
-    final String firstColumnHeader = isWeek ? 'DAY' : isMonth ? 'Week' : 'Month';
-    final List<Map<String, dynamic>> data = isWeek
-        ? [
-            {'period': 'Mon', 'values': [20, 20, 20, 20, 20, 20]},
-            {'period': 'Tue', 'values': [23, 23, 23, 23, 23, 23]},
-            {'period': 'Wed', 'values': [25, 25, 25, 25, 25, 25]},
-            {'period': 'Thu', 'values': [19, 19, 19, 19, 19, 19]},
-            {'period': 'Fri', 'values': [24, 24, 24, 24, 24, 24]},
-            {'period': 'Sat', 'values': [22, 22, 22, 22, 22, 22]},
-            {'period': 'Sun', 'values': [20, 20, 20, 20, 20, 20]},
-          ]
-        : isMonth
-            ? [
-                {'period': 'W1', 'values': [20, 20, 20, 20, 20, 20]},
-                {'period': 'W2', 'values': [23, 23, 23, 23, 23, 23]},
-                {'period': 'W3', 'values': [25, 25, 25, 25, 25, 25]},
-                {'period': 'W4', 'values': [19, 19, 19, 19, 19, 19]},
-              ]
-            : [
-                {'period': 'Jan', 'values': [20, 20, 20, 20, 20, 20]},
-                {'period': 'Feb', 'values': [23, 23, 23, 23, 23, 23]},
-                {'period': 'Mar', 'values': [25, 25, 25, 25, 25, 25]},
-                {'period': 'Apr', 'values': [19, 19, 19, 19, 19, 19]},
-                {'period': 'May', 'values': [20, 20, 20, 20, 20, 20]},
-                {'period': 'Jun', 'values': [23, 23, 23, 23, 23, 23]},
-                {'period': 'Jul', 'values': [25, 25, 25, 25, 25, 25]},
-                {'period': 'Aug', 'values': [19, 19, 19, 19, 19, 19]},
-                {'period': 'Sep', 'values': [20, 20, 20, 20, 20, 20]},
-                {'period': 'Oct', 'values': [23, 23, 23, 23, 23, 23]},
-                {'period': 'Nov', 'values': [25, 25, 25, 25, 25, 25]},
-                {'period': 'Dec', 'values': [19, 19, 19, 19, 19, 19]},
-              ];
+  String _getLocalizedPeriod(String period) {
+    // Convert complete day/month names to localized versions
+    switch (period) {
+      case 'Monday':
+        return l10n.monday;
+      case 'Tuesday':
+        return l10n.tuesday;
+      case 'Wednesday':
+        return l10n.wednesday;
+      case 'Thursday':
+        return l10n.thursday;
+      case 'Friday':
+        return l10n.friday;
+      case 'Saturday':
+        return l10n.saturday;
+      case 'Sunday':
+        return l10n.sunday;
+      case 'January':
+        return l10n.january;
+      case 'February':
+        return l10n.february;
+      case 'March':
+        return l10n.march;
+      case 'April':
+        return l10n.april;
+      case 'May':
+        return l10n.may;
+      case 'June':
+        return l10n.june;
+      case 'July':
+        return l10n.july;
+      case 'August':
+        return l10n.august;
+      case 'September':
+        return l10n.september;
+      case 'October':
+        return l10n.october;
+      case 'November':
+        return l10n.november;
+      case 'December':
+        return l10n.december;
+      default:
+        return period; // Return as-is for other periods like 'W1', 'W2', etc.
+    }
+  }
+
+  String _getAverageText(String periodLabel, List<ReportData> reports) {
+    if (reports.isEmpty) return 'No data available';
+    
+    // Calculate averages from actual data
+    double totalCowMilk = reports.fold(0.0, (sum, item) => sum + item.cowMilk);
+    double totalBuffaloMilk = reports.fold(0.0, (sum, item) => sum + item.buffaloMilk);
+    
+    // Safe division - check for zero length
+    int reportCount = reports.length;
+    if (reportCount == 0) return 'No data available';
+    
+    double avgCowSnf = reports.fold(0.0, (sum, item) => sum + item.cowSnf) / reportCount;
+    double avgBuffaloSnf = reports.fold(0.0, (sum, item) => sum + item.buffaloSnf) / reportCount;
+    double avgCowFat = reports.fold(0.0, (sum, item) => sum + item.cowFat) / reportCount;
+    double avgBuffaloFat = reports.fold(0.0, (sum, item) => sum + item.buffaloFat) / reportCount;
+    
+    return periodLabel == l10n.selectWeek
+        ? 'Milk Weekly Total: ${(totalCowMilk + totalBuffaloMilk).toStringAsFixed(0)} L\nSNF Average: ${((avgCowSnf + avgBuffaloSnf) / 2).toStringAsFixed(1)}\nFat% Average: ${((avgCowFat + avgBuffaloFat) / 2).toStringAsFixed(1)}%'
+        : periodLabel == l10n.monthly
+            ? 'Milk Monthly Total: ${(totalCowMilk + totalBuffaloMilk).toStringAsFixed(0)} L\nSNF Average: ${((avgCowSnf + avgBuffaloSnf) / 2).toStringAsFixed(1)}\nFat% Average: ${((avgCowFat + avgBuffaloFat) / 2).toStringAsFixed(1)}%'
+            : 'Milk Yearly Total: ${(totalCowMilk + totalBuffaloMilk).toStringAsFixed(0)} L\nSNF Average: ${((avgCowSnf + avgBuffaloSnf) / 2).toStringAsFixed(1)}\nFat% Average: ${((avgCowFat + avgBuffaloFat) / 2).toStringAsFixed(1)}%';
+  }
+
+  Widget _buildReportTable(List<ReportData> data) {
+    if (data.isEmpty) {
+      return Container(
+        padding: const EdgeInsets.all(32),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.black, width: 1),
+        ),
+        child: const Center(
+          child: Text(
+            'No data available',
+            style: TextStyle(
+              color: Colors.grey,
+              fontSize: 16,
+            ),
+          ),
+        ),
+      );
+    }
+
+    final String firstColumnHeader = _selectedPeriod == 'Weekly' || _selectedPeriod == l10n.weekly ? l10n.dayHeader : _selectedPeriod == 'Monthly' || _selectedPeriod == l10n.monthly ? 'Week' : 'Month';
+    
     return Container(
       decoration: BoxDecoration(
         border: Border.all(color: Colors.black, width: 1),
@@ -370,9 +495,9 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
 
   Widget _buildTableHeader(String firstColumnHeader) {
     return Container(
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         color: Colors.white,
-        borderRadius: const BorderRadius.only(
+        borderRadius: BorderRadius.only(
           topLeft: Radius.circular(6),
           topRight: Radius.circular(6),
         ),
@@ -383,8 +508,8 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
           Row(
             children: [
               _buildHeaderCell(firstColumnHeader, flex: 15),
-              _buildHeaderCell('Cow', flex: 30),
-              _buildHeaderCell('Buffalo', flex: 30, hasRightBorder: false),
+              _buildHeaderCell(l10n.cow, flex: 30),
+              _buildHeaderCell(l10n.buffalo, flex: 30, hasRightBorder: false),
             ],
           ),
           // Horizontal separator row - only under Cow and Buffalo sections
@@ -411,12 +536,12 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
           Row(
             children: [
               Expanded(flex: 15, child: Container()),
-              _buildSubHeaderCell('Milk(L)', flex: 10, hasLeftBorder: true),
-              _buildSubHeaderCell('SNF', flex: 10),
-              _buildSubHeaderCell('Fat%', flex: 10),
-              _buildSubHeaderCell('Milk(L)', flex: 10, hasLeftBorder: true),
-              _buildSubHeaderCell('SNF', flex: 10),
-              _buildSubHeaderCell('Fat%', flex: 10, hasRightBorder: false),
+              _buildSubHeaderCell(l10n.milkLHeader, flex: 10, hasLeftBorder: true),
+              _buildSubHeaderCell(l10n.snfHeader, flex: 10),
+              _buildSubHeaderCell(l10n.fatHeader, flex: 10),
+              _buildSubHeaderCell(l10n.milkLHeader, flex: 10, hasLeftBorder: true),
+              _buildSubHeaderCell(l10n.snfHeader, flex: 10),
+              _buildSubHeaderCell(l10n.fatHeader, flex: 10, hasRightBorder: false),
             ],
           ),
           Container(
@@ -473,7 +598,7 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
             text,
             style: TextStyle(
               fontWeight: FontWeight.bold,
-              fontSize: isMilk ? 9 : 11, // Reduce only for Milk(L)
+              fontSize: isMilk ? 9 : 11,
               color: Colors.black,
             ),
           ),
@@ -482,11 +607,10 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
     );
   }
 
-  List<Widget> _buildDataRows(List<Map<String, dynamic>> data) {
+  List<Widget> _buildDataRows(List<ReportData> data) {
     List<Widget> rows = [];
     for (var i = 0; i < data.length; i++) {
       final rowData = data[i];
-      final values = rowData['values'] as List;
       rows.add(
         Container(
           decoration: BoxDecoration(
@@ -498,13 +622,13 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
           ),
           child: Row(
             children: [
-              _buildDataCell((rowData['period'] as String), flex: 15, isBold: true),
-              _buildDataCell(values[0].toString(), flex: 10),
-              _buildDataCell(values[1].toString(), flex: 10),
-              _buildDataCell(values[2].toString(), flex: 10),
-              _buildDataCell(values[3].toString(), flex: 10),
-              _buildDataCell(values[4].toString(), flex: 10),
-              _buildDataCell(values[5].toString(), flex: 10, hasRightBorder: false),
+              _buildDataCell(_getLocalizedPeriod(rowData.period), flex: 15, isBold: true),
+              _buildDataCell(rowData.cowMilk.toStringAsFixed(1), flex: 10),
+              _buildDataCell(rowData.cowSnf.toStringAsFixed(1), flex: 10),
+              _buildDataCell(rowData.cowFat.toStringAsFixed(1), flex: 10),
+              _buildDataCell(rowData.buffaloMilk.toStringAsFixed(1), flex: 10),
+              _buildDataCell(rowData.buffaloSnf.toStringAsFixed(1), flex: 10),
+              _buildDataCell(rowData.buffaloFat.toStringAsFixed(1), flex: 10, hasRightBorder: false),
             ],
           ),
         ),

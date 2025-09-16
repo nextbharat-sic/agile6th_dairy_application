@@ -1,7 +1,7 @@
 import 'dart:ui';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' hide AuthProvider;
-import 'package:flutter/material.dart' hide DateUtils;
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../../backend/repositories/expense_repository.dart';
@@ -11,6 +11,8 @@ import '../../constants/constants.dart';
 import '../../models/report_models.dart';
 import '../../providers/auth_provider.dart';
 import '../../l10n/app_localizations.dart';
+import '../../utils/date_utils.dart' as CustomDateUtils;
+
 
 class AnimatedHomeScreen extends StatefulWidget {
   const AnimatedHomeScreen({super.key});
@@ -510,8 +512,8 @@ class _InfiniteGlassCarouselState extends State<InfiniteGlassCarousel> {
 
     final result = await _reportService.generateReport(
       userId: _userId!,
-      startDate: DateUtils.getFirstDayOfYear(),
-      endDate: DateUtils.getToday(),
+      startDate: CustomDateUtils.DateUtils.getFirstDayOfYear(DateTime.now()),
+      endDate: CustomDateUtils.DateUtils.getToday(),
       groupByFrequency: GroupByFrequency.month,
       animalTypes: [AnimalType.buffalo, AnimalType.cow],
     );
@@ -574,20 +576,51 @@ class _InfiniteGlassCarouselState extends State<InfiniteGlassCarousel> {
   }
 
   String _getTranslatedMonthName(String monthName, AppLocalizations l10n) {
-    switch (monthName) {
-      case 'JANUARY': return l10n.january;
-      case 'FEBRUARY': return l10n.february;
-      case 'MARCH': return l10n.march;
-      case 'APRIL': return l10n.april;
-      case 'MAY': return l10n.may;
-      case 'JUNE': return l10n.june;
-      case 'JULY': return l10n.july;
-      case 'AUGUST': return l10n.august;
-      case 'SEPTEMBER': return l10n.september;
-      case 'OCTOBER': return l10n.october;
-      case 'NOVEMBER': return l10n.november;
-      case 'DECEMBER': return l10n.december;
-      default: return monthName;
+    // Handle different month name formats
+    final month = monthName.toUpperCase();
+    switch (month) {
+      case 'JANUARY':
+      case 'JAN':
+        return l10n.january;
+      case 'FEBRUARY':
+      case 'FEB':
+        return l10n.february;
+      case 'MARCH':
+      case 'MAR':
+        return l10n.march;
+      case 'APRIL':
+      case 'APR':
+        return l10n.april;
+      case 'MAY':
+        return l10n.may;
+      case 'JUNE':
+      case 'JUN':
+        return l10n.june;
+      case 'JULY':
+      case 'JUL':
+        return l10n.july;
+      case 'AUGUST':
+      case 'AUG':
+        return l10n.august;
+      case 'SEPTEMBER':
+      case 'SEP':
+        return l10n.september;
+      case 'OCTOBER':
+      case 'OCT':
+        return l10n.october;
+      case 'NOVEMBER':
+      case 'NOV':
+        return l10n.november;
+      case 'DECEMBER':
+      case 'DEC':
+        return l10n.december;
+      default: 
+        // Try to extract month name from strings like "Feb 2025"
+        final parts = monthName.split(' ');
+        if (parts.isNotEmpty) {
+          return _getTranslatedMonthName(parts[0], l10n);
+        }
+        return monthName;
     }
   }
 
