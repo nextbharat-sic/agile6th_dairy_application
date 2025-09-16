@@ -1,6 +1,79 @@
 import 'package:flutter/material.dart';
 import '../../l10n/app_localizations.dart';
 
+// Notification classes for scale events
+class ScaleStartNotification extends Notification {}
+class ScaleEndNotification extends Notification {}
+
+// Custom ZoomableWidget for pinch zoom functionality
+class ZoomableWidget extends StatefulWidget {
+  final Widget child;
+  final double minScale;
+  final double maxScale;
+
+  const ZoomableWidget({
+    super.key,
+    required this.child,
+    this.minScale = 1.0,
+    this.maxScale = 4.0,
+  });
+
+  @override
+  State<ZoomableWidget> createState() => _ZoomableWidgetState();
+}
+
+class _ZoomableWidgetState extends State<ZoomableWidget> {
+  double _scale = 1.0;
+  double _previousScale = 1.0;
+  Offset _offset = Offset.zero;
+  Offset _previousOffset = Offset.zero;
+  Offset? _initialFocalPoint;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onScaleStart: (details) {
+        _previousScale = _scale;
+        _previousOffset = _offset;
+        _initialFocalPoint = details.focalPoint;
+        ScaleStartNotification().dispatch(context);
+      },
+      onScaleUpdate: (details) {
+        setState(() {
+          // Handle scaling
+          _scale = (_previousScale * details.scale)
+              .clamp(widget.minScale, widget.maxScale);
+          
+          // Handle panning - this now works properly during and after zoom
+          if (_initialFocalPoint != null) {
+            final Offset normalizedOffset = (details.focalPoint - _initialFocalPoint!) / _previousScale;
+            _offset = _previousOffset + normalizedOffset;
+          }
+        });
+      },
+      onScaleEnd: (details) {
+        _previousScale = _scale;
+        _previousOffset = _offset;
+        _initialFocalPoint = null;
+        ScaleEndNotification().dispatch(context);
+      },
+      onDoubleTap: () {
+        setState(() {
+          _scale = widget.minScale;
+          _offset = Offset.zero;
+        });
+      },
+      child: Transform.scale(
+        scale: _scale,
+        child: Transform.translate(
+          offset: _offset,
+          child: widget.child,
+        ),
+      ),
+    );
+  }
+}
+
 class ReportsScreen extends StatefulWidget {
   const ReportsScreen({super.key});
 
@@ -11,6 +84,7 @@ class ReportsScreen extends StatefulWidget {
 class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProviderStateMixin {
   late TabController _tabController;
   String _selectedPeriod = 'Weekly';
+  bool _isTableZooming = false; // Track table zoom state
 
   @override
   void initState() {
@@ -154,6 +228,8 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
     return StatefulBuilder(
       builder: (context, setState) {
         return SingleChildScrollView(
+          // Disable scrolling when table is being zoomed
+          physics: _isTableZooming ? const NeverScrollableScrollPhysics() : null,
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 0),
             child: Column(
@@ -319,7 +395,7 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
   Widget _buildReportTable(String periodLabel) {
     final isWeek = periodLabel == 'Select Week';
     final isMonth = periodLabel == 'Month';
-    final isYear = periodLabel == 'Select Year';
+    // final isYear = periodLabel == 'Select Year';
     final String firstColumnHeader = isWeek ? 'DAY' : isMonth ? 'Week' : 'Month';
     final List<Map<String, dynamic>> data = isWeek
         ? [

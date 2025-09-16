@@ -1,4 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+<<<<<<< HEAD
+=======
+
+>>>>>>> 1f0ca371040dcdf19f4ab6a3a76bf5a9ec7ad263
 import '../../constants/constants.dart';
 import '../../models/income_model.dart';
 import '../../utils/date_utils.dart';
@@ -6,9 +10,12 @@ import '../../utils/id_generator.dart';
 import '../entities/income_entity.dart';
 import '../repositories/income_repository.dart';
 import '../repositories/user_repository.dart';
+
 class IncomeService {
   final IncomeRepository incomeRepo;
   final UserRepository userRepo;
+
+
   IncomeService({
     required this.incomeRepo,
     required this.userRepo,
@@ -47,11 +54,14 @@ class IncomeService {
       fat: fat,
       costPerLiter: newCostPerLiter,
     );
+
     // 5. Map entity to model and persist
     final incomeModel = IncomeModel.fromEntity(incomeEntity);
     await incomeRepo.addIncome(userId, incomeId, incomeModel);
+
     // 6. Use the entity’s computed totalIncome for this session entry
     final totalIncomeSession = incomeEntity.totalIncome;
+
     // 7. Compute day total across all sessions of that animal
     final totalIncomeDay = await getTotalIncomeForDay(
       userId: userId,
@@ -68,7 +78,6 @@ class IncomeService {
     };
   }
 
-  /// Retrieves income records for a specific animal within a given date range.
   /// Retrieves income records for the given animals within a given date range.
   Future<QuerySnapshot<Map<String, dynamic>>> getIncomeForAnimalInRange(
     String userId,
