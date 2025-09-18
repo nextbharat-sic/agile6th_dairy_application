@@ -488,6 +488,7 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
                        if (value == null || value.trim().isEmpty) {
                          return null;
                        }
+                       return null;
                        
                      },
                    ),

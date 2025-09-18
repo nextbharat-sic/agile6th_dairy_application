@@ -11,6 +11,7 @@ import '../../constants/constants.dart';
 import '../../models/report_models.dart';
 import '../../providers/auth_provider.dart';
 import '../../l10n/app_localizations.dart';
+import '../../utils/date_utils.dart';
 
 class AnimatedHomeScreen extends StatefulWidget {
   const AnimatedHomeScreen({super.key});
@@ -441,20 +442,7 @@ class _InfiniteGlassCarouselState extends State<InfiniteGlassCarousel> {
 
 
   List<Map<String, String>> _monthsData = [];
-  // final List<Map<String, String>> _monthsData = const [
-  //   {'name': 'JANUARY', 'expense': '1234', 'revenue': '2468', 'profit': '1234'},
-  //   {'name': 'FEBRUARY', 'expense': '1500', 'revenue': '2800', 'profit': '1300'},
-  //   {'name': 'MARCH', 'expense': '1100', 'revenue': '2200', 'profit': '1100'},
-  //   {'name': 'APRIL', 'expense': '1800', 'revenue': '3200', 'profit': '1400'},
-  //   {'name': 'MAY', 'expense': '1600', 'revenue': '2900', 'profit': '1300'},
-  //   {'name': 'JUNE', 'expense': '1400', 'revenue': '2600', 'profit': '1200'},
-  //   {'name': 'JULY', 'expense': '1900', 'revenue': '3400', 'profit': '1500'},
-  //   {'name': 'AUGUST', 'expense': '1700', 'revenue': '3100', 'profit': '1400'},
-  //   {'name': 'SEPTEMBER', 'expense': '1300', 'revenue': '2400', 'profit': '1100'},
-  //   {'name': 'OCTOBER', 'expense': '2000', 'revenue': '3600', 'profit': '1600'},
-  //   {'name': 'NOVEMBER', 'expense': '1800', 'revenue': '3200', 'profit': '1400'},
-  //   {'name': 'DECEMBER', 'expense': '2200', 'revenue': '4000', 'profit': '1800'},
-  // ];
+
 
   @override
   void initState() {
@@ -503,7 +491,6 @@ class _InfiniteGlassCarouselState extends State<InfiniteGlassCarousel> {
   Future<void> _loadReport() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
-
       return;
     }
     _userId = user.uid;
@@ -518,6 +505,7 @@ class _InfiniteGlassCarouselState extends State<InfiniteGlassCarousel> {
 
     if (!mounted) return;
     setState(() {
+      print("repport ${result.toMap()}");
       _monthsData = getMonthDataList(result);
     });
   }

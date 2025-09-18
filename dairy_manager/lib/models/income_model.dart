@@ -84,3 +84,54 @@ class IncomeModel {
     'updatedAt': updatedAt.toIso8601String(),
   };
 }
+
+
+class AddIncomeResponseModel {
+  final String incomeId;
+  final AnimalType animalType;
+  final double costPerLiter;
+  final double totalIncomeSession;
+  final Map<AnimalType, double> todayIncomeList;
+
+  AddIncomeResponseModel({
+    required this.incomeId,
+    required this.animalType,
+    required this.costPerLiter,
+    required this.totalIncomeSession,
+    Map<AnimalType, double>? todayIncomeList,
+  }) : todayIncomeList = todayIncomeList ?? _initializetodayIncomeList();
+
+  static Map<AnimalType, double> _initializetodayIncomeList() {
+    return Map.fromEntries(
+      AnimalType.values.map((animal) => MapEntry(animal, 0.0)),
+    );
+  }
+
+  double getIncomeFor(AnimalType animal) => todayIncomeList[animal] ?? 0.0;
+
+  AddIncomeResponseModel updateIncomeFor(AnimalType animal, double income) {
+    final updatedIncomes = Map<AnimalType, double>.from(todayIncomeList);
+    updatedIncomes[animal] = income;
+
+    return AddIncomeResponseModel(
+      incomeId: incomeId,
+      animalType: animalType,
+      costPerLiter: costPerLiter,
+      totalIncomeSession: totalIncomeSession,
+      todayIncomeList: updatedIncomes,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'incomeId': incomeId,
+      'animalType': animalType.name,
+      'costPerLiter': costPerLiter,
+      'totalIncomeSession': totalIncomeSession,
+      'todayIncomeList': todayIncomeList.map(
+            (key, value) => MapEntry(key.name, value),
+      ),
+    };
+  }
+}
+
