@@ -55,7 +55,7 @@ class DateUtils {
         return "Week${groupKey.split('-W').last}"; // e.g., 'Week1'
       case GroupByFrequency.month:
         return DateFormat.MMM()
-            .format(DateTime.parse("${groupKey}-01")); // e.g., 'Sep'
+            .format(DateTime.parse("$groupKey-01")); // e.g., 'Sep'
       case GroupByFrequency.quarter:
         return groupKey.split('-').last; // e.g., 'Q3'
       case GroupByFrequency.year:

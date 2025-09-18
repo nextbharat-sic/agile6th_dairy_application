@@ -6,7 +6,6 @@ import '../providers/auth_provider.dart';
 import '../providers/expenses_provider.dart';
 import '../backend/services/expense_service.dart';
 import '../backend/repositories/expense_repository.dart';
-import '../backend/repositories/user_repository.dart';
 import '../presentation/registration_screen/registration_screen.dart';
 import '../presentation/home_screen/animated_home_screen.dart';
 import '../presentation/milk_entry_screen/milk_entry_screen.dart';
