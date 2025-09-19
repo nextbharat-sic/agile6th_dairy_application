@@ -13,7 +13,6 @@ import '../../providers/auth_provider.dart';
 import '../../l10n/app_localizations.dart';
 import '../../utils/date_utils.dart' as CustomDateUtils;
 
-
 class AnimatedHomeScreen extends StatefulWidget {
   const AnimatedHomeScreen({super.key});
 
@@ -33,7 +32,6 @@ class _AnimatedHomeScreenState extends State<AnimatedHomeScreen>
   @override
   void initState() {
     super.initState();
-
 
     _milkDripController = AnimationController(
       duration: const Duration(milliseconds: 600),
@@ -92,7 +90,7 @@ class _AnimatedHomeScreenState extends State<AnimatedHomeScreen>
     final authProvider = context.watch<AuthProvider>();
     final userName = authProvider.userName ?? 'User';
     final l10n = AppLocalizations.of(context)!;
-    
+
     return Scaffold(
       backgroundColor: Colors.black,
       body: Stack(
@@ -189,7 +187,10 @@ class _AnimatedHomeScreenState extends State<AnimatedHomeScreen>
             builder: (context, child) {
               return Positioned(
                 // Raise initial position so drips are visible in collapsed state
-                top: 32 + (_milkDripAnimation.value * MediaQuery.of(context).size.height * 0.45),
+                top: 32 +
+                    (_milkDripAnimation.value *
+                        MediaQuery.of(context).size.height *
+                        0.45),
                 left: 0,
                 right: 0,
                 child: SizedBox(
@@ -428,7 +429,7 @@ class _AnimatedHomeScreenState extends State<AnimatedHomeScreen>
 
 class InfiniteGlassCarousel extends StatefulWidget {
   final AppLocalizations l10n;
-  
+
   const InfiniteGlassCarousel({super.key, required this.l10n});
 
   @override
@@ -441,27 +442,11 @@ class _InfiniteGlassCarouselState extends State<InfiniteGlassCarousel> {
   late final ReportService _reportService;
   String? _userId;
 
-
   List<Map<String, String>> _monthsData = [];
-  // final List<Map<String, String>> _monthsData = const [
-  //   {'name': 'JANUARY', 'expense': '1234', 'revenue': '2468', 'profit': '1234'},
-  //   {'name': 'FEBRUARY', 'expense': '1500', 'revenue': '2800', 'profit': '1300'},
-  //   {'name': 'MARCH', 'expense': '1100', 'revenue': '2200', 'profit': '1100'},
-  //   {'name': 'APRIL', 'expense': '1800', 'revenue': '3200', 'profit': '1400'},
-  //   {'name': 'MAY', 'expense': '1600', 'revenue': '2900', 'profit': '1300'},
-  //   {'name': 'JUNE', 'expense': '1400', 'revenue': '2600', 'profit': '1200'},
-  //   {'name': 'JULY', 'expense': '1900', 'revenue': '3400', 'profit': '1500'},
-  //   {'name': 'AUGUST', 'expense': '1700', 'revenue': '3100', 'profit': '1400'},
-  //   {'name': 'SEPTEMBER', 'expense': '1300', 'revenue': '2400', 'profit': '1100'},
-  //   {'name': 'OCTOBER', 'expense': '2000', 'revenue': '3600', 'profit': '1600'},
-  //   {'name': 'NOVEMBER', 'expense': '1800', 'revenue': '3200', 'profit': '1400'},
-  //   {'name': 'DECEMBER', 'expense': '2200', 'revenue': '4000', 'profit': '1800'},
-  // ];
 
   @override
   void initState() {
     super.initState();
-
 
     final firestore = FirebaseFirestore.instance;
     final incomeRepo = IncomeRepository(firestore);
@@ -471,7 +456,6 @@ class _InfiniteGlassCarouselState extends State<InfiniteGlassCarousel> {
       expenseRepository: expenseRepo,
     );
 
-
     final currentMonth = DateTime.now().month - 1; // 0..11
     final initialPage = (_monthsData.length * 1000) + currentMonth;
     _pageController = PageController(
@@ -479,7 +463,6 @@ class _InfiniteGlassCarouselState extends State<InfiniteGlassCarousel> {
       initialPage: initialPage,
     );
     _currentPage = currentMonth;
-
 
     _loadReport();
   }
@@ -501,11 +484,9 @@ class _InfiniteGlassCarouselState extends State<InfiniteGlassCarousel> {
     }).toList();
   }
 
-
   Future<void> _loadReport() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
-
       return;
     }
     _userId = user.uid;
@@ -520,6 +501,7 @@ class _InfiniteGlassCarouselState extends State<InfiniteGlassCarousel> {
 
     if (!mounted) return;
     setState(() {
+      print("repport ${result.toMap()}");
       _monthsData = getMonthDataList(result);
     });
   }
@@ -568,7 +550,8 @@ class _InfiniteGlassCarouselState extends State<InfiniteGlassCarousel> {
                 ),
               );
             },
-            child: _buildGlassCard(_monthsData[actualIndex], actualIndex, widget.l10n),
+            child: _buildGlassCard(
+                _monthsData[actualIndex], actualIndex, widget.l10n),
           );
         },
       ),
@@ -614,7 +597,7 @@ class _InfiniteGlassCarouselState extends State<InfiniteGlassCarousel> {
       case 'DECEMBER':
       case 'DEC':
         return l10n.december;
-      default: 
+      default:
         // Try to extract month name from strings like "Feb 2025"
         final parts = monthName.split(' ');
         if (parts.isNotEmpty) {
@@ -624,7 +607,8 @@ class _InfiniteGlassCarouselState extends State<InfiniteGlassCarousel> {
     }
   }
 
-  Widget _buildGlassCard(Map<String, String> monthData, int monthIndex, AppLocalizations l10n) {
+  Widget _buildGlassCard(
+      Map<String, String> monthData, int monthIndex, AppLocalizations l10n) {
     final isCurrentMonth = _isCurrentMonth(monthIndex);
 
     return Container(
@@ -708,11 +692,14 @@ class _InfiniteGlassCarouselState extends State<InfiniteGlassCarousel> {
                   ),
                 ),
                 const SizedBox(height: 8),
-                _buildDataRow(l10n.expense, monthData['expense']!, isCurrentMonth: isCurrentMonth),
+                _buildDataRow(l10n.expense, monthData['expense']!,
+                    isCurrentMonth: isCurrentMonth),
                 const SizedBox(height: 4),
-                _buildDataRow(l10n.revenue, monthData['revenue']!, isCurrentMonth: isCurrentMonth),
+                _buildDataRow(l10n.revenue, monthData['revenue']!,
+                    isCurrentMonth: isCurrentMonth),
                 const SizedBox(height: 4),
-                _buildDataRow(l10n.profit, monthData['profit']!, isProfit: true, isCurrentMonth: isCurrentMonth),
+                _buildDataRow(l10n.profit, monthData['profit']!,
+                    isProfit: true, isCurrentMonth: isCurrentMonth),
               ],
             ),
           ),

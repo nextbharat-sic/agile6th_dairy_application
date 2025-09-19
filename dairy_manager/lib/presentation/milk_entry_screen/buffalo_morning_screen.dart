@@ -7,7 +7,6 @@ import '../../backend/services/income_service.dart';
 import '../../constants/constants.dart';
 import '../../theme/app_theme.dart';
 
-
 class BuffaloMorningScreen extends StatefulWidget {
   const BuffaloMorningScreen({super.key});
 
@@ -22,7 +21,6 @@ class _BuffaloMorningScreenState extends State<BuffaloMorningScreen> {
   final _snfController = TextEditingController();
   final _fatController = TextEditingController();
   final _costController = TextEditingController();
-
 
   bool _isMorning = true;
   DateTime _selectedDate = DateTime.now();
@@ -63,7 +61,7 @@ class _BuffaloMorningScreenState extends State<BuffaloMorningScreen> {
   void _calculateIncome() {
     final milkQuantity = double.tryParse(_milkController.text) ?? 0.0;
     final costPerLiter = double.tryParse(_costController.text) ?? 0.0;
-    
+
     setState(() {
       _todayIncome = milkQuantity * costPerLiter;
     });
@@ -79,8 +77,8 @@ class _BuffaloMorningScreenState extends State<BuffaloMorningScreen> {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: Theme.of(context).colorScheme.copyWith(
-              primary: AppTheme.primaryColor,
-            ),
+                  primary: AppTheme.primaryColor,
+                ),
           ),
           child: child!,
         );
@@ -97,18 +95,24 @@ class _BuffaloMorningScreenState extends State<BuffaloMorningScreen> {
 
   Future<void> _fetchTodayIncome() async {
     if (_userId == null) {
-      setState(() { _todayIncome = 0.0; });
+      setState(() {
+        _todayIncome = 0.0;
+      });
       return;
     }
     try {
       final total = await _incomeService.getTotalIncomeForDay(
         userId: _userId!,
         date: _selectedDate,
-        animalType: AnimalType.buffalo,
+        animalTypes: [AnimalType.buffalo],
       );
-      setState(() { _todayIncome = total; });
+      setState(() {
+        _todayIncome = 0.0;
+      });
     } catch (_) {
-      setState(() { _todayIncome = 0.0; });
+      setState(() {
+        _todayIncome = 0.0;
+      });
     }
   }
 
@@ -154,7 +158,7 @@ class _BuffaloMorningScreenState extends State<BuffaloMorningScreen> {
       await _fetchTodayIncome();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text("Entry saved! Session income: ₹${result['totalIncomeSession'].toStringAsFixed(2)}, Day total: ₹${result['totalIncomeDay'].toStringAsFixed(2)}"),
+          content: Text(""),
           backgroundColor: AppTheme.accentColor,
         ),
       );
@@ -187,7 +191,8 @@ class _BuffaloMorningScreenState extends State<BuffaloMorningScreen> {
                   child: Row(
                     children: [
                       IconButton(
-                        icon: const Icon(Icons.arrow_back, color: Colors.white, size: 24),
+                        icon: const Icon(Icons.arrow_back,
+                            color: Colors.white, size: 24),
                         onPressed: () => Navigator.pop(context),
                       ),
                       Expanded(
@@ -218,7 +223,10 @@ class _BuffaloMorningScreenState extends State<BuffaloMorningScreen> {
                             const SizedBox(height: 4),
                             Text(
                               'ఎద్దు',
-                              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleMedium
+                                  ?.copyWith(
                                     color: Colors.white,
                                     fontWeight: FontWeight.w600,
                                     fontSize: 16,
@@ -227,12 +235,13 @@ class _BuffaloMorningScreenState extends State<BuffaloMorningScreen> {
                           ],
                         ),
                       ),
-                                              IconButton(
-                          icon: const Icon(Icons.settings, color: Colors.white, size: 24),
-                          onPressed: () {
-                            Navigator.pushNamed(context, '/settings');
-                          },
-                        ),
+                      IconButton(
+                        icon: const Icon(Icons.settings,
+                            color: Colors.white, size: 24),
+                        onPressed: () {
+                          Navigator.pushNamed(context, '/settings');
+                        },
+                      ),
                     ],
                   ),
                 ),
@@ -260,11 +269,14 @@ class _BuffaloMorningScreenState extends State<BuffaloMorningScreen> {
                         AnimatedAlign(
                           duration: const Duration(milliseconds: 300),
                           curve: Curves.easeInOut,
-                          alignment: _isMorning ? Alignment.centerLeft : Alignment.centerRight,
+                          alignment: _isMorning
+                              ? Alignment.centerLeft
+                              : Alignment.centerRight,
                           child: Container(
                             width: MediaQuery.of(context).size.width / 2 - 24,
                             height: 40,
-                            margin: const EdgeInsets.symmetric(horizontal: 2, vertical: 2),
+                            margin: const EdgeInsets.symmetric(
+                                horizontal: 2, vertical: 2),
                             decoration: BoxDecoration(
                               color: Colors.white,
                               borderRadius: BorderRadius.circular(20),
@@ -287,14 +299,21 @@ class _BuffaloMorningScreenState extends State<BuffaloMorningScreen> {
                                   height: 48,
                                   child: Center(
                                     child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
                                       children: [
-                                        Icon(Icons.wb_sunny, size: 20, color: _isMorning ? const Color(0xFF395364) : Colors.white),
+                                        Icon(Icons.wb_sunny,
+                                            size: 20,
+                                            color: _isMorning
+                                                ? const Color(0xFF395364)
+                                                : Colors.white),
                                         const SizedBox(width: 6),
                                         Text(
                                           'ఉదయం',
                                           style: TextStyle(
-                                            color: _isMorning ? const Color(0xFF395364) : Colors.white,
+                                            color: _isMorning
+                                                ? const Color(0xFF395364)
+                                                : Colors.white,
                                             fontWeight: FontWeight.bold,
                                             fontSize: 14,
                                           ),
@@ -312,14 +331,21 @@ class _BuffaloMorningScreenState extends State<BuffaloMorningScreen> {
                                   height: 48,
                                   child: Center(
                                     child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
                                       children: [
-                                        Icon(Icons.nightlight_round, size: 20, color: !_isMorning ? const Color(0xFF395364) : Colors.white),
+                                        Icon(Icons.nightlight_round,
+                                            size: 20,
+                                            color: !_isMorning
+                                                ? const Color(0xFF395364)
+                                                : Colors.white),
                                         const SizedBox(width: 6),
                                         Text(
                                           'సాయంత్రం',
                                           style: TextStyle(
-                                            color: !_isMorning ? const Color(0xFF395364) : Colors.white,
+                                            color: !_isMorning
+                                                ? const Color(0xFF395364)
+                                                : Colors.white,
                                             fontWeight: FontWeight.bold,
                                             fontSize: 14,
                                           ),
@@ -341,7 +367,9 @@ class _BuffaloMorningScreenState extends State<BuffaloMorningScreen> {
                 Container(
                   width: double.infinity,
                   decoration: BoxDecoration(
-                    color: _isMorning ? const Color(0xFFE4E5E6) : const Color(0xFF395364),
+                    color: _isMorning
+                        ? const Color(0xFFE4E5E6)
+                        : const Color(0xFF395364),
                     borderRadius: BorderRadius.circular(20),
                     boxShadow: [
                       BoxShadow(
@@ -421,7 +449,9 @@ class _BuffaloMorningScreenState extends State<BuffaloMorningScreen> {
                                     style: TextStyle(
                                       fontSize: 16,
                                       fontWeight: FontWeight.w600,
-                                      color: _isMorning ? const Color(0xFF395364) : Colors.white,
+                                      color: _isMorning
+                                          ? const Color(0xFF395364)
+                                          : Colors.white,
                                     ),
                                   ),
                                 ),
@@ -453,22 +483,27 @@ class _BuffaloMorningScreenState extends State<BuffaloMorningScreen> {
                     ],
                   ),
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+                    padding:
+                        const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           "Today's Income",
-                          style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w600,
-                              ),
+                          style:
+                              Theme.of(context).textTheme.titleSmall?.copyWith(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w600,
+                                  ),
                         ),
                         const SizedBox(height: 6),
                         Center(
                           child: Text(
                             '\u20b9${_todayIncome.toStringAsFixed(0)}/-',
-                            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleLarge
+                                ?.copyWith(
                                   color: Colors.white,
                                   fontWeight: FontWeight.bold,
                                   fontSize: 18,
@@ -528,14 +563,12 @@ class _BuffaloMorningScreenState extends State<BuffaloMorningScreen> {
             decoration: InputDecoration(
               hintText: hint,
               hintStyle: TextStyle(
-                color: _isMorning 
-                  ? AppTheme.textSecondaryColor 
-                  : Colors.white.withAlpha(180),
+                color: _isMorning
+                    ? AppTheme.textSecondaryColor
+                    : Colors.white.withAlpha(180),
               ),
               filled: true,
-              fillColor: _isMorning 
-                ? Colors.white 
-                : const Color(0xFF585F65),
+              fillColor: _isMorning ? Colors.white : const Color(0xFF585F65),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: BorderSide.none,
@@ -555,20 +588,18 @@ class _BuffaloMorningScreenState extends State<BuffaloMorningScreen> {
                 horizontal: 16,
                 vertical: 16,
               ),
-              suffixIcon: suffixIcon != null 
-                ? Icon(
-                    suffixIcon,
-                    size: 20,
-                    color: _isMorning 
-                      ? AppTheme.textSecondaryColor 
-                      : Colors.white.withAlpha(180),
-                  )
-                : null,
+              suffixIcon: suffixIcon != null
+                  ? Icon(
+                      suffixIcon,
+                      size: 20,
+                      color: _isMorning
+                          ? AppTheme.textSecondaryColor
+                          : Colors.white.withAlpha(180),
+                    )
+                  : null,
             ),
             style: TextStyle(
-              color: _isMorning 
-                ? AppTheme.textPrimaryColor 
-                : Colors.white,
+              color: _isMorning ? AppTheme.textPrimaryColor : Colors.white,
               fontSize: 16,
             ),
           ),
@@ -576,4 +607,4 @@ class _BuffaloMorningScreenState extends State<BuffaloMorningScreen> {
       ],
     );
   }
-} 
+}
