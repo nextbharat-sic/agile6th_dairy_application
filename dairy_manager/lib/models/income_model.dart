@@ -64,10 +64,14 @@ class IncomeModel {
       totalIncome: (map['totalIncome'] as num).toDouble(),
       createdAt: map['createdAt'] is String
           ? DateTime.parse(map['createdAt'] as String)
-          : (map['createdAt'] as Timestamp).toDate(),
+          : map['createdAt'] != null 
+              ? (map['createdAt'] as Timestamp).toDate()
+              : DateTime.now(),
       updatedAt: map['updatedAt'] is String
           ? DateTime.parse(map['updatedAt'] as String)
-          : (map['updatedAt'] as Timestamp).toDate(),
+          : map['updatedAt'] != null 
+              ? (map['updatedAt'] as Timestamp).toDate()
+              : DateTime.now(),
     );
   }
   Map<String, dynamic> toMap() => {

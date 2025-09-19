@@ -166,6 +166,28 @@ class ExpenseRepository {
         .update(model.toMap());
   }
 
+  /// Get expenses for a date range (alias for getExpenses)
+  Future<QuerySnapshot<Map<String, dynamic>>> getExpensesForDateRange(
+    String userId,
+    DateTime startDateTime,
+    DateTime endDateTime,
+  ) async {
+    try {
+      final startTimestamp = startDateTime.toIso8601String();
+      final endTimestamp = endDateTime.toIso8601String();
+      
+      return await firestore.collection('users').doc(userId)
+          .collection('expenses')
+          .where('timestamp', isGreaterThanOrEqualTo: startTimestamp)
+          .where('timestamp', isLessThanOrEqualTo: endTimestamp)
+          .orderBy('timestamp', descending: true)
+          .get();
+    } catch (e) {
+      print('Error fetching expenses for date range: $e');
+      rethrow;
+    }
+  }
+
   /// Clean up invalid expense documents
   Future<void> cleanupInvalidExpenses(String userId) async {
     try {
