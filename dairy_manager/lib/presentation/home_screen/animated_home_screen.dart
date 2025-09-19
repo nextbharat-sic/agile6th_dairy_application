@@ -14,6 +14,7 @@ import '../../providers/auth_provider.dart';
 import '../../l10n/app_localizations.dart';
 import '../../utils/date_utils.dart';
 
+
 class AnimatedHomeScreen extends StatefulWidget {
   const AnimatedHomeScreen({super.key});
 
@@ -442,11 +443,20 @@ class _InfiniteGlassCarouselState extends State<InfiniteGlassCarousel> {
   String? _userId;
   
   List<Map<String, String>> _monthsData = [];
-  bool _isLoading = true;
-  bool _hasError = false;
-  String? _errorMessage;
-  StreamSubscription<QuerySnapshot<Map<String, dynamic>>>? _incomeSub;
-  StreamSubscription<QuerySnapshot<Map<String, dynamic>>>? _expenseSub;
+  // final List<Map<String, String>> _monthsData = const [
+  //   {'name': 'JANUARY', 'expense': '1234', 'revenue': '2468', 'profit': '1234'},
+  //   {'name': 'FEBRUARY', 'expense': '1500', 'revenue': '2800', 'profit': '1300'},
+  //   {'name': 'MARCH', 'expense': '1100', 'revenue': '2200', 'profit': '1100'},
+  //   {'name': 'APRIL', 'expense': '1800', 'revenue': '3200', 'profit': '1400'},
+  //   {'name': 'MAY', 'expense': '1600', 'revenue': '2900', 'profit': '1300'},
+  //   {'name': 'JUNE', 'expense': '1400', 'revenue': '2600', 'profit': '1200'},
+  //   {'name': 'JULY', 'expense': '1900', 'revenue': '3400', 'profit': '1500'},
+  //   {'name': 'AUGUST', 'expense': '1700', 'revenue': '3100', 'profit': '1400'},
+  //   {'name': 'SEPTEMBER', 'expense': '1300', 'revenue': '2400', 'profit': '1100'},
+  //   {'name': 'OCTOBER', 'expense': '2000', 'revenue': '3600', 'profit': '1600'},
+  //   {'name': 'NOVEMBER', 'expense': '1800', 'revenue': '3200', 'profit': '1400'},
+  //   {'name': 'DECEMBER', 'expense': '2200', 'revenue': '4000', 'profit': '1800'},
+  // ];
 
   @override
   void initState() {
@@ -494,17 +504,12 @@ class _InfiniteGlassCarouselState extends State<InfiniteGlassCarousel> {
   }
 
   Future<void> _loadReport() async {
-    try {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user == null) {
-        setState(() {
-          _hasError = true;
-          _errorMessage = 'User not authenticated';
-          _isLoading = false;
-        });
-        return;
-      }
-      _userId = user.uid;
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+
+      return;
+    }
+    _userId = user.uid;
 
       final result = await _reportService.generateReport(
         userId: _userId!,
@@ -515,198 +520,16 @@ class _InfiniteGlassCarouselState extends State<InfiniteGlassCarousel> {
         generateAnimalBreakdown: false,
       );
 
-      if (!mounted) return;
-      
-      final newMonthsData = getMonthDataList(result);
-      if (newMonthsData.isNotEmpty) {
-        // Merge into full 12 months ensuring Oct-Dec exist with zeros when absent
-        final ordered = const [
-          'JANUARY','FEBRUARY','MARCH','APRIL','MAY','JUNE',
-          'JULY','AUGUST','SEPTEMBER','OCTOBER','NOVEMBER','DECEMBER'
-        ];
-        final Map<String, Map<String, String>> byName = {
-          for (final m in ordered)
-            m: {
-              'name': m,
-              'expense': '0',
-              'profit': '0.00',
-              'revenue': '0.00',
-            }
-        };
-        for (final m in newMonthsData) {
-          final name = (m['name'] ?? '').toUpperCase();
-          if (byName.containsKey(name)) {
-            byName[name] = m;
-          }
-        }
-        setState(() {
-          _monthsData = ordered.map((n) => byName[n]!).toList();
-          _isLoading = false;
-          _hasError = false;
-        });
-        // Center the current month after data loads
-        _ensureCurrentMonthCentered();
-      } else {
-        setState(() {
-          _isLoading = false;
-          // Keep default data if no real data is available
-        });
-      }
-    } catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _hasError = true;
-        _errorMessage = 'Failed to load data: ${e.toString()}';
-        _isLoading = false;
-      });
-    }
-  }
-
-  void _ensureCurrentMonthCentered() {
     if (!mounted) return;
-    if (!_pageController.hasClients) return;
-    final currentMonth = DateTime.now().month - 1;
-    final resolvedIndex = _resolveMonthIndexInData(currentMonth);
-    final target = (_monthsData.length * 1000) + resolvedIndex;
-    // Use jump for immediate center without noticeable animation flash
-    _pageController.jumpToPage(target);
     setState(() {
-      _currentPage = resolvedIndex;
+      _monthsData = getMonthDataList(result);
     });
   }
 
-  int _resolveMonthIndexInData(int desiredMonthIndex) {
-    // Try direct match by mapping month names to indices
-    int nameToIndex(String name) {
-      final key = name.trim().toUpperCase();
-      switch (key) {
-        case 'JAN':
-        case 'JANUARY':
-          return 0;
-        case 'FEB':
-        case 'FEBRUARY':
-          return 1;
-        case 'MAR':
-        case 'MARCH':
-          return 2;
-        case 'APR':
-        case 'APRIL':
-          return 3;
-        case 'MAY':
-          return 4;
-        case 'JUN':
-        case 'JUNE':
-          return 5;
-        case 'JUL':
-        case 'JULY':
-          return 6;
-        case 'AUG':
-        case 'AUGUST':
-          return 7;
-        case 'SEP':
-        case 'SEPTEMBER':
-          return 8;
-        case 'OCT':
-        case 'OCTOBER':
-          return 9;
-        case 'NOV':
-        case 'NOVEMBER':
-          return 10;
-        case 'DEC':
-        case 'DECEMBER':
-          return 11;
-        default:
-          return -1;
-      }
-    }
-
-    final idx = _monthsData.indexWhere((m) => nameToIndex(m['name'] ?? '') == desiredMonthIndex);
-    if (idx != -1) return idx;
-    // Fallback to desiredMonthIndex if array is in calendar order
-    if (desiredMonthIndex >= 0 && desiredMonthIndex < _monthsData.length) {
-      return desiredMonthIndex;
-    }
-    // Final fallback to 0
-    return 0;
-  }
-
-  void _setupRealtimeListeners() {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) return;
-    _userId = user.uid;
-
-    final userRef = FirebaseFirestore.instance.collection('users').doc(_userId);
-    _incomeSub?.cancel();
-    _expenseSub?.cancel();
-    _incomeSub = userRef.collection('income').snapshots().listen((snap) {
-      if (!mounted) return;
-      // Update immediately on any add/update/delete
-      _loadReport();
-    });
-    _expenseSub = userRef.collection('expenses').snapshots().listen((snap) {
-      if (!mounted) return;
-      _loadReport();
-    });
-  }
-
-  // Transform dataBreakdown into UI-friendly format
-  List<Map<String, String>> getMonthDataList(Report report) {
-    if (report.dataBreakdown == null) return [];
-
-    String toFullMonthKey(String key) {
-      final k = key.trim().toUpperCase();
-      switch (k) {
-        case 'JAN':
-        case 'JANUARY':
-          return 'JANUARY';
-        case 'FEB':
-        case 'FEBRUARY':
-          return 'FEBRUARY';
-        case 'MAR':
-        case 'MARCH':
-          return 'MARCH';
-        case 'APR':
-        case 'APRIL':
-          return 'APRIL';
-        case 'MAY':
-          return 'MAY';
-        case 'JUN':
-        case 'JUNE':
-          return 'JUNE';
-        case 'JUL':
-        case 'JULY':
-          return 'JULY';
-        case 'AUG':
-        case 'AUGUST':
-          return 'AUGUST';
-        case 'SEP':
-        case 'SEPTEMBER':
-          return 'SEPTEMBER';
-        case 'OCT':
-        case 'OCTOBER':
-          return 'OCTOBER';
-        case 'NOV':
-        case 'NOVEMBER':
-          return 'NOVEMBER';
-        case 'DEC':
-        case 'DECEMBER':
-          return 'DECEMBER';
-        default:
-          return k; // fallback
-      }
-    }
-
-    return report.dataBreakdown!.entries.map((entry) {
-      final String monthName = toFullMonthKey(entry.key); // normalize to full name
-      final ReportMetrics metrics = entry.value;
-
-      return {
-        'name': monthName,
-        'expense': (metrics.expense as num).toInt().toString(),
-        'profit': metrics.profit.toInt().toString(),
-        'revenue': metrics.yield.income.toInt().toString(),
-      };
-    }).toList();
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
   }
 
   // Helper to check if a month is the current month

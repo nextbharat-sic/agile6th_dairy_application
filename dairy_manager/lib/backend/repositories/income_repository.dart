@@ -18,24 +18,43 @@ class IncomeRepository {
         .set(model.toMap());
   }
 
+  /// Fetches income records for a user within a specific date range,
+  /// with optional filtering by a single animal type and session type.
   Future<QuerySnapshot<Map<String, dynamic>>> getIncomeForAnimalsInDateRange(
-      String userId,
-      DateTime startDateTime,
-      DateTime endDateTime,
-      List<AnimalType> animalTypes) async {
-    // 'dateTime' is stored as ISO8601 string in Firestore via IncomeModel.toMap()
-    final startIso = startDateTime.toIso8601String();
-    final endIso = endDateTime.toIso8601String();
-
-    final snapshot = await firestore
+    String userId,
+    DateTime startDateTime,
+    DateTime endDateTime, {
+    AnimalType? animalType,
+    SessionType? sessionType,
+  }) async {
+    // 1. Start with the base query pointing to the collection
+    Query<Map<String, dynamic>> query = FirebaseFirestore.instance
         .collection('users')
         .doc(userId)
-        .collection('income')
-        .where('dateTime', isGreaterThanOrEqualTo: startIso)
-        .where('dateTime', isLessThanOrEqualTo: endIso)
-        .where('animalType', whereIn: animalTypes.map((t) => t.key).toList())
-        .get();
+        .collection('income');
 
+    // 2. Conditionally add filters if the parameters are not null
+    if (animalType != null) {
+      query = query.where('animalType', isEqualTo: animalType.key);
+    }
+
+    if (sessionType != null) {
+      query = query.where('session', isEqualTo: sessionType.key);
+    }
+
+    // 3. Add the mandatory date range and ordering
+    // Note: The first orderBy must match the field in your range filter ('>', '<')
+    query = query
+        .where('dateTime',
+            isGreaterThanOrEqualTo: startDateTime.toIso8601String())
+        .where('dateTime', isLessThanOrEqualTo: endDateTime.toIso8601String())
+        .orderBy('dateTime', descending: true);
+
+    // 4. Execute the fully constructed query
+    final snapshot = await query.get();
+    for (final doc in snapshot.docs) {
+      print(doc.data());
+    }
     return snapshot;
   }
 }

@@ -76,7 +76,10 @@ class ReportService {
       List<AnimalType> animalTypes) async {
     final results = await Future.wait([
       _incomeRepository.getIncomeForAnimalsInDateRange(
-          userId, startDate, endDate, animalTypes),
+        userId,
+        startDate,
+        endDate,
+      ),
       _expenseRepository.getExpenses(userId, startDate, endDate),
     ]);
     final incomeDocs = results[0] as dynamic;

@@ -9,7 +9,7 @@ class ExpensesProvider extends ChangeNotifier {
   // State variables
   List<ExpenseModel> _expenses = [];
   double _totalExpenses = 0.0;
-  Map<ExpenseCategory, double> _categoryTotals = {};
+  final Map<ExpenseCategory, double> _categoryTotals = {};
   bool _isLoading = false;
   String? _error;
 

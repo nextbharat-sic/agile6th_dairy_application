@@ -9,7 +9,7 @@ import '../../constants/constants.dart';
 import '../../l10n/app_localizations.dart';
 
 class MilkEntryScreen extends StatefulWidget {
-  const MilkEntryScreen({Key? key}) : super(key: key);
+  const MilkEntryScreen({super.key});
 
   @override
   _MilkEntryScreenState createState() => _MilkEntryScreenState();
@@ -18,7 +18,7 @@ class MilkEntryScreen extends StatefulWidget {
 class _MilkEntryScreenState extends State<MilkEntryScreen> {
   String? _userId;
   late IncomeService _incomeService;
-  
+
   // Selector types
   AnimalType selectedAnimal = AnimalType.buffalo;
   SessionType selectedSession = SessionType.morning;
@@ -41,96 +41,24 @@ class _MilkEntryScreenState extends State<MilkEntryScreen> {
   void initState() {
     super.initState();
     _userId = FirebaseAuth.instance.currentUser?.uid;
-    
+
     // Initialize repositories and service
     final firestore = FirebaseFirestore.instance;
     final incomeRepo = IncomeRepository(firestore);
     final userRepo = UserRepository(firestore);
     _incomeService = IncomeService(incomeRepo: incomeRepo, userRepo: userRepo);
-    
+
     // Set today's date as default
     final today = DateTime.now();
-    dateController.text = '${today.day.toString().padLeft(2, '0')}/${today.month.toString().padLeft(2, '0')}/${today.year}';
-    
-    // Load saved cost values
-    _loadSavedCosts();
-  }
-  
-  Future<void> _loadSavedCosts() async {
-    final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      lockedCowCost = prefs.getDouble('locked_cow_cost') ?? 50.0;
-      lockedBuffaloCost = prefs.getDouble('locked_buffalo_cost') ?? 60.0;
-      isCostLocked = prefs.getBool('is_cost_locked') ?? false;
-    });
-    
-    // Set the cost field based on current animal selection
-    _updateCostField();
-  }
-  
-  Future<void> _saveCosts() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setDouble('locked_cow_cost', lockedCowCost);
-    await prefs.setDouble('locked_buffalo_cost', lockedBuffaloCost);
-    await prefs.setBool('is_cost_locked', isCostLocked);
-  }
-  
-  void _updateCostField() {
-    if (isCostLocked) {
-      final cost = selectedAnimal == AnimalType.cow ? lockedCowCost : lockedBuffaloCost;
-      costController.text = cost.toString();
-      calculateIncome();
-    }
-  }
-  
-  void _toggleCostLock() {
-    setState(() {
-      if (isCostLocked) {
-        // Unlocking - allow user to edit
-        isCostLocked = false;
-      } else {
-        // Locking - save current value and lock
-        final currentCost = double.tryParse(costController.text) ?? 0.0;
-        if (selectedAnimal == AnimalType.cow) {
-          lockedCowCost = currentCost;
-        } else {
-          lockedBuffaloCost = currentCost;
-        }
-        isCostLocked = true;
-        _saveCosts();
-      }
-    });
-  }
-
-  void calculateIncome() {
-    final milk = double.tryParse(milkController.text) ?? 0.0;
-    final costPerLitre = double.tryParse(costController.text) ?? 0.0;
-    final amount = milk * costPerLitre;
-
-    setState(() {
-      if (selectedAnimal == AnimalType.cow) {
-        cowIncome = amount;
-        buffaloIncome = 0.0; // Show zero for buffalo when cow is selected
-      } else {
-        buffaloIncome = amount;
-        cowIncome = 0.0; // Show zero for cow when buffalo is selected
-      }
-    });
+    dateController.text =
+        '${today.day.toString().padLeft(2, '0')}/${today.month.toString().padLeft(2, '0')}/${today.year}';
   }
 
   void clearFields() {
     milkController.clear();
     snfController.clear();
     fatController.clear();
-    if (!isCostLocked) {
-      costController.clear();
-    } else {
-      _updateCostField();
-    }
-    setState(() {
-      cowIncome = 0.0;
-      buffaloIncome = 0.0;
-    });
+    costController.clear();
   }
 
   Future<void> _selectDate(BuildContext context) async {
@@ -142,7 +70,8 @@ class _MilkEntryScreenState extends State<MilkEntryScreen> {
     );
     if (picked != null) {
       setState(() {
-        dateController.text = '${picked.day.toString().padLeft(2, '0')}/${picked.month.toString().padLeft(2, '0')}/${picked.year}';
+        dateController.text =
+            '${picked.day.toString().padLeft(2, '0')}/${picked.month.toString().padLeft(2, '0')}/${picked.year}';
       });
     }
   }
@@ -158,7 +87,8 @@ class _MilkEntryScreenState extends State<MilkEntryScreen> {
     // Validate required fields
     if (milkController.text.isEmpty || costController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill in Milk (L) and Cost/L fields')),
+        const SnackBar(
+            content: Text('Please fill in Milk (L) and Cost/L fields')),
       );
       return;
     }
@@ -171,7 +101,8 @@ class _MilkEntryScreenState extends State<MilkEntryScreen> {
       final year = int.parse(dateParts[2]);
       // Use current time for hour, minute, second, etc
       final now = DateTime.now();
-      final selectedDate = DateTime(year, month, day, now.hour, now.minute, now.second, now.millisecond, now.microsecond);
+      final selectedDate = DateTime(year, month, day, now.hour, now.minute,
+          now.second, now.millisecond, now.microsecond);
 
       // Submit to backend using the correct method signature
       final result = await _incomeService.addIncome(
@@ -185,8 +116,13 @@ class _MilkEntryScreenState extends State<MilkEntryScreen> {
         newCostPerLiter: double.parse(costController.text),
       );
 
+      cowIncome = result.todayIncomeList[AnimalType.cow] ?? 0.0;
+      buffaloIncome = result.todayIncomeList[AnimalType.buffalo] ?? 0.0;
+
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Milk entry saved successfully! Session income: ${result['totalIncomeSession']}')),
+        SnackBar(
+            content: Text(
+                'Milk entry saved successfully! Session income: ${result.totalIncomeSession}')),
       );
 
       // Clear fields after successful submission
@@ -201,15 +137,14 @@ class _MilkEntryScreenState extends State<MilkEntryScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    
+
     return Scaffold(
       backgroundColor: Colors.grey[200],
       appBar: AppBar(
         backgroundColor: Colors.black,
         toolbarHeight: 100, // Increased from default ~56 to 100
         shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(bottom: Radius.circular(30))
-        ),
+            borderRadius: BorderRadius.vertical(bottom: Radius.circular(30))),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white, size: 28),
           onPressed: () => Navigator.pop(context),
@@ -218,7 +153,7 @@ class _MilkEntryScreenState extends State<MilkEntryScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              l10n.milk + ' ' + l10n.entry,
+              '${l10n.milk} ${l10n.entry}',
               style: const TextStyle(
                 color: Colors.white,
                 fontSize: 24, // Increased from 18 to 24
@@ -237,7 +172,8 @@ class _MilkEntryScreenState extends State<MilkEntryScreen> {
         centerTitle: true,
         actions: [
           IconButton(
-            icon: const Icon(Icons.settings, color: Colors.white, size: 28), // Increased from default to 28
+            icon: const Icon(Icons.settings,
+                color: Colors.white, size: 28), // Increased from default to 28
             onPressed: () {
               Navigator.pushNamed(context, '/settings');
             },
@@ -327,66 +263,73 @@ class _MilkEntryScreenState extends State<MilkEntryScreen> {
             const SizedBox(height: 16),
             _inputFieldRow(l10n.date, dateController, isDateField: true),
             const SizedBox(height: 8),
-            _inputFieldRow(l10n.milkL, milkController, onChanged: (value) => calculateIncome()),
+            _inputFieldRow(l10n.milkL, milkController,
+                onChanged: (value) => ()),
             const SizedBox(height: 8),
             _inputFieldRow(l10n.snf, snfController),
             const SizedBox(height: 8),
             _inputFieldRow(l10n.fat, fatController),
             const SizedBox(height: 8),
-            _inputFieldRowWithLock(l10n.costL, costController, onChanged: (value) => calculateIncome()),
+            _inputFieldRow(l10n.costL, costController,
+                onChanged: (value) => ()),
             const SizedBox(height: 20),
-            Container(
-            width: double.infinity,
-            height: 60, // Set fixed height for proper alignment
-            child: Stack(
-              children: [
-                // Perfectly centered Submit button
-                Center(
-                  child: SizedBox(
-                    width: 200, // Fixed button width - adjust as needed
-                    child: ElevatedButton(
-                      onPressed: _handleSubmit,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        foregroundColor: Colors.black,
-                        padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 14),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30),
-                          side: const BorderSide(color: Colors.black, width: 1),
+            SizedBox(
+              width: double.infinity,
+              height: 60, // Set fixed height for proper alignment
+              child: Stack(
+                children: [
+                  // Perfectly centered Submit button
+                  Center(
+                    child: SizedBox(
+                      width: 200, // Fixed button width - adjust as needed
+                      child: ElevatedButton(
+                        onPressed: _handleSubmit,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          foregroundColor: Colors.black,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 48, vertical: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30),
+                            side:
+                                const BorderSide(color: Colors.black, width: 1),
+                          ),
                         ),
-                      ),
-                      child: const Text(
-                        'SUBMIT',
-                        style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+                        child: const Text(
+                          'SUBMIT',
+                          style: TextStyle(
+                              color: Colors.black, fontWeight: FontWeight.bold),
+                        ),
                       ),
                     ),
                   ),
-                ),
-                // Edit icon positioned absolutely to the right
-                Positioned(
-                  right: 10, // Distance from right edge - adjust as needed
-                  top: 0,
-                  bottom: 0,
-                  child: Center(
-                    child: IconButton(
-                      onPressed: () => Navigator.pushNamed(context, '/milk-entry-edit'),
-                      icon: const Icon(Icons.edit, color: Colors.black),
-                      style: ButtonStyle(
-                        backgroundColor: WidgetStateProperty.all(Colors.white),
-                        shape: WidgetStateProperty.all(
-                          RoundedRectangleBorder(
-                            side: const BorderSide(color: Colors.black, width: 1),
-                            borderRadius: BorderRadius.circular(22),
+                  // Edit icon positioned absolutely to the right
+                  Positioned(
+                    right: 10, // Distance from right edge - adjust as needed
+                    top: 0,
+                    bottom: 0,
+                    child: Center(
+                      child: IconButton(
+                        onPressed: () =>
+                            Navigator.pushNamed(context, '/milk-entry-edit'),
+                        icon: const Icon(Icons.edit, color: Colors.black),
+                        style: ButtonStyle(
+                          backgroundColor:
+                              WidgetStateProperty.all(Colors.white),
+                          shape: WidgetStateProperty.all(
+                            RoundedRectangleBorder(
+                              side: const BorderSide(
+                                  color: Colors.black, width: 1),
+                              borderRadius: BorderRadius.circular(22),
+                            ),
                           ),
                         ),
                       ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-
             const SizedBox(height: 32),
             Divider(thickness: 2, color: Colors.black26),
             const SizedBox(height: 24),
@@ -404,8 +347,8 @@ class _MilkEntryScreenState extends State<MilkEntryScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                _incomeDisplay('Cow', cowIncome),
                 _incomeDisplay('Buffalo', buffaloIncome),
+                _incomeDisplay('Cow', cowIncome),
               ],
             ),
             const SizedBox(height: 24),
@@ -415,155 +358,117 @@ class _MilkEntryScreenState extends State<MilkEntryScreen> {
     );
   }
 
-  Widget _cattleToggleButton(String label, String iconPath, bool selected, VoidCallback onTap) {
-  return GestureDetector(
-    onTap: onTap,
-    child: Container(
-      height: 70,
-      decoration: BoxDecoration(
-        color: selected ? Colors.black : Colors.white, // SWAPPED: black when selected
-        borderRadius: BorderRadius.circular(30),
-        border: Border.all(color: Colors.black, width: 1),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Image.asset(
-            iconPath,
-            width: 30,
-            height: 30,
-            color: selected ? Colors.white : Colors.black, // SWAPPED: white icon when selected
-          ),
-          const SizedBox(height: 6),
-          Text(
-            label,
-            style: TextStyle(
-              color: selected ? Colors.white : Colors.black, // SWAPPED: white text when selected
-              fontWeight: FontWeight.w600,
-              fontSize: 14,
+  Widget _cattleToggleButton(
+      String label, String iconPath, bool selected, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        height: 70,
+        decoration: BoxDecoration(
+          color: selected
+              ? Colors.black
+              : Colors.white, // SWAPPED: black when selected
+          borderRadius: BorderRadius.circular(30),
+          border: Border.all(color: Colors.black, width: 1),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Image.asset(
+              iconPath,
+              width: 30,
+              height: 30,
+              color: selected
+                  ? Colors.white
+                  : Colors.black, // SWAPPED: white icon when selected
             ),
-          ),
-        ],
+            const SizedBox(height: 6),
+            Text(
+              label,
+              style: TextStyle(
+                color: selected
+                    ? Colors.white
+                    : Colors.black, // SWAPPED: white text when selected
+                fontWeight: FontWeight.w600,
+                fontSize: 14,
+              ),
+            ),
+          ],
+        ),
       ),
-    ),
-  );
-}
-
+    );
+  }
 
   Widget _sessionToggleButton(String label, bool selected, VoidCallback onTap) {
-  return GestureDetector(
-    onTap: onTap,
-    child: Container(
-      height: 50,
-      decoration: BoxDecoration(
-        color: selected ? Colors.black : Colors.white, // CHANGED: black when selected
-        borderRadius: BorderRadius.circular(30),
-        border: Border.all(color: Colors.black, width: 1),
-      ),
-      child: Center(
-        child: Text(
-          label,
-          style: TextStyle(
-            color: selected ? Colors.white : Colors.black, // CHANGED: white text when selected
-            fontWeight: FontWeight.w600,
-            fontSize: 16,
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        height: 50,
+        decoration: BoxDecoration(
+          color: selected
+              ? Colors.black
+              : Colors.white, // CHANGED: black when selected
+          borderRadius: BorderRadius.circular(30),
+          border: Border.all(color: Colors.black, width: 1),
+        ),
+        child: Center(
+          child: Text(
+            label,
+            style: TextStyle(
+              color: selected
+                  ? Colors.white
+                  : Colors.black, // CHANGED: white text when selected
+              fontWeight: FontWeight.w600,
+              fontSize: 16,
+            ),
           ),
         ),
       ),
-    ),
-  );
-}
+    );
+  }
 
   Widget _inputFieldRow(String label, TextEditingController controller,
-    {bool isDateField = false, Function(String)? onChanged}) {
-  final l10n = AppLocalizations.of(context)!;
-  
-  return Row(
-    children: [
-      SizedBox(
-        width: 80,
-        child: Text(
-          label,
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-        ),
-      ),
-      const SizedBox(width: 12),
-      Expanded(
-        child: GestureDetector(
-          onTap: isDateField ? () => _selectDate(context) : null,
-          child: TextField(
-            controller: controller,
-            readOnly: isDateField,
-            keyboardType: TextInputType.number,
-            obscureText: false, // Always visible, never encrypted
-            decoration: InputDecoration(
-              hintText: isDateField ? l10n.ddmmyyyy : l10n.inputText,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(color: Colors.grey),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(color: Colors.grey),
-              ),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            ),
-            onChanged: onChanged,
+      {bool isDateField = false, Function(String)? onChanged}) {
+    final l10n = AppLocalizations.of(context)!;
+
+    return Row(
+      children: [
+        SizedBox(
+          width: 80,
+          child: Text(
+            label,
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
           ),
         ),
-      ),
-    ],
-  );
-}
-
-  Widget _inputFieldRowWithLock(String label, TextEditingController controller,
-    {Function(String)? onChanged}) {
-  final l10n = AppLocalizations.of(context)!;
-  
-  return Row(
-    children: [
-      SizedBox(
-        width: 80,
-        child: Text(
-          label,
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-        ),
-      ),
-      const SizedBox(width: 12),
-      Expanded(
-        child: TextField(
-          controller: controller,
-          readOnly: isCostLocked,
-          keyboardType: TextInputType.number,
-          decoration: InputDecoration(
-            hintText: l10n.inputText,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: Colors.grey),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: Colors.grey),
-            ),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            suffixIcon: IconButton(
-              onPressed: _toggleCostLock,
-              icon: Image.asset(
-                isCostLocked ? 'assets/images/lock.png' : 'assets/images/unlock.png',
-                width: 20,
-                height: 20,
-                color: Colors.black,
+        const SizedBox(width: 12),
+        Expanded(
+          child: GestureDetector(
+            onTap: isDateField ? () => _selectDate(context) : null,
+            child: TextField(
+              controller: controller,
+              readOnly: isDateField,
+              keyboardType: TextInputType.number,
+              obscureText: false, // Always visible, never encrypted
+              decoration: InputDecoration(
+                hintText: isDateField ? l10n.ddmmyyyy : l10n.inputText,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: const BorderSide(color: Colors.grey),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: const BorderSide(color: Colors.grey),
+                ),
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               ),
+              onChanged: onChanged,
             ),
           ),
-          onChanged: onChanged,
         ),
-      ),
-    ],
-  );
-}
-
-
+      ],
+    );
+  }
 
   Widget _incomeDisplay(String label, double amount) {
     return Column(
