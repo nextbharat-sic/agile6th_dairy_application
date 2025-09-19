@@ -50,7 +50,8 @@ class DateUtils {
       String groupKey, GroupByFrequency groupBy) {
     switch (groupBy) {
       case GroupByFrequency.day:
-        return DateFormat.E().format(DateTime.parse(groupKey)); // e.g., 'Sat'
+        // Show day of month as 2-digit label '01'..'31'
+        return DateFormat('dd').format(DateTime.parse(groupKey));
       case GroupByFrequency.week:
         return "Week${groupKey.split('-W').last}"; // e.g., 'Week1'
       case GroupByFrequency.month:

@@ -23,12 +23,16 @@ class IncomeRepository {
       DateTime startDateTime,
       DateTime endDateTime,
       List<AnimalType> animalTypes) async {
+    // 'dateTime' is stored as ISO8601 string in Firestore via IncomeModel.toMap()
+    final startIso = startDateTime.toIso8601String();
+    final endIso = endDateTime.toIso8601String();
+
     final snapshot = await firestore
         .collection('users')
         .doc(userId)
         .collection('income')
-        .where('dateTime', isGreaterThanOrEqualTo: startDateTime)
-        .where('dateTime', isLessThanOrEqualTo: endDateTime)
+        .where('dateTime', isGreaterThanOrEqualTo: startIso)
+        .where('dateTime', isLessThanOrEqualTo: endIso)
         .where('animalType', whereIn: animalTypes.map((t) => t.key).toList())
         .get();
 

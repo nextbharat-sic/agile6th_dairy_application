@@ -26,8 +26,8 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
   double _totalExpenses = 0.0;
   
   // UI state
-  String _selectedMonth = 'January';
-  String _selectedYear = '2024';
+  String _selectedMonth = '';
+  String _selectedYear = '';
   
   final List<String> _months = [
     'January', 'February', 'March', 'April', 'May', 'June',
@@ -70,6 +70,10 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
   void initState() {
     super.initState();
     _initializeServices();
+    // Initialize selectors to current month/year
+    final now = DateTime.now();
+    _selectedMonth = _months[now.month - 1];
+    _selectedYear = now.year.toString();
     _loadExpensesForSelectedPeriod();
   }
 
@@ -209,7 +213,7 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
           children: [
             // Filter Section
             Container(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.only(left: 16, right: 16, top: 24, bottom: 16),
               decoration: BoxDecoration(
                 color: Colors.black,
                 borderRadius: BorderRadius.circular(12),
@@ -223,11 +227,11 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
                       dropdownColor: Colors.black,
                       style: const TextStyle(color: Colors.white, fontSize: 14),
                       isExpanded: true,
-                      items: [l10n.month, ..._months].map((String value) {
+                      items: _months.map((String value) {
                         return DropdownMenuItem<String>(
                           value: value,
                           child: Text(
-                            value == l10n.month ? value : _getTranslatedMonthName(value, l10n),
+                            _getTranslatedMonthName(value, l10n),
                             style: const TextStyle(color: Colors.white, fontSize: 14),
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -250,7 +254,7 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
                       dropdownColor: Colors.black,
                       style: const TextStyle(color: Colors.white, fontSize: 14),
                       isExpanded: true,
-                      items: [l10n.selectYear, ..._years].map((String value) {
+                      items: _years.map((String value) {
                         return DropdownMenuItem<String>(
                           value: value,
                           child: Text(

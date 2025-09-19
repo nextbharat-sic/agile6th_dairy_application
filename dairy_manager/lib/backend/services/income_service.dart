@@ -1,8 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-<<<<<<< HEAD
-=======
-
->>>>>>> 1f0ca371040dcdf19f4ab6a3a76bf5a9ec7ad263
 import '../../constants/constants.dart';
 import '../../models/income_model.dart';
 import '../../utils/date_utils.dart';

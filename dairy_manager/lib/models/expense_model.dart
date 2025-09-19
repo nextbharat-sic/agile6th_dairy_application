@@ -66,12 +66,30 @@ class ExpenseModel {
       }
 
       // Parse timestamp safely
-      DateTime dateTime;
-      try {
-        dateTime = DateTime.parse(timestamp.toString());
-      } catch (e) {
-        throw ArgumentError('Invalid timestamp format: $timestamp. Error: $e');
+      DateTime _parseDate(dynamic value) {
+        if (value == null) return DateTime.now();
+        try {
+          // Firestore Timestamp
+          // Avoid import to keep model lean; rely on toString fallback
+          if (value.runtimeType.toString() == 'Timestamp') {
+            // When coming from Firestore, value has toDate()
+            final toDate = (value as dynamic).toDate;
+            if (toDate is Function) {
+              return (value as dynamic).toDate() as DateTime;
+            }
+          }
+        } catch (_) {}
+        if (value is DateTime) return value;
+        if (value is num) {
+          return DateTime.fromMillisecondsSinceEpoch(value.toInt());
+        }
+        if (value is String) {
+          final parsed = DateTime.tryParse(value);
+          if (parsed != null) return parsed;
+        }
+        throw ArgumentError('Invalid timestamp format: $value');
       }
+      final dateTime = _parseDate(timestamp);
 
       // Parse amount safely
       double amountValue;

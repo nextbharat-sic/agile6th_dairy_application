@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../backend/repositories/income_repository.dart';
 import '../../backend/repositories/user_repository.dart';
 import '../../backend/services/income_service.dart';
@@ -30,6 +31,11 @@ class _MilkEntryScreenState extends State<MilkEntryScreen> {
 
   double cowIncome = 0.0;
   double buffaloIncome = 0.0;
+  
+  // Lock/unlock state for cost/L field
+  bool isCostLocked = false;
+  double lockedCowCost = 50.0; // Default value for cow
+  double lockedBuffaloCost = 60.0; // Default value for buffalo
 
   @override
   void initState() {
@@ -45,6 +51,55 @@ class _MilkEntryScreenState extends State<MilkEntryScreen> {
     // Set today's date as default
     final today = DateTime.now();
     dateController.text = '${today.day.toString().padLeft(2, '0')}/${today.month.toString().padLeft(2, '0')}/${today.year}';
+    
+    // Load saved cost values
+    _loadSavedCosts();
+  }
+  
+  Future<void> _loadSavedCosts() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      lockedCowCost = prefs.getDouble('locked_cow_cost') ?? 50.0;
+      lockedBuffaloCost = prefs.getDouble('locked_buffalo_cost') ?? 60.0;
+      isCostLocked = prefs.getBool('is_cost_locked') ?? false;
+    });
+    
+    // Set the cost field based on current animal selection
+    _updateCostField();
+  }
+  
+  Future<void> _saveCosts() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setDouble('locked_cow_cost', lockedCowCost);
+    await prefs.setDouble('locked_buffalo_cost', lockedBuffaloCost);
+    await prefs.setBool('is_cost_locked', isCostLocked);
+  }
+  
+  void _updateCostField() {
+    if (isCostLocked) {
+      final cost = selectedAnimal == AnimalType.cow ? lockedCowCost : lockedBuffaloCost;
+      costController.text = cost.toString();
+      calculateIncome();
+    }
+  }
+  
+  void _toggleCostLock() {
+    setState(() {
+      if (isCostLocked) {
+        // Unlocking - allow user to edit
+        isCostLocked = false;
+      } else {
+        // Locking - save current value and lock
+        final currentCost = double.tryParse(costController.text) ?? 0.0;
+        if (selectedAnimal == AnimalType.cow) {
+          lockedCowCost = currentCost;
+        } else {
+          lockedBuffaloCost = currentCost;
+        }
+        isCostLocked = true;
+        _saveCosts();
+      }
+    });
   }
 
   void calculateIncome() {
@@ -67,7 +122,11 @@ class _MilkEntryScreenState extends State<MilkEntryScreen> {
     milkController.clear();
     snfController.clear();
     fatController.clear();
-    costController.clear();
+    if (!isCostLocked) {
+      costController.clear();
+    } else {
+      _updateCostField();
+    }
     setState(() {
       cowIncome = 0.0;
       buffaloIncome = 0.0;
@@ -207,6 +266,9 @@ class _MilkEntryScreenState extends State<MilkEntryScreen> {
                         selectedAnimal = AnimalType.buffalo;
                         clearFields();
                       });
+                      if (isCostLocked) {
+                        _updateCostField();
+                      }
                     },
                   ),
                 ),
@@ -221,6 +283,9 @@ class _MilkEntryScreenState extends State<MilkEntryScreen> {
                         selectedAnimal = AnimalType.cow;
                         clearFields();
                       });
+                      if (isCostLocked) {
+                        _updateCostField();
+                      }
                     },
                   ),
                 ),
@@ -268,7 +333,7 @@ class _MilkEntryScreenState extends State<MilkEntryScreen> {
             const SizedBox(height: 8),
             _inputFieldRow(l10n.fat, fatController),
             const SizedBox(height: 8),
-            _inputFieldRow(l10n.costL, costController, onChanged: (value) => calculateIncome()),
+            _inputFieldRowWithLock(l10n.costL, costController, onChanged: (value) => calculateIncome()),
             const SizedBox(height: 20),
             Container(
             width: double.infinity,
@@ -445,6 +510,53 @@ class _MilkEntryScreenState extends State<MilkEntryScreen> {
             ),
             onChanged: onChanged,
           ),
+        ),
+      ),
+    ],
+  );
+}
+
+  Widget _inputFieldRowWithLock(String label, TextEditingController controller,
+    {Function(String)? onChanged}) {
+  final l10n = AppLocalizations.of(context)!;
+  
+  return Row(
+    children: [
+      SizedBox(
+        width: 80,
+        child: Text(
+          label,
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+        ),
+      ),
+      const SizedBox(width: 12),
+      Expanded(
+        child: TextField(
+          controller: controller,
+          readOnly: isCostLocked,
+          keyboardType: TextInputType.number,
+          decoration: InputDecoration(
+            hintText: l10n.inputText,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: const BorderSide(color: Colors.grey),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: const BorderSide(color: Colors.grey),
+            ),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            suffixIcon: IconButton(
+              onPressed: _toggleCostLock,
+              icon: Image.asset(
+                isCostLocked ? 'assets/images/lock.png' : 'assets/images/unlock.png',
+                width: 20,
+                height: 20,
+                color: Colors.black,
+              ),
+            ),
+          ),
+          onChanged: onChanged,
         ),
       ),
     ],

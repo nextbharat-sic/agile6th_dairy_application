@@ -50,11 +50,28 @@ class IncomeModel {
 
   /// Create a model from a map, likely from a database record.
   factory IncomeModel.fromMap(Map<String, dynamic> map) {
+    DateTime _parseDate(dynamic value, {DateTime? fallback}) {
+      if (value == null) return fallback ?? DateTime.now();
+      if (value is Timestamp) return value.toDate();
+      if (value is DateTime) return value;
+      if (value is num) {
+        final millis = value.toInt();
+        return DateTime.fromMillisecondsSinceEpoch(millis);
+      }
+      if (value is String) {
+        final parsed = DateTime.tryParse(value);
+        if (parsed != null) return parsed;
+      }
+      return fallback ?? DateTime.now();
+    }
+
+    final dynamic dateField = map['dateTime'] ?? map['timestamp'];
+    final dynamic createdAtField = map['createdAt'];
+    final dynamic updatedAtField = map['updatedAt'];
+
     return IncomeModel(
       id: map['id'] as String,
-      dateTime: map['dateTime'] is String
-          ? DateTime.parse(map['dateTime'] as String)
-          : (map['dateTime'] as Timestamp).toDate(),
+      dateTime: _parseDate(dateField),
       animalType: AnimalType.values.byName(map['animalType'] as String),
       session: SessionType.values.byName(map['session'] as String),
       liters: (map['liters'] as num).toDouble(),
@@ -62,12 +79,8 @@ class IncomeModel {
       fat: (map['fat'] as num).toDouble(),
       costPerLiter: (map['costPerLiter'] as num).toDouble(),
       totalIncome: (map['totalIncome'] as num).toDouble(),
-      createdAt: map['createdAt'] is String
-          ? DateTime.parse(map['createdAt'] as String)
-          : (map['createdAt'] as Timestamp).toDate(),
-      updatedAt: map['updatedAt'] is String
-          ? DateTime.parse(map['updatedAt'] as String)
-          : (map['updatedAt'] as Timestamp).toDate(),
+      createdAt: _parseDate(createdAtField, fallback: _parseDate(dateField)),
+      updatedAt: _parseDate(updatedAtField, fallback: _parseDate(dateField)),
     );
   }
   Map<String, dynamic> toMap() => {
