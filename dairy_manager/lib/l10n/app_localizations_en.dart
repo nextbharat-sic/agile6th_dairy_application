@@ -375,4 +375,24 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cattleOwned => 'Cattle Owned';
   @override
   String get location => 'Location';
+
+  // Delete confirmation dialog
+  @override
+  String get deleteExpense => 'Delete Expense';
+  @override
+  String get deleteConfirmation => 'Are you sure you want to delete this expense?';
+  @override
+  String get delete => 'Delete';
+
+  // Profile edit screen translations
+  @override
+  String get editProfile => 'Edit Profile';
+  @override
+  String get name => 'Name';
+  @override
+  String get enterName => 'Enter name';
+  @override
+  String get invalidEmail => 'Invalid email';
+  @override
+  String get save => 'SAVE';
 }

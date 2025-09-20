@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import '../../l10n/app_localizations.dart';
 // Removed direct dependency on app AuthProvider; we use FirebaseAuth directly for prefills
 
 class ProfileEditScreen extends StatefulWidget {
@@ -56,6 +57,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: Colors.grey[200],
       appBar: AppBar(
@@ -68,9 +70,9 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
           icon: const Icon(Icons.arrow_back, color: Colors.white, size: 28),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
-          'Edit Profile',
-          style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w600),
+        title: Text(
+          l10n.editProfile,
+          style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w600),
         ),
         centerTitle: true,
       ),
@@ -106,17 +108,17 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                   ],
                 ),
                 const SizedBox(height: 20),
-                _label('Name'),
-                _field(_nameCtrl, validator: (v) => v!.trim().isEmpty ? 'Enter name' : null),
-                _label('Email Address'),
-                _field(_emailCtrl, keyboardType: TextInputType.emailAddress, validator: (v) => v!.contains('@') ? null : 'Invalid email'),
-                _label('Phone Number'),
+                _label(l10n.name),
+                _field(_nameCtrl, validator: (v) => v!.trim().isEmpty ? l10n.enterName : null),
+                _label(l10n.emailAddress),
+                _field(_emailCtrl, keyboardType: TextInputType.emailAddress, validator: (v) => v!.contains('@') ? null : l10n.invalidEmail),
+                _label(l10n.phoneNumber),
                 _field(_phoneCtrl, keyboardType: TextInputType.phone),
-                _label('Age'),
+                _label(l10n.age),
                 _field(_ageCtrl, keyboardType: TextInputType.number),
-                _label('Cattle Owned'),
+                _label(l10n.cattleOwned),
                 _field(_cattleCtrl, keyboardType: TextInputType.number),
-                _label('Location'),
+                _label(l10n.location),
                 _field(_locationCtrl),
                 const SizedBox(height: 24),
                 SizedBox(
@@ -159,7 +161,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24), side: const BorderSide(color: Colors.black, width: 1.5)),
                       padding: const EdgeInsets.symmetric(vertical: 14),
                     ),
-                    child: const Text('SAVE', style: TextStyle(fontWeight: FontWeight.w700)),
+                    child: Text(l10n.save, style: const TextStyle(fontWeight: FontWeight.w700)),
                   ),
                 )
               ],

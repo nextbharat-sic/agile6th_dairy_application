@@ -598,6 +598,18 @@ abstract class AppLocalizations {
   String get age;
   String get cattleOwned;
   String get location;
+
+  // Delete confirmation dialog
+  String get deleteExpense;
+  String get deleteConfirmation;
+  String get delete;
+
+  // Profile edit screen translations
+  String get editProfile;
+  String get name;
+  String get enterName;
+  String get invalidEmail;
+  String get save;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
