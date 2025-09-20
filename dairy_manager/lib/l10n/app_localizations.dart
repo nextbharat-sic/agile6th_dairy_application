@@ -301,23 +301,6 @@ abstract class AppLocalizations {
   /// **'Select Week'**
   String get selectWeek;
 
-  /// No description provided for @milkWeeklyAverage.
-  ///
-  /// In en, this message translates to:
-  /// **'Milk Weekly Average : 148 L\nSNF Weekly Average : 12\nFat% Weekly Average : 20%'**
-  String get milkWeeklyAverage;
-
-  /// No description provided for @milkMonthlyAverage.
-  ///
-  /// In en, this message translates to:
-  /// **'Milk Monthly Average : 520 L\nSNF Monthly Average : 20\nFat% Monthly Average : 20%'**
-  String get milkMonthlyAverage;
-
-  /// No description provided for @milkYearlyAverage.
-  ///
-  /// In en, this message translates to:
-  /// **'Milk Yearly Average : 6000 L\nSNF Yearly Average : 20\nFat% Yearly Average : 20%'**
-  String get milkYearlyAverage;
 
   /// No description provided for @milkLHeader.
   ///
@@ -569,16 +552,6 @@ abstract class AppLocalizations {
   /// **'Cancel'**
   String get cancel;
 
-  // Additional translations for milk entry page
-  String get todaysIncome;
-  String get buffaloLabel;
-  String get cowLabel;
-
-  // Delete confirmation dialog
-  String get deleteExpense;
-  String get deleteConfirmation;
-  String get delete;
-
   // Reports screen average text translations
   String get milkWeeklyTotal;
   String get milkMonthlyTotal;
@@ -586,6 +559,45 @@ abstract class AppLocalizations {
   String get snfAverage;
   String get fatAverage;
   String get noDataAvailable;
+
+  // Edit entry screen translations
+  String get today;
+  String get yesterday;
+  String get dayBeforeYesterday;
+  String get snfPercent;
+  String get fatPercent;
+  String get costPerL;
+
+  // Logout confirmation dialog
+  String get logoutConfirmation;
+
+  // Add expense form translations
+  String get addReceiptPhoto;
+  String get camera;
+  String get gallery;
+  String get cameraFunctionalityComingSoon;
+  String get galleryFunctionalityComingSoon;
+  String get pleaseEnterAmount;
+  String get pleaseEnterValidAmount;
+  String get descriptionOptional;
+  String get enterExpenseDetails;
+  String get receiptAdded;
+  String get addReceipt;
+
+  // Edit entry form translations
+  String get editEntry;
+
+  // Additional missing translations
+  String get todaysIncome;
+  String get buffaloLabel;
+  String get cowLabel;
+
+  // Profile page translations
+  String get emailAddress;
+  String get phoneNumber;
+  String get age;
+  String get cattleOwned;
+  String get location;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

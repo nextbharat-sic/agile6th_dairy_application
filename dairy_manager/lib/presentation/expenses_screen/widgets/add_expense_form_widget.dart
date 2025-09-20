@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:sizer/sizer.dart';
 
 import '../../../core/app_export.dart';
+import '../../../l10n/app_localizations.dart';
 import './expense_category_selector_widget.dart';
 
 class AddExpenseFormWidget extends StatefulWidget {
@@ -74,10 +75,12 @@ class AddExpenseFormWidgetState extends State<AddExpenseFormWidget> {
         backgroundColor: AppTheme.lightTheme.colorScheme.surface,
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
-        builder: (context) => Container(
+        builder: (context) {
+          final l10n = AppLocalizations.of(context)!;
+          return Container(
             padding: EdgeInsets.all(4.w),
             child: Column(mainAxisSize: MainAxisSize.min, children: [
-              Text('Add Receipt Photo',
+              Text(l10n.addReceiptPhoto,
                   style: AppTheme.lightTheme.textTheme.titleMedium),
               SizedBox(height: 3.h),
               Row(children: [
@@ -88,13 +91,13 @@ class AddExpenseFormWidgetState extends State<AddExpenseFormWidget> {
                           setState(() => _hasReceipt = true);
                           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                               content:
-                                  Text('Camera functionality coming soon')));
+                                  Text(l10n.cameraFunctionalityComingSoon)));
                         },
                         icon: CustomIconWidget(
                             iconName: 'camera_alt',
                             color: AppTheme.lightTheme.colorScheme.onPrimary,
                             size: 20),
-                        label: Text('Camera'))),
+                        label: Text(l10n.camera))),
                 SizedBox(width: 2.w),
                 Expanded(
                     child: ElevatedButton.icon(
@@ -103,16 +106,17 @@ class AddExpenseFormWidgetState extends State<AddExpenseFormWidget> {
                           setState(() => _hasReceipt = true);
                           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                               content:
-                                  Text('Gallery functionality coming soon')));
+                                  Text(l10n.galleryFunctionalityComingSoon)));
                         },
                         icon: CustomIconWidget(
                             iconName: 'photo_library',
                             color: AppTheme.lightTheme.colorScheme.onPrimary,
                             size: 20),
-                        label: Text('Gallery'))),
+                        label: Text(l10n.gallery))),
               ]),
               SizedBox(height: 2.h),
-            ])));
+            ]));
+        });
   }
 
   String _formatCurrency(String value) {
@@ -128,6 +132,8 @@ class AddExpenseFormWidgetState extends State<AddExpenseFormWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    
     final selectedCategoryData = widget.categories.firstWhere(
         (cat) => cat["name"] == widget.selectedCategory,
         orElse: () => widget.categories.first);
@@ -151,7 +157,7 @@ class AddExpenseFormWidgetState extends State<AddExpenseFormWidget> {
                   Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text('Add Expense',
+                        Text(l10n.addExpense,
                             style: AppTheme.lightTheme.textTheme.titleLarge),
                         IconButton(
                             onPressed: () => Navigator.pop(context),
@@ -242,7 +248,7 @@ class AddExpenseFormWidgetState extends State<AddExpenseFormWidget> {
                         }),
                       ],
                       decoration: InputDecoration(
-                          labelText: 'Amount',
+                          labelText: l10n.amount,
                           prefixText: '₹ ',
                           prefixStyle: AppTheme.lightTheme.textTheme.bodyLarge
                               ?.copyWith(
@@ -252,12 +258,12 @@ class AddExpenseFormWidgetState extends State<AddExpenseFormWidget> {
                           hintText: '0'),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Please enter amount';
+                          return l10n.pleaseEnterAmount;
                         }
                         final amount =
                             double.tryParse(value.replaceAll(',', ''));
                         if (amount == null || amount <= 0) {
-                          return 'Please enter valid amount';
+                          return l10n.pleaseEnterValidAmount;
                         }
                         return null;
                       }),
@@ -269,8 +275,8 @@ class AddExpenseFormWidgetState extends State<AddExpenseFormWidget> {
                       controller: widget.descriptionController,
                       maxLines: 3,
                       decoration: InputDecoration(
-                          labelText: 'Description (Optional)',
-                          hintText: 'Enter expense details...',
+                          labelText: l10n.descriptionOptional,
+                          hintText: l10n.enterExpenseDetails,
                           alignLabelWithHint: true)),
 
                   SizedBox(height: 2.h),
@@ -288,7 +294,7 @@ class AddExpenseFormWidgetState extends State<AddExpenseFormWidget> {
                                     : AppTheme.lightTheme.colorScheme.onSurface,
                                 size: 20),
                             label: Text(
-                                _hasReceipt ? 'Receipt Added' : 'Add Receipt'),
+                                _hasReceipt ? l10n.receiptAdded : l10n.addReceipt),
                             style: OutlinedButton.styleFrom(
                                 foregroundColor: _hasReceipt
                                     ? AppTheme.lightTheme.colorScheme.primary
@@ -309,7 +315,7 @@ class AddExpenseFormWidgetState extends State<AddExpenseFormWidget> {
                           },
                           style: ElevatedButton.styleFrom(
                               padding: EdgeInsets.symmetric(vertical: 2.h)),
-                          child: Text('Add Expense',
+                          child: Text(l10n.addExpense,
                               style: AppTheme.lightTheme.textTheme.titleMedium
                                   ?.copyWith(
                                       color: AppTheme

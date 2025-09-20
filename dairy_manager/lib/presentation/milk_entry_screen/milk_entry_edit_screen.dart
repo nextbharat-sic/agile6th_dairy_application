@@ -7,6 +7,7 @@ import '../../backend/repositories/user_repository.dart';
 import '../../constants/constants.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../utils/date_utils.dart';
+import '../../l10n/app_localizations.dart';
 
 class MilkEntryEditScreen extends StatefulWidget {
   const MilkEntryEditScreen({super.key});
@@ -99,9 +100,9 @@ class _MilkEntryEditScreenState extends State<MilkEntryEditScreen> {
           icon: const Icon(Icons.arrow_back, color: Colors.white, size: 28),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
-          'Edit Entry',
-          style: TextStyle(
+        title: Text(
+          AppLocalizations.of(context)!.editEntry,
+          style: const TextStyle(
               color: Colors.white, fontSize: 24, fontWeight: FontWeight.w600),
         ),
         centerTitle: true,
@@ -118,13 +119,13 @@ class _MilkEntryEditScreenState extends State<MilkEntryEditScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('పశువులను ఎంచుకోండి',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+              Text(AppLocalizations.of(context)!.chooseCattle,
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
               const SizedBox(height: 8),
               Row(children: [
                 Expanded(
                     child: _cattleToggle(
-                        'గేదె',
+                        AppLocalizations.of(context)!.buffaloLabel,
                         'assets/images/buffalo.png',
                         selectedAnimal == AnimalType.buffalo,
                         () => setState(
@@ -132,26 +133,26 @@ class _MilkEntryEditScreenState extends State<MilkEntryEditScreen> {
                 const SizedBox(width: 8),
                 Expanded(
                     child: _cattleToggle(
-                        'ఆవు',
+                        AppLocalizations.of(context)!.cowLabel,
                         'assets/images/cow.png',
                         selectedAnimal == AnimalType.cow,
                         () => setState(() => selectedAnimal = AnimalType.cow))),
               ]),
               const SizedBox(height: 16),
-              const Text('Choose Session',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+              Text(AppLocalizations.of(context)!.chooseSession,
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
               const SizedBox(height: 8),
               Row(children: [
                 Expanded(
                     child: _sessionToggle(
-                        'Morning',
+                        AppLocalizations.of(context)!.morning,
                         selectedSession == SessionType.morning,
                         () => setState(
                             () => selectedSession = SessionType.morning))),
                 const SizedBox(width: 8),
                 Expanded(
                     child: _sessionToggle(
-                        'Evening',
+                        AppLocalizations.of(context)!.evening,
                         selectedSession == SessionType.evening,
                         () => setState(
                             () => selectedSession = SessionType.evening))),
@@ -175,11 +176,11 @@ class _MilkEntryEditScreenState extends State<MilkEntryEditScreen> {
     final e = _entries[index];
     String label;
     if (index == 0) {
-      label = 'Today';
+      label = AppLocalizations.of(context)!.today;
     } else if (index == 1) {
-      label = 'Yesterday';
+      label = AppLocalizations.of(context)!.yesterday;
     } else {
-      label = 'Day before yesterday';
+      label = AppLocalizations.of(context)!.dayBeforeYesterday;
     }
 
     final date = DateUtils.convertToDateString(
@@ -216,11 +217,11 @@ class _MilkEntryEditScreenState extends State<MilkEntryEditScreen> {
               Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: const [
-                  _MetricHeader('Milk(L)'),
-                  _MetricHeader('SNF%'),
-                  _MetricHeader('Fat%'),
-                  _MetricHeader('Cost/L'),
+                children: [
+                  _MetricHeader(AppLocalizations.of(context)!.milkL),
+                  _MetricHeader(AppLocalizations.of(context)!.snfPercent),
+                  _MetricHeader(AppLocalizations.of(context)!.fatPercent),
+                  _MetricHeader(AppLocalizations.of(context)!.costPerL),
                 ]),
             const SizedBox(height: 8),
             Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
@@ -269,22 +270,22 @@ class _MilkEntryEditScreenState extends State<MilkEntryEditScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Row(children: const [
+                Row(children: [
                   Expanded(
-                      child: Text('Edit Entry',
-                          style: TextStyle(
+                      child: Text(AppLocalizations.of(context)!.editEntry,
+                          style: const TextStyle(
                               fontWeight: FontWeight.w700, fontSize: 16))),
                 ]),
                 const SizedBox(height: 12),
-                _fieldRow('Date', dateCtrl, isDate: true),
+                _fieldRow(AppLocalizations.of(context)!.date, dateCtrl, isDate: true),
                 const SizedBox(height: 8),
-                _fieldRow('Milk (L)', milkCtrl),
+                _fieldRow(AppLocalizations.of(context)!.milkL, milkCtrl),
                 const SizedBox(height: 8),
-                _fieldRow('SNF', snfCtrl),
+                _fieldRow(AppLocalizations.of(context)!.snfPercent, snfCtrl),
                 const SizedBox(height: 8),
-                _fieldRow('Fat', fatCtrl),
+                _fieldRow(AppLocalizations.of(context)!.fatPercent, fatCtrl),
                 const SizedBox(height: 8),
-                _fieldRow('Cost/L', costCtrl, lockIcon: true),
+                _fieldRow(AppLocalizations.of(context)!.costPerL, costCtrl, lockIcon: true),
                 const SizedBox(height: 16),
                 SizedBox(
                   width: 160,

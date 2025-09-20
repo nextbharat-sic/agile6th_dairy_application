@@ -215,7 +215,7 @@ class SettingsScreen extends StatelessWidget {
           ),
         ),
         content: Text(
-          'Are you sure you want to logout?',
+          l10n.logoutConfirmation,
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
             color: AppTheme.textSecondaryColor,
           ),
@@ -224,7 +224,7 @@ class SettingsScreen extends StatelessWidget {
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: Text(
-              'Cancel',
+              l10n.cancel,
               style: TextStyle(
                 color: AppTheme.textSecondaryColor,
               ),

@@ -297,7 +297,7 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
                           child: Row(
                             children: [
                               Text(
-                                'Date: $selectedDate',
+                                '${l10n.date}: $selectedDate',
                                 style: const TextStyle(
                                   color: Colors.black,
                                   fontWeight: FontWeight.w600,
@@ -452,10 +452,10 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
     final avgFat = ((avgCowFat + avgBuffaloFat) / 2).toStringAsFixed(1);
     
     return periodLabel == l10n.selectWeek
-        ? '${l10n.milkWeeklyTotal}: $totalMilk L\n${l10n.snfAverage}: $avgSnf\n${l10n.fatAverage}: $avgFat%'
+        ? '${l10n.milkWeeklyTotal}: ${(totalCowMilk + totalBuffaloMilk).toStringAsFixed(0)} L\n${l10n.snfAverage}: ${((avgCowSnf + avgBuffaloSnf) / 2).toStringAsFixed(1)}\n${l10n.fatAverage}: ${((avgCowFat + avgBuffaloFat) / 2).toStringAsFixed(1)}%'
         : periodLabel == l10n.monthly
-            ? '${l10n.milkMonthlyTotal}: $totalMilk L\n${l10n.snfAverage}: $avgSnf\n${l10n.fatAverage}: $avgFat%'
-            : '${l10n.milkYearlyTotal}: $totalMilk L\n${l10n.snfAverage}: $avgSnf\n${l10n.fatAverage}: $avgFat%';
+            ? '${l10n.milkMonthlyTotal}: ${(totalCowMilk + totalBuffaloMilk).toStringAsFixed(0)} L\n${l10n.snfAverage}: ${((avgCowSnf + avgBuffaloSnf) / 2).toStringAsFixed(1)}\n${l10n.fatAverage}: ${((avgCowFat + avgBuffaloFat) / 2).toStringAsFixed(1)}%'
+            : '${l10n.milkYearlyTotal}: ${(totalCowMilk + totalBuffaloMilk).toStringAsFixed(0)} L\n${l10n.snfAverage}: ${((avgCowSnf + avgBuffaloSnf) / 2).toStringAsFixed(1)}\n${l10n.fatAverage}: ${((avgCowFat + avgBuffaloFat) / 2).toStringAsFixed(1)}%';
   }
 
   Widget _buildReportTable(List<ReportData> data) {
