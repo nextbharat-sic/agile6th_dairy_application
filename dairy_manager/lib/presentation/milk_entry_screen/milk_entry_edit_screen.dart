@@ -118,13 +118,13 @@ class _MilkEntryEditScreenState extends State<MilkEntryEditScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('Choose Cattle',
+              const Text('పశువులను ఎంచుకోండి',
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
               const SizedBox(height: 8),
               Row(children: [
                 Expanded(
                     child: _cattleToggle(
-                        'Buffalo',
+                        'గేదె',
                         'assets/images/buffalo.png',
                         selectedAnimal == AnimalType.buffalo,
                         () => setState(
@@ -132,7 +132,7 @@ class _MilkEntryEditScreenState extends State<MilkEntryEditScreen> {
                 const SizedBox(width: 8),
                 Expanded(
                     child: _cattleToggle(
-                        'Cow',
+                        'ఆవు',
                         'assets/images/cow.png',
                         selectedAnimal == AnimalType.cow,
                         () => setState(() => selectedAnimal = AnimalType.cow))),

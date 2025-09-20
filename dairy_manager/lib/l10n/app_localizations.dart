@@ -568,6 +568,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Cancel'**
   String get cancel;
+
+  // Additional translations for milk entry page
+  String get todaysIncome;
+  String get buffaloLabel;
+  String get cowLabel;
+
+  // Delete confirmation dialog
+  String get deleteExpense;
+  String get deleteConfirmation;
+  String get delete;
+
+  // Reports screen average text translations
+  String get milkWeeklyTotal;
+  String get milkMonthlyTotal;
+  String get milkYearlyTotal;
+  String get snfAverage;
+  String get fatAverage;
+  String get noDataAvailable;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

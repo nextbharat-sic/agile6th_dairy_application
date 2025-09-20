@@ -293,4 +293,43 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get cancel => 'Cancel';
+
+  // Additional translations for milk entry page
+  @override
+  String get todaysIncome => 'TODAY\'S INCOME';
+
+  @override
+  String get buffaloLabel => 'Buffalo';
+
+  @override
+  String get cowLabel => 'Cow';
+
+  // Delete confirmation dialog
+  @override
+  String get deleteExpense => 'Delete Expense';
+
+  @override
+  String get deleteConfirmation => 'Are you sure you want to delete this expense?';
+
+  @override
+  String get delete => 'Delete';
+
+  // Reports screen average text translations
+  @override
+  String get milkWeeklyTotal => 'Milk Weekly Total';
+
+  @override
+  String get milkMonthlyTotal => 'Milk Monthly Total';
+
+  @override
+  String get milkYearlyTotal => 'Milk Yearly Total';
+
+  @override
+  String get snfAverage => 'SNF Average';
+
+  @override
+  String get fatAverage => 'Fat% Average';
+
+  @override
+  String get noDataAvailable => 'No data available';
 }

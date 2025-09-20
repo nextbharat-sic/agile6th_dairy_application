@@ -60,7 +60,7 @@ class AppLocalizationsTe extends AppLocalizations {
   String get chooseCattle => 'పశువులను ఎంచుకోండి';
 
   @override
-  String get buffalo => 'ఎద్దు';
+  String get buffalo => 'గేదె';
 
   @override
   String get cow => 'ఆవు';
@@ -293,4 +293,43 @@ class AppLocalizationsTe extends AppLocalizations {
 
   @override
   String get cancel => 'రద్దు చేయండి';
+
+  // Additional translations for milk entry page
+  @override
+  String get todaysIncome => 'ఈ రోజు ఆదాయం';
+
+  @override
+  String get buffaloLabel => 'గేదె';
+
+  @override
+  String get cowLabel => 'ఆవు';
+
+  // Delete confirmation dialog
+  @override
+  String get deleteExpense => 'ఖర్చును తొలగించండి';
+
+  @override
+  String get deleteConfirmation => 'మీరు ఈ ఖర్చును తొలగించాలనుకుంటున్నారా?';
+
+  @override
+  String get delete => 'తొలగించండి';
+
+  // Reports screen average text translations
+  @override
+  String get milkWeeklyTotal => 'పాల వారపు మొత్తం';
+
+  @override
+  String get milkMonthlyTotal => 'పాల నెలవారీ మొత్తం';
+
+  @override
+  String get milkYearlyTotal => 'పాల సంవత్సర మొత్తం';
+
+  @override
+  String get snfAverage => 'SNF సగటు';
+
+  @override
+  String get fatAverage => 'కొవ్వు% సగటు';
+
+  @override
+  String get noDataAvailable => 'డేటా అందుబాటులో లేదు';
 }

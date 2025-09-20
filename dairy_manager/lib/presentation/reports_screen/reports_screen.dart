@@ -432,7 +432,7 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
   }
 
   String _getAverageText(String periodLabel, List<ReportData> reports) {
-    if (reports.isEmpty) return 'No data available';
+    if (reports.isEmpty) return l10n.noDataAvailable;
     
     // Calculate averages from actual data
     double totalCowMilk = reports.fold(0.0, (sum, item) => sum + item.cowMilk);
@@ -440,18 +440,22 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
     
     // Safe division - check for zero length
     int reportCount = reports.length;
-    if (reportCount == 0) return 'No data available';
+    if (reportCount == 0) return l10n.noDataAvailable;
     
     double avgCowSnf = reports.fold(0.0, (sum, item) => sum + item.cowSnf) / reportCount;
     double avgBuffaloSnf = reports.fold(0.0, (sum, item) => sum + item.buffaloSnf) / reportCount;
     double avgCowFat = reports.fold(0.0, (sum, item) => sum + item.cowFat) / reportCount;
     double avgBuffaloFat = reports.fold(0.0, (sum, item) => sum + item.buffaloFat) / reportCount;
     
+    final totalMilk = (totalCowMilk + totalBuffaloMilk).toStringAsFixed(0);
+    final avgSnf = ((avgCowSnf + avgBuffaloSnf) / 2).toStringAsFixed(1);
+    final avgFat = ((avgCowFat + avgBuffaloFat) / 2).toStringAsFixed(1);
+    
     return periodLabel == l10n.selectWeek
-        ? 'Milk Weekly Total: ${(totalCowMilk + totalBuffaloMilk).toStringAsFixed(0)} L\nSNF Average: ${((avgCowSnf + avgBuffaloSnf) / 2).toStringAsFixed(1)}\nFat% Average: ${((avgCowFat + avgBuffaloFat) / 2).toStringAsFixed(1)}%'
+        ? '${l10n.milkWeeklyTotal}: $totalMilk L\n${l10n.snfAverage}: $avgSnf\n${l10n.fatAverage}: $avgFat%'
         : periodLabel == l10n.monthly
-            ? 'Milk Monthly Total: ${(totalCowMilk + totalBuffaloMilk).toStringAsFixed(0)} L\nSNF Average: ${((avgCowSnf + avgBuffaloSnf) / 2).toStringAsFixed(1)}\nFat% Average: ${((avgCowFat + avgBuffaloFat) / 2).toStringAsFixed(1)}%'
-            : 'Milk Yearly Total: ${(totalCowMilk + totalBuffaloMilk).toStringAsFixed(0)} L\nSNF Average: ${((avgCowSnf + avgBuffaloSnf) / 2).toStringAsFixed(1)}\nFat% Average: ${((avgCowFat + avgBuffaloFat) / 2).toStringAsFixed(1)}%';
+            ? '${l10n.milkMonthlyTotal}: $totalMilk L\n${l10n.snfAverage}: $avgSnf\n${l10n.fatAverage}: $avgFat%'
+            : '${l10n.milkYearlyTotal}: $totalMilk L\n${l10n.snfAverage}: $avgSnf\n${l10n.fatAverage}: $avgFat%';
   }
 
   Widget _buildReportTable(List<ReportData> data) {
