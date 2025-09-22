@@ -31,26 +31,21 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   }
 
   Future<void> _handleRegister() async {
-    print('Register button pressed'); // Debug print
     
     try {
       // Check if form key exists
       if (_formKey.currentState == null) {
-        print('Form key is null');
         return;
       }
       
       // Validate form
       if (!_formKey.currentState!.validate()) {
-        print('Form validation failed');
         return;
       }
       
-      print('Form validation passed'); // Debug print
       
       // Check password match
       if (_passwordController.text != _confirmPasswordController.text) {
-        print('Passwords do not match');
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Passwords do not match'),
@@ -60,7 +55,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
         return;
       }
       
-      print('Passwords match, attempting registration...'); // Debug print
       
       // Get AuthProvider
       final authProvider = context.read<AuthProvider>();
@@ -72,7 +66,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
         _passwordController.text,
       );
       
-      print('Registration successful'); // Debug print
       
       // Navigate to dashboard
       if (mounted) {
@@ -80,7 +73,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       }
       
     } catch (e) {
-      print('Registration failed with error: $e'); // Debug print
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -283,7 +275,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                               onPressed: authProvider.isLoading 
                                 ? null 
                                 : () {
-                                    print('Button pressed - calling _handleRegister'); // Debug print
                                     _handleRegister();
                                   },
                               style: ElevatedButton.styleFrom(

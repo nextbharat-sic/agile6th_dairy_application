@@ -19,7 +19,6 @@ class MilkDripWidget extends StatelessWidget {
         'assets/images/milk_drip.png',
         fit: BoxFit.cover,
         errorBuilder: (context, error, stackTrace) {
-          print('Milk drip image not found: $error');
           // Return a fallback container with the drip effect
           return Container(
             decoration: BoxDecoration(

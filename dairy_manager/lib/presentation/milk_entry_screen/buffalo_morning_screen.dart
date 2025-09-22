@@ -6,6 +6,7 @@ import '../../backend/repositories/user_repository.dart';
 import '../../backend/services/income_service.dart';
 import '../../constants/constants.dart';
 import '../../theme/app_theme.dart';
+import '../../l10n/app_localizations.dart';
 
 class BuffaloMorningScreen extends StatefulWidget {
   const BuffaloMorningScreen({super.key});
@@ -101,7 +102,7 @@ class _BuffaloMorningScreenState extends State<BuffaloMorningScreen> {
       return;
     }
     try {
-      final total = await _incomeService.getTotalIncomeForDay(
+      await _incomeService.getTotalIncomeForDay(
         userId: _userId!,
         date: _selectedDate,
         animalTypes: [AnimalType.buffalo],
@@ -145,7 +146,7 @@ class _BuffaloMorningScreenState extends State<BuffaloMorningScreen> {
     final costPerLiter = double.tryParse(_costController.text) ?? 0.0;
 
     try {
-      final result = await _incomeService.addIncome(
+      await _incomeService.addIncome(
         userId: _userId!,
         dateTime: _selectedDate,
         animalType: animalType,
@@ -259,7 +260,7 @@ class _BuffaloMorningScreenState extends State<BuffaloMorningScreen> {
                             borderRadius: BorderRadius.circular(24),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withOpacity(0.08),
+                                color: Colors.black.withValues(alpha: (8 * 255).toDouble()),
                                 blurRadius: 4,
                                 offset: const Offset(0, 2),
                               ),
@@ -282,7 +283,7 @@ class _BuffaloMorningScreenState extends State<BuffaloMorningScreen> {
                               borderRadius: BorderRadius.circular(20),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black.withOpacity(0.12),
+                                  color: Colors.black.withValues(alpha: (12 * 255).toDouble()),
                                   blurRadius: 6,
                                   offset: const Offset(0, 2),
                                 ),
@@ -373,7 +374,7 @@ class _BuffaloMorningScreenState extends State<BuffaloMorningScreen> {
                     borderRadius: BorderRadius.circular(20),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.08),
+                        color: Colors.black.withValues(alpha: (8 * 255).toDouble()),
                         blurRadius: 8,
                         offset: const Offset(0, 4),
                       ),
@@ -432,7 +433,7 @@ class _BuffaloMorningScreenState extends State<BuffaloMorningScreen> {
                               borderRadius: BorderRadius.circular(12),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black.withOpacity(0.08),
+                                  color: Colors.black.withValues(alpha: (8 * 255).toDouble()),
                                   blurRadius: 4,
                                   offset: const Offset(0, 2),
                                 ),
@@ -445,7 +446,7 @@ class _BuffaloMorningScreenState extends State<BuffaloMorningScreen> {
                                 borderRadius: BorderRadius.circular(12),
                                 child: Center(
                                   child: Text(
-                                    'Submit',
+                                    AppLocalizations.of(context)!.submit,
                                     style: TextStyle(
                                       fontSize: 16,
                                       fontWeight: FontWeight.w600,
@@ -476,7 +477,7 @@ class _BuffaloMorningScreenState extends State<BuffaloMorningScreen> {
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.15),
+                        color: Colors.black.withValues(alpha: (15 * 255).toDouble()),
                         blurRadius: 4,
                         offset: const Offset(0, 2),
                       ),

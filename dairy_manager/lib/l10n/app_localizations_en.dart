@@ -198,6 +198,9 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get month => 'Month';
 
+  @override
+  String get day => 'Day';
+
   // Expense Categories
   @override
   String get feed => 'Feed';
@@ -239,6 +242,19 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get accountCreated => 'Account Created';
 
+  @override
+  String get logoutConfirmation => 'Are you sure you want to log out?';
+  @override
+  String get emailAddress => 'Email address';
+  @override
+  String get phoneNumber => 'Phone number';
+  @override
+  String get age => 'Age';
+  @override
+  String get cattleOwned => 'Cattle owned';
+  @override
+  String get location => 'Location';
+
   // Expenses Screen Translations
   @override
   String get thisMonthsExpenses => 'This Month\'s Expenses';
@@ -269,4 +285,101 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get cancel => 'Cancel';
+
+  // Edit Entry Screen Translations
+  @override
+  String get editEntry => 'Edit Entry';
+
+  @override
+  String get today => 'Today';
+
+  @override
+  String get yesterday => 'Yesterday';
+
+  @override
+  String get dayBeforeYesterday => 'Day before yesterday';
+
+  @override
+  String get costPerL => 'Cost/L';
+
+  @override
+  String get submit => 'Submit';
+
+  @override
+  String get pleaseFillMilkAndCost => 'Please fill Milk and Cost fields';
+
+  @override
+  String get entrySavedSuccessfully => 'Entry saved successfully';
+
+  @override
+  String get errorSavingEntry => 'Error saving entry';
+
+  @override
+  String get todaysIncome => 'TODAY\'S INCOME';
+
+  // Average labels
+  @override
+  String get milkDailyAverage => 'Milk Daily Average';
+  @override
+  String get fatDailyAverage => 'Fat% Daily Average';
+  @override
+  String get fatMonthlyAverage => 'Fat% Monthly Average';
+  @override
+  String get snfDailyAverage => 'SNF Daily Average';
+  @override
+  String get snfMonthlyAverage => 'SNF Monthly Average';
+
+  // Expense form labels
+  @override
+  String get descriptionOptional => 'Description (Optional)';
+  @override
+  String get enterExpenseDetails => 'Enter expense details...';
+  @override
+  String get addReceipt => 'Add Receipt';
+  @override
+  String get receiptAdded => 'Receipt Added';
+  @override
+  String get addReceiptPhoto => 'Add Receipt Photo';
+  @override
+  String get camera => 'Camera';
+  @override
+  String get gallery => 'Gallery';
+  @override
+  String get cameraFunctionalityComingSoon => 'Camera functionality coming soon';
+  @override
+  String get galleryFunctionalityComingSoon => 'Gallery functionality coming soon';
+
+  // Validation messages
+  @override
+  String get pleaseEnterAmount => 'Please enter amount';
+  @override
+  String get pleaseEnterValidAmount => 'Please enter valid amount';
+
+  // Additional expense screen strings
+  @override
+  String get amountIsRequired => 'Amount is required';
+  @override
+  String get expenseAddedSuccessfully => 'Expense added successfully!';
+  @override
+  String get errorAddingExpense => 'Error adding expense';
+  @override
+  String get avg => 'Avg';
+  @override
+  String get deleteExpense => 'Delete Expense';
+  @override
+  String get areYouSureDeleteExpense => 'Are you sure you want to delete this expense?';
+  @override
+  String get delete => 'Delete';
+  @override
+  String get receipt => 'Receipt';
+
+  @override
+  String get name => 'Name';
+  @override
+  String get enterName => 'Enter name';
+  @override
+  String get invalidEmail => 'Invalid email';
+  @override
+  String get save => 'Save';
+
 }

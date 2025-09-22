@@ -118,19 +118,19 @@ class ProfileScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _label('Email Address'),
+                  _label(l10n.emailAddress),
                   _input(context, value: userEmail),
                   const SizedBox(height: 12),
-                  _label('Phone Number'),
+                  _label(l10n.phoneNumber),
                   _input(context, value: phone),
                   const SizedBox(height: 12),
-                  _label('Age'),
+                  _label(l10n.age),
                   _input(context, value: '—'),
                   const SizedBox(height: 12),
-                  _label('Cattle Owned'),
+                  _label(l10n.cattleOwned),
                   _input(context, value: '—'),
                   const SizedBox(height: 12),
-                  _label('Location'),
+                  _label(l10n.location),
                   _input(context, value: location),
                   const SizedBox(height: 24),
                   Center(
@@ -149,7 +149,7 @@ class ProfileScreen extends StatelessWidget {
                         ),
                         child: Text(
                           l10n.logout,
-                          style: const TextStyle(fontWeight: FontWeight.w700),
+                          style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 18),
                         ),
                       ),
                     ),
@@ -171,7 +171,7 @@ class ProfileScreen extends StatelessWidget {
         style: const TextStyle(
           color: Colors.black,
           fontWeight: FontWeight.w600,
-          fontSize: 13,
+          fontSize: 18,
         ),
       ),
     );
@@ -183,13 +183,6 @@ class ProfileScreen extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(30),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.08),
-            blurRadius: 6,
-            offset: const Offset(0, 3),
-          ),
-        ],
       ),
       padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
       child: Row(
@@ -234,7 +227,7 @@ class ProfileScreen extends StatelessWidget {
           ),
         ),
         content: Text(
-          'Are you sure you want to logout?',
+          l10n.logoutConfirmation,
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
             color: AppTheme.textSecondaryColor,
           ),
@@ -243,7 +236,7 @@ class ProfileScreen extends StatelessWidget {
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: Text(
-              'Cancel',
+              l10n.cancel,
               style: TextStyle(
                 color: AppTheme.textSecondaryColor,
               ),

@@ -93,19 +93,15 @@ class AuthProvider extends ChangeNotifier {
   Future<void> signInWithGoogle() async {
     _setLoading(true);
     try {
-      print('Starting Google Sign-In process...');
       
       // Check if user is already signed in
       if (await _googleSignIn.isSignedIn()) {
-        print('User already signed in, signing out first...');
         await _googleSignIn.signOut();
       }
       
       // Initialize Google Sign In
-      print('Initializing Google Sign-In...');
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
       if (googleUser == null) {
-        print('User canceled Google Sign-In');
         _setLoading(false);
         return;
       }
@@ -117,9 +113,7 @@ class AuthProvider extends ChangeNotifier {
         idToken: googleAuth.idToken,
       );
 
-      print('Attempting to sign in with Firebase...');
       final userCredential = await _auth.signInWithCredential(credential);
-      print('Firebase sign-in successful: ${userCredential.user?.email}');
 
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('auth_token', userCredential.user!.uid);
@@ -129,7 +123,6 @@ class AuthProvider extends ChangeNotifier {
 
       // The authStateChanges listener will handle updating the UI
     } on FirebaseAuthException catch (e) {
-      print('Firebase Auth Exception: ${e.code} - ${e.message}');
       String errorMessage = _getFirebaseErrorMessage(e.code);
       
       // Handle Google-specific Firebase errors
@@ -158,7 +151,6 @@ class AuthProvider extends ChangeNotifier {
       
       throw Exception(errorMessage);
     } catch (e) {
-      print('Google Sign-In Exception: $e');
       String errorMessage = 'Google Sign-in failed';
       
       if (e.toString().contains('network')) {

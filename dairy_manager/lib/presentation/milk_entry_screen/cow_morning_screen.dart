@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../theme/app_theme.dart';
+import '../../l10n/app_localizations.dart';
 
 class CowMorningScreen extends StatefulWidget {
   const CowMorningScreen({super.key});
@@ -167,7 +168,7 @@ class _CowMorningScreenState extends State<CowMorningScreen> {
                             borderRadius: BorderRadius.circular(24),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withOpacity(0.08),
+                                color: Colors.black.withValues(alpha: 20),
                                 blurRadius: 4,
                                 offset: const Offset(0, 2),
                               ),
@@ -187,7 +188,7 @@ class _CowMorningScreenState extends State<CowMorningScreen> {
                               borderRadius: BorderRadius.circular(20),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black.withOpacity(0.12),
+                                  color: Colors.black.withValues(alpha: 30),
                                   blurRadius: 6,
                                   offset: const Offset(0, 2),
                                 ),
@@ -262,7 +263,7 @@ class _CowMorningScreenState extends State<CowMorningScreen> {
                     borderRadius: BorderRadius.circular(20),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.08),
+                        color: Colors.black.withValues(alpha: 20),
                         blurRadius: 8,
                         offset: const Offset(0, 4),
                       ),
@@ -321,7 +322,7 @@ class _CowMorningScreenState extends State<CowMorningScreen> {
                               borderRadius: BorderRadius.circular(12),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black.withOpacity(0.08),
+                                  color: Colors.black.withValues(alpha: 20),
                                   blurRadius: 4,
                                   offset: const Offset(0, 2),
                                 ),
@@ -334,7 +335,7 @@ class _CowMorningScreenState extends State<CowMorningScreen> {
                                 borderRadius: BorderRadius.circular(12),
                                 child: Center(
                                   child: Text(
-                                    'Submit',
+                                    AppLocalizations.of(context)!.submit,
                                     style: TextStyle(
                                       fontSize: 16,
                                       fontWeight: FontWeight.w600,
@@ -363,7 +364,7 @@ class _CowMorningScreenState extends State<CowMorningScreen> {
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.15),
+                        color: Colors.black.withValues(alpha: 37),
                         blurRadius: 4,
                         offset: const Offset(0, 2),
                       ),
@@ -400,48 +401,6 @@ class _CowMorningScreenState extends State<CowMorningScreen> {
               ],
             ),
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildToggleButton(String text, IconData icon, bool isMorning, bool isSelected) {
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          _isMorning = isMorning;
-        });
-      },
-      child: Container(
-        height: 48,
-        decoration: BoxDecoration(
-          color: isSelected 
-            ? const Color(0xFF395364)
-            : Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: isSelected ? const Color(0xFF395364) : Colors.white,
-            width: 2,
-          ),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              icon,
-              size: 20,
-              color: isSelected ? Colors.white : const Color(0xFF395364),
-            ),
-            const SizedBox(width: 8),
-            Text(
-              text,
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: isSelected ? Colors.white : const Color(0xFF395364),
-              ),
-            ),
-          ],
         ),
       ),
     );
@@ -489,7 +448,7 @@ class _CowMorningScreenState extends State<CowMorningScreen> {
               hintStyle: TextStyle(
                 color: _isMorning 
                   ? AppTheme.textSecondaryColor 
-                  : Colors.white.withValues(alpha: 0.7),
+                  : Colors.white.withValues(alpha: 178),
               ),
               filled: true,
               fillColor: _isMorning 
@@ -520,7 +479,7 @@ class _CowMorningScreenState extends State<CowMorningScreen> {
                     size: 20,
                     color: _isMorning 
                       ? AppTheme.textSecondaryColor 
-                      : Colors.white.withValues(alpha: 0.7),
+                      : Colors.white.withValues(alpha: 178),
                   )
                 : null,
             ),

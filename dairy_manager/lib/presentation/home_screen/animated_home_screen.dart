@@ -4,16 +4,13 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' hide AuthProvider;
 import 'package:flutter/material.dart' hide DateUtils;
 import 'package:flutter/services.dart';
-import 'package:provider/provider.dart';
 import '../../backend/repositories/expense_repository.dart';
 import '../../backend/repositories/income_repository.dart';
 import '../../backend/services/report_service.dart';
 import '../../constants/constants.dart';
 import '../../models/report_models.dart';
-import '../../providers/auth_provider.dart';
 import '../../l10n/app_localizations.dart';
 import '../../utils/date_utils.dart';
-
 
 class AnimatedHomeScreen extends StatefulWidget {
   const AnimatedHomeScreen({super.key});
@@ -28,13 +25,18 @@ class _AnimatedHomeScreenState extends State<AnimatedHomeScreen>
   late AnimationController _buttonsController;
   late Animation<double> _milkDripAnimation;
   late Animation<double> _buttonsAnimation;
-
+  
+  // Add DraggableScrollableController
+  late DraggableScrollableController _draggableController;
+  Timer? _autoSwipeTimer;
   bool _isExpanded = false;
 
   @override
   void initState() {
     super.initState();
 
+    // Initialize the draggable controller
+    _draggableController = DraggableScrollableController();
 
     _milkDripController = AnimationController(
       duration: const Duration(milliseconds: 600),
@@ -61,12 +63,45 @@ class _AnimatedHomeScreenState extends State<AnimatedHomeScreen>
       parent: _buttonsController,
       curve: Curves.easeInOutExpo,
     ));
+
+    // Start automatic swipe timer for 2 seconds
+    _startAutoSwipeTimer();
+  }
+
+  void _startAutoSwipeTimer() {
+    _autoSwipeTimer = Timer(const Duration(seconds: 2), () {
+      if (mounted && !_isExpanded) {
+        _expandToFullScreen();
+      }
+    });
+  }
+
+  // FIXED: Enhanced method to ensure complete screen expansion
+  void _expandToFullScreen() async {
+    HapticFeedback.lightImpact();
+    setState(() {
+      _isExpanded = true;
+    });
+    
+    // Start visual animations immediately
+    _milkDripController.forward();
+    _buttonsController.forward();
+    
+    // Animate to absolute full screen (1.0 = 100% screen height)
+    await _draggableController.animateTo(
+      1.0, // Full screen expansion
+      duration: const Duration(milliseconds: 800), // Slightly longer for smoother effect
+      curve: Curves.easeInOutCubic, // Smoother curve for better feel
+    );
   }
 
   @override
   void dispose() {
+    // Cancel the timer to prevent memory leaks
+    _autoSwipeTimer?.cancel();
     _milkDripController.dispose();
     _buttonsController.dispose();
+    _draggableController.dispose();
     super.dispose();
   }
 
@@ -90,26 +125,28 @@ class _AnimatedHomeScreenState extends State<AnimatedHomeScreen>
 
   @override
   Widget build(BuildContext context) {
-    final authProvider = context.watch<AuthProvider>();
-    final userName = authProvider.userName ?? 'User';
     final l10n = AppLocalizations.of(context)!;
     
     return Scaffold(
       backgroundColor: Colors.black,
       body: Stack(
         children: [
-          // Removed top light background to avoid white rectangle during swipe
           // Main content with DraggableScrollableSheet
           DraggableScrollableSheet(
+            controller: _draggableController,
             initialChildSize: 0.75,
             minChildSize: 0.75,
-            maxChildSize: 1.0,
+            maxChildSize: 1.0, // Full screen maximum
             builder: (context, scrollController) {
               return NotificationListener<DraggableScrollableNotification>(
                 onNotification: (notification) {
-                  if (notification.extent > 0.85 && !_isExpanded) {
+                  // Cancel auto swipe timer if user interacts manually
+                  _autoSwipeTimer?.cancel();
+                  
+                  // FIXED: Adjusted triggers to work better with automatic expansion
+                  if (notification.extent >= 0.99 && !_isExpanded) { // Very close to full screen
                     _handleSwipeUp();
-                  } else if (notification.extent < 0.8 && _isExpanded) {
+                  } else if (notification.extent <= 0.85 && _isExpanded) { // More lenient down trigger
                     _handleSwipeDown();
                   }
                   return false;
@@ -120,14 +157,15 @@ class _AnimatedHomeScreenState extends State<AnimatedHomeScreen>
                   ),
                   child: SingleChildScrollView(
                     controller: scrollController,
+                    physics: const ClampingScrollPhysics(), // Better scroll behavior
                     child: Column(
                       children: [
-                        // Animated spacing that moves everything upwards
+                        // ENHANCED: More dramatic spacing animation for full-screen effect
                         AnimatedBuilder(
                           animation: _buttonsAnimation,
                           builder: (context, child) {
                             return SizedBox(
-                              height: 175 - (_buttonsAnimation.value * 40),
+                              height: 175 - (_buttonsAnimation.value * 90), // Increased from 70 to 90
                             );
                           },
                         ),
@@ -161,14 +199,14 @@ class _AnimatedHomeScreenState extends State<AnimatedHomeScreen>
                         // Infinite Glass Morphism Carousel
                         InfiniteGlassCarousel(l10n: l10n),
                         const SizedBox(height: 40),
-                        // Navigation Buttons (animated)
+                        // Navigation Buttons (animated with enhanced movement)
                         AnimatedBuilder(
                           animation: _buttonsAnimation,
                           child: _buildNavigationButtons(l10n),
                           builder: (context, child) {
                             return Transform.translate(
                               offset: Offset(
-                                  0, (1 - _buttonsAnimation.value) * 100),
+                                  0, (1 - _buttonsAnimation.value) * 120), // Increased from 100 to 120
                               child: Opacity(
                                 opacity: _buttonsAnimation.value,
                                 child: child,
@@ -176,7 +214,8 @@ class _AnimatedHomeScreenState extends State<AnimatedHomeScreen>
                             );
                           },
                         ),
-                        const SizedBox(height: 30),
+                        // ADDED: Extra bottom padding to ensure full scrollability
+                        SizedBox(height: 50 + MediaQuery.of(context).padding.bottom),
                       ],
                     ),
                   ),
@@ -184,18 +223,17 @@ class _AnimatedHomeScreenState extends State<AnimatedHomeScreen>
               );
             },
           ),
-          // Animated Milk Drip Overlay at the top
+          // Animated Milk Drip Overlay at the top (enhanced positioning)
           AnimatedBuilder(
             animation: _milkDripAnimation,
             builder: (context, child) {
               return Positioned(
-                // Raise initial position so drips are visible in collapsed state
-                top: 32 + (_milkDripAnimation.value * MediaQuery.of(context).size.height * 0.45),
+                // ENHANCED: Better positioning calculation for full-screen effect
+                top: 32 + (_milkDripAnimation.value * MediaQuery.of(context).size.height * 0.5), // Increased multiplier
                 left: 0,
                 right: 0,
                 child: SizedBox(
-                  // Slightly reduce to frame the drip shape better
-                  height: MediaQuery.of(context).size.height * 0.5,
+                  height: MediaQuery.of(context).size.height * 0.55, // Slightly larger
                   child: Image.asset(
                     'assets/images/milkdrip-.png',
                     width: double.infinity,
@@ -212,6 +250,7 @@ class _AnimatedHomeScreenState extends State<AnimatedHomeScreen>
     );
   }
 
+  // Rest of your methods remain the same...
   Widget _buildRakuDiaryTitle() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -427,6 +466,7 @@ class _AnimatedHomeScreenState extends State<AnimatedHomeScreen>
   }
 }
 
+// InfiniteGlassCarousel class remains exactly the same as your original code...
 class InfiniteGlassCarousel extends StatefulWidget {
   final AppLocalizations l10n;
   
@@ -437,26 +477,15 @@ class InfiniteGlassCarousel extends StatefulWidget {
 }
 
 class _InfiniteGlassCarouselState extends State<InfiniteGlassCarousel> {
+  // ... [All the existing InfiniteGlassCarousel code remains unchanged] ...
   late final PageController _pageController;
   int _currentPage = 0;
   late final ReportService _reportService;
   String? _userId;
   
   List<Map<String, String>> _monthsData = [];
-  // final List<Map<String, String>> _monthsData = const [
-  //   {'name': 'JANUARY', 'expense': '1234', 'revenue': '2468', 'profit': '1234'},
-  //   {'name': 'FEBRUARY', 'expense': '1500', 'revenue': '2800', 'profit': '1300'},
-  //   {'name': 'MARCH', 'expense': '1100', 'revenue': '2200', 'profit': '1100'},
-  //   {'name': 'APRIL', 'expense': '1800', 'revenue': '3200', 'profit': '1400'},
-  //   {'name': 'MAY', 'expense': '1600', 'revenue': '2900', 'profit': '1300'},
-  //   {'name': 'JUNE', 'expense': '1400', 'revenue': '2600', 'profit': '1200'},
-  //   {'name': 'JULY', 'expense': '1900', 'revenue': '3400', 'profit': '1500'},
-  //   {'name': 'AUGUST', 'expense': '1700', 'revenue': '3100', 'profit': '1400'},
-  //   {'name': 'SEPTEMBER', 'expense': '1300', 'revenue': '2400', 'profit': '1100'},
-  //   {'name': 'OCTOBER', 'expense': '2000', 'revenue': '3600', 'profit': '1600'},
-  //   {'name': 'NOVEMBER', 'expense': '1800', 'revenue': '3200', 'profit': '1400'},
-  //   {'name': 'DECEMBER', 'expense': '2200', 'revenue': '4000', 'profit': '1800'},
-  // ];
+  StreamSubscription<QuerySnapshot<Map<String, dynamic>>>? _incomeSub;
+  StreamSubscription<QuerySnapshot<Map<String, dynamic>>>? _expenseSub;
 
   @override
   void initState() {
@@ -470,10 +499,9 @@ class _InfiniteGlassCarouselState extends State<InfiniteGlassCarousel> {
       expenseRepository: expenseRepo,
     );
 
-    // Initialize with default data to prevent division by zero
     _initializeDefaultData();
     
-    final currentMonth = DateTime.now().month - 1; // 0..11
+    final currentMonth = DateTime.now().month - 1;
     final initialIndex = _resolveMonthIndexInData(currentMonth);
     final initialPage = (_monthsData.length * 1000) + initialIndex;
     _pageController = PageController(
@@ -484,18 +512,19 @@ class _InfiniteGlassCarouselState extends State<InfiniteGlassCarousel> {
 
     _loadReport();
     _setupRealtimeListeners();
-    // Ensure current month is centered on first paint
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _ensureCurrentMonthCentered();
     });
   }
 
-  // Initialize with 12 months of empty data to prevent errors
   void _initializeDefaultData() {
-    final months = ['JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE',
-                   'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER'];
-    
-    _monthsData = months.map((month) => {
+    final now = DateTime.now();
+    final currentMonthIndex = now.month - 1;
+    final months = [
+      'JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE',
+      'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER'
+    ];
+    _monthsData = months.take(currentMonthIndex + 1).map((month) => {
       'name': month,
       'expense': '0',
       'profit': '0.00',
@@ -505,34 +534,35 @@ class _InfiniteGlassCarouselState extends State<InfiniteGlassCarousel> {
 
   Future<void> _loadReport() async {
     final user = FirebaseAuth.instance.currentUser;
-    if (user == null) {
-
-      return;
-    }
+    if (user == null) return;
     _userId = user.uid;
 
-      final result = await _reportService.generateReport(
-        userId: _userId!,
-        startDate: DateUtils.getFirstDayOfYear(),
-        endDate: DateUtils.getToday(),
-        groupByFrequency: GroupByFrequency.month,
-        animalTypes: [AnimalType.buffalo, AnimalType.cow],
-        generateAnimalBreakdown: false,
-      );
+    final result = await _reportService.generateReport(
+      userId: _userId!,
+      startDate: DateUtils.getFirstDayOfYear(),
+      endDate: DateUtils.getToday(),
+      groupByFrequency: GroupByFrequency.month,
+      animalTypes: [AnimalType.buffalo, AnimalType.cow],
+      generateAnimalBreakdown: false,
+    );
 
     if (!mounted) return;
     setState(() {
-      _monthsData = getMonthDataList(result);
+      final now = DateTime.now();
+      final currentMonthIndex = now.month - 1;
+      final allMonths = getMonthDataList(result);
+      _monthsData = allMonths.take(currentMonthIndex + 1).toList();
     });
   }
 
   @override
   void dispose() {
+    _incomeSub?.cancel();
+    _expenseSub?.cancel();
     _pageController.dispose();
     super.dispose();
   }
 
-  // Helper to check if a month is the current month
   bool _isCurrentMonth(int monthIndex) {
     final currentMonth = DateTime.now().month - 1;
     return monthIndex == currentMonth;
@@ -540,58 +570,6 @@ class _InfiniteGlassCarouselState extends State<InfiniteGlassCarousel> {
 
   @override
   Widget build(BuildContext context) {
-    // Show loading indicator
-    if (_isLoading) {
-      return SizedBox(
-        height: 280,
-        child: Center(
-          child: CircularProgressIndicator(
-            color: Colors.white.withOpacity(0.7),
-          ),
-        ),
-      );
-    }
-
-    // Show error message
-    if (_hasError) {
-      return SizedBox(
-        height: 280,
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.error_outline,
-                color: Colors.white.withOpacity(0.7),
-                size: 32,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                _errorMessage ?? 'Something went wrong',
-                style: TextStyle(
-                  color: Colors.white.withOpacity(0.7),
-                  fontSize: 16,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: () {
-                  setState(() {
-                    _isLoading = true;
-                    _hasError = false;
-                  });
-                  _loadReport();
-                },
-                child: const Text('Retry'),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-
-    // Ensure we have data before building PageView
     if (_monthsData.isEmpty) {
       return SizedBox(
         height: 280,
@@ -599,7 +577,7 @@ class _InfiniteGlassCarouselState extends State<InfiniteGlassCarousel> {
           child: Text(
             'No data available',
             style: TextStyle(
-              color: Colors.white.withOpacity(0.7),
+              color: Colors.white.withValues(alpha: 0.7),
               fontSize: 16,
             ),
           ),
@@ -611,7 +589,6 @@ class _InfiniteGlassCarouselState extends State<InfiniteGlassCarousel> {
       height: 280,
       child: PageView.builder(
         controller: _pageController,
-        // Infinite scrolling by omitting itemCount
         onPageChanged: (index) {
           setState(() {
             _currentPage = index % _monthsData.length;
@@ -641,14 +618,6 @@ class _InfiniteGlassCarouselState extends State<InfiniteGlassCarousel> {
         },
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    _incomeSub?.cancel();
-    _expenseSub?.cancel();
-    _pageController.dispose();
-    super.dispose();
   }
 
   String _getTranslatedMonthName(String monthName, AppLocalizations l10n) {
@@ -681,6 +650,105 @@ class _InfiniteGlassCarouselState extends State<InfiniteGlassCarousel> {
     }
   }
 
+  List<Map<String, String>> getMonthDataList(Report report) {
+    final ordered = const [
+      'JANUARY','FEBRUARY','MARCH','APRIL','MAY','JUNE',
+      'JULY','AUGUST','SEPTEMBER','OCTOBER','NOVEMBER','DECEMBER'
+    ];
+    final Map<String, Map<String, String>> byName = {
+      for (final m in ordered)
+        m: {'name': m, 'expense': '0', 'profit': '0', 'revenue': '0'}
+    };
+    if (report.dataBreakdown != null) {
+      report.dataBreakdown!.forEach((key, metrics) {
+        final k = key.trim().toUpperCase();
+        String normalize(String s) {
+          switch (s) {
+            case 'JAN': return 'JANUARY';
+            case 'FEB': return 'FEBRUARY';
+            case 'MAR': return 'MARCH';
+            case 'APR': return 'APRIL';
+            case 'MAY': return 'MAY';
+            case 'JUN': return 'JUNE';
+            case 'JUL': return 'JULY';
+            case 'AUG': return 'AUGUST';
+            case 'SEP': return 'SEPTEMBER';
+            case 'OCT': return 'OCTOBER';
+            case 'NOV': return 'NOVEMBER';
+            case 'DEC': return 'DECEMBER';
+            default: return s;
+          }
+        }
+        final norm = normalize(k);
+        if (byName.containsKey(norm)) {
+          byName[norm] = {
+            'name': norm,
+            'expense': (metrics.expense as num).toInt().toString(),
+            'profit': (metrics.profit as num).toInt().toString(),
+            'revenue': (metrics.yield.income as num).toInt().toString(),
+          };
+        }
+      });
+    }
+    return ordered.map((n) => byName[n]!).toList();
+  }
+
+  int _resolveMonthIndexInData(int desiredMonthIndex) {
+    int nameToIndex(String name) {
+      final k = name.trim().toUpperCase();
+      switch (k) {
+        case 'JAN':
+        case 'JANUARY': return 0;
+        case 'FEB':
+        case 'FEBRUARY': return 1;
+        case 'MAR':
+        case 'MARCH': return 2;
+        case 'APR':
+        case 'APRIL': return 3;
+        case 'MAY': return 4;
+        case 'JUN':
+        case 'JUNE': return 5;
+        case 'JUL':
+        case 'JULY': return 6;
+        case 'AUG':
+        case 'AUGUST': return 7;
+        case 'SEP':
+        case 'SEPTEMBER': return 8;
+        case 'OCT':
+        case 'OCTOBER': return 9;
+        case 'NOV':
+        case 'NOVEMBER': return 10;
+        case 'DEC':
+        case 'DECEMBER': return 11;
+        default: return -1;
+      }
+    }
+    final idx = _monthsData.indexWhere((m) => nameToIndex(m['name'] ?? '') == desiredMonthIndex);
+    if (idx != -1) return idx;
+    if (desiredMonthIndex >= 0 && desiredMonthIndex < _monthsData.length) return desiredMonthIndex;
+    return 0;
+  }
+
+  void _ensureCurrentMonthCentered() {
+    if (!_pageController.hasClients) return;
+    final current = DateTime.now().month - 1;
+    final idx = _resolveMonthIndexInData(current);
+    final target = (_monthsData.length * 1000) + idx;
+    _pageController.jumpToPage(target);
+    _currentPage = idx;
+  }
+
+  void _setupRealtimeListeners() {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+    _userId = user.uid;
+    final userRef = FirebaseFirestore.instance.collection('users').doc(_userId);
+    _incomeSub?.cancel();
+    _expenseSub?.cancel();
+    _incomeSub = userRef.collection('income').snapshots().listen((_) => _loadReport());
+    _expenseSub = userRef.collection('expenses').snapshots().listen((_) => _loadReport());
+  }
+
   Widget _buildGlassCard(Map<String, String> monthData, int monthIndex, AppLocalizations l10n) {
     final isCurrentMonth = _isCurrentMonth(monthIndex);
 
@@ -705,36 +773,31 @@ class _InfiniteGlassCarouselState extends State<InfiniteGlassCarousel> {
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
                 color: isCurrentMonth
-                    ? Colors.white.withOpacity(0.6)
+                    ? Colors.white.withValues(alpha: 0.6)
                     : Colors.white.withValues(alpha: 0.2),
                 width: isCurrentMonth ? 2.0 : 1.5,
               ),
               boxShadow: [
-                // Exterior neon glow for current month only
                 if (isCurrentMonth) ...[
-                  // Minimal inner glow layer
                   BoxShadow(
-                    color: Colors.white.withOpacity(0.25),
+                    color: Colors.white.withValues(alpha: 0.25),
                     blurRadius: 4,
                     spreadRadius: 1,
                     offset: const Offset(0, 0),
                   ),
-                  // Middle glow layer (unchanged)
                   BoxShadow(
-                    color: Colors.white.withOpacity(0.5),
+                    color: Colors.white.withValues(alpha: 0.5),
                     blurRadius: 35,
                     spreadRadius: 4,
                     offset: const Offset(0, 0),
                   ),
-                  // Enhanced outer glow layer
                   BoxShadow(
-                    color: Colors.white.withOpacity(0.45),
+                    color: Colors.white.withValues(alpha: 0.45),
                     blurRadius: 80,
                     spreadRadius: 12,
                     offset: const Offset(0, 0),
                   ),
                 ],
-                // Default shadows for all cards
                 BoxShadow(
                   color: Colors.black.withValues(alpha: 0.3),
                   blurRadius: 20,
@@ -757,7 +820,7 @@ class _InfiniteGlassCarouselState extends State<InfiniteGlassCarousel> {
                   style: TextStyle(
                     color: isCurrentMonth
                         ? Colors.white
-                        : Colors.white.withOpacity(0.9),
+                        : Colors.white.withValues(alpha: 0.9),
                     fontSize: isCurrentMonth ? 28 : 24,
                     fontWeight: FontWeight.bold,
                     letterSpacing: 1.0,

@@ -57,10 +57,10 @@ class AppLocalizationsTe extends AppLocalizations {
 
   // Milk Entry Screen Translations
   @override
-  String get chooseCattle => 'పశువులను ఎంచుకోండి';
+  String get chooseCattle => 'పశువును ఎంచుకోండి';
 
   @override
-  String get buffalo => 'ఎద్దు';
+  String get buffalo => 'బర్రె';
 
   @override
   String get cow => 'ఆవు';
@@ -269,4 +269,116 @@ class AppLocalizationsTe extends AppLocalizations {
 
   @override
   String get cancel => 'రద్దు చేయండి';
+
+  // Edit Entry Screen Translations
+  @override
+  String get editEntry => 'ఎంట్రీని సవరించండి';
+
+  @override
+  String get today => 'ఈ రోజు';
+
+  @override
+  String get yesterday => 'నిన్న';
+
+  @override
+  String get dayBeforeYesterday => 'మొన్న';
+
+  @override
+  String get costPerL => 'ఖర్చు/లీ';
+
+  @override
+  String get submit => 'సమర్పించండి';
+
+  @override
+  String get pleaseFillMilkAndCost => 'దయచేసి పాలు మరియు ఖర్చు ఫీల్డ్‌లను నింపండి';
+
+  @override
+  String get entrySavedSuccessfully => 'ఎంట్రీ విజయవంతంగా సేవ్ చేయబడింది';
+
+  @override
+  String get errorSavingEntry => 'ఎంట్రీని సేవ్ చేయడంలో లోపం';
+
+  @override
+  String get todaysIncome => 'నేటి ఆదాయం';
+
+  // Average labels
+  @override
+  String get milkDailyAverage => 'పాల రోజువారీ సగటు';
+  @override
+  String get fatDailyAverage => 'కొవ్వు% రోజువారీ సగటు';
+  @override
+  String get fatMonthlyAverage => 'కొవ్వు% నెలవారీ సగటు';
+  @override
+  String get snfDailyAverage => 'SNF రోజువారీ సగటు';
+  @override
+  String get snfMonthlyAverage => 'SNF నెలవారీ సగటు';
+
+  // Expense form labels
+  @override
+  String get descriptionOptional => 'వివరణ (ఐచ్ఛికం)';
+  @override
+  String get enterExpenseDetails => 'వ్యయ వివరాలను నమోదు చేయండి...';
+  @override
+  String get addReceipt => 'రసీదు జోడించండి';
+  @override
+  String get receiptAdded => 'రసీదు జోడించబడింది';
+  @override
+  String get addReceiptPhoto => 'రసీదు ఫోటో జోడించండి';
+  @override
+  String get camera => 'కెమెరా';
+  @override
+  String get gallery => 'గ్యాలరీ';
+  @override
+  String get cameraFunctionalityComingSoon => 'కెమెరా ఫంక్షనాలిటీ త్వరలో వస్తుంది';
+  @override
+  String get galleryFunctionalityComingSoon => 'గ్యాలరీ ఫంక్షనాలిటీ త్వరలో వస్తుంది';
+
+  // Validation messages
+  @override
+  String get pleaseEnterAmount => 'దయచేసి మొత్తాన్ని నమోదు చేయండి';
+  @override
+  String get pleaseEnterValidAmount => 'దయచేసి సరైన మొత్తాన్ని నమోదు చేయండి';
+
+  // Additional expense screen strings
+  @override
+  String get amountIsRequired => 'మొత్తం అవసరం';
+  @override
+  String get expenseAddedSuccessfully => 'వ్యయం విజయవంతంగా జోడించబడింది!';
+  @override
+  String get errorAddingExpense => 'వ్యయం జోడించడంలో లోపం';
+  @override
+  String get avg => 'సగటు';
+  @override
+  String get deleteExpense => 'వ్యయాన్ని తొలగించండి';
+  @override
+  String get areYouSureDeleteExpense => 'మీరు ఈ వ్యయాన్ని తొలగించాలని ఖచ్చితంగా అనుకుంటున్నారా?';
+  @override
+  String get delete => 'తొలగించండి';
+  @override
+  String get receipt => 'రసీదు';
+
+  @override
+  String get logoutConfirmation => 'మీరు ఖచ్చితంగా లాగ్ అవుట్ చేయాలనుకుంటున్నారా?';
+  @override
+  String get emailAddress => 'ఇమెయిల్ చిరునామా';
+  @override
+  String get phoneNumber => 'ఫోన్ నంబర్';
+  @override
+  String get age => 'వయస్సు';
+  @override
+  String get cattleOwned => 'పశువుల యాజమాన్యం';
+  @override
+  String get location => 'స్థానం';
+
+  @override
+  String get name => 'పేరు';
+  @override
+  String get enterName => 'పేరు నమోదు చేయండి';
+  @override
+  String get invalidEmail => 'చెల్లని ఇమెయిల్ చిరునామా';
+  @override
+  String get save => 'సేవ్ చేయండి';
+
+  @override
+  String get day => 'రోజు';
 }

@@ -28,19 +28,15 @@ class ExpensesProvider extends ChangeNotifier {
     _clearError();
     
     try {
-      print('ExpensesProvider: Loading expenses for month: $month, year: $year, userId: $userId');
       
       // First, clean up any invalid expenses
       await cleanupInvalidExpenses(userId);
       
       final expenses = await _expenseService.getExpensesForMonth(userId, month, year);
-      print('ExpensesProvider: Loaded ${expenses.length} expenses');
       _expenses = expenses;
       _calculateTotals();
       notifyListeners();
-      print('ExpensesProvider: Expenses loaded and UI updated');
     } catch (e) {
-      print('ExpensesProvider: Error loading expenses: $e');
       _setError('Failed to load expenses: $e');
     } finally {
       _setLoading(false);
@@ -59,7 +55,6 @@ class ExpensesProvider extends ChangeNotifier {
     _clearError();
     
     try {
-      print('ExpensesProvider: Adding expense - userId: $userId, amount: $amount, category: ${category.key}'); // Debug log
       
       await _expenseService.addExpense(
         userId: userId,
@@ -69,20 +64,14 @@ class ExpensesProvider extends ChangeNotifier {
         amount: amount,
       );
       
-      print('ExpensesProvider: Expense added successfully, reloading data...'); // Debug log
-      
       // CRITICAL FIX: Force reload of current expenses to ensure UI is updated
       // This prevents expenses from being replaced instead of added
-      print('ExpensesProvider: Forcing data reload to prevent replacement');
       
       // CRITICAL FIX: Don't reload here - let the UI handle reloading for the selected month
       // This prevents the provider from switching to a different month than what the UI shows
-      print('ExpensesProvider: Expense added, UI will handle reload for selected month');
       
-      print('ExpensesProvider: Data reloaded successfully'); // Debug log
       return true;
     } catch (e) {
-      print('ExpensesProvider: Error adding expense: $e'); // Debug log
       _setError('Failed to add expense: $e');
       return false;
     } finally {
@@ -92,7 +81,6 @@ class ExpensesProvider extends ChangeNotifier {
 
   /// Calculate totals from current expenses
   void _calculateTotals() {
-    print('ExpensesProvider: Calculating totals for ${_expenses.length} expenses');
     
     // CRITICAL FIX: Clear totals before recalculating to prevent accumulation errors
     _totalExpenses = 0.0;
@@ -100,7 +88,6 @@ class ExpensesProvider extends ChangeNotifier {
     
     // Calculate total expenses
     _totalExpenses = _expenses.fold(0.0, (total, expense) => total + expense.amount);
-    print('ExpensesProvider: Total expenses: $_totalExpenses');
     
     // Calculate category totals - CRITICAL: Each expense should ADD to its category total
     for (final expense in _expenses) {
@@ -108,11 +95,8 @@ class ExpensesProvider extends ChangeNotifier {
       final newTotal = currentTotal + expense.amount;
       _categoryTotals[expense.category] = newTotal;
       
-      print('ExpensesProvider: Category ${expense.category.displayName}: $currentTotal + ${expense.amount} = $newTotal');
     }
     
-    print('ExpensesProvider: Final category totals: $_categoryTotals');
-    print('ExpensesProvider: Total categories found: ${_categoryTotals.length}');
   }
 
   /// Clear expenses and reset state
@@ -146,11 +130,8 @@ class ExpensesProvider extends ChangeNotifier {
   /// Clean up invalid expenses
   Future<void> cleanupInvalidExpenses(String userId) async {
     try {
-      print('ExpensesProvider: Cleaning up invalid expenses for user: $userId');
       await _expenseService.cleanupInvalidExpenses(userId);
-      print('ExpensesProvider: Cleanup completed');
     } catch (e) {
-      print('ExpensesProvider: Error during cleanup: $e');
       _setError('Failed to cleanup invalid expenses: $e');
     }
   }

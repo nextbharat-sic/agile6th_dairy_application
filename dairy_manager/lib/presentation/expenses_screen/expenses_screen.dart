@@ -5,7 +5,6 @@ import '../../theme/app_theme.dart';
 import '../../backend/services/expense_service.dart';
 import '../../backend/repositories/expense_repository.dart';
 import '../../constants/constants.dart';
-import '../../models/expense_model.dart';
 import '../../l10n/app_localizations.dart';
 
 class ExpensesScreen extends StatefulWidget {
@@ -21,7 +20,6 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
   bool _isLoading = true;
   
   // Real data from backend
-  List<ExpenseModel> _expenses = [];
   Map<ExpenseCategory, double> _expensesByCategory = {};
   double _totalExpenses = 0.0;
   
@@ -91,12 +89,6 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
     
     try {
       final currentDate = DateTime.now();
-      final expenses = await _expenseService.getExpensesForMonth(
-        _userId!, 
-        currentDate.month, 
-        currentDate.year
-      );
-      
       final totalExpenses = await _expenseService.getTotalExpensesForMonth(
         _userId!, 
         currentDate.month, 
@@ -110,13 +102,11 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
       );
       
       setState(() {
-        _expenses = expenses;
-        _totalExpenses = totalExpenses;
         _expensesByCategory = expensesByCategory;
+        _totalExpenses = totalExpenses;
         _isLoading = false;
       });
     } catch (e) {
-      print('Error loading expenses: $e');
       setState(() => _isLoading = false);
     }
   }
@@ -130,12 +120,6 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
       final monthIndex = _months.indexOf(_selectedMonth) + 1;
       final year = int.parse(_selectedYear);
       
-      final expenses = await _expenseService.getExpensesForMonth(
-        _userId!, 
-        monthIndex, 
-        year
-      );
-      
       final totalExpenses = await _expenseService.getTotalExpensesForMonth(
         _userId!, 
         monthIndex, 
@@ -149,13 +133,11 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
       );
       
       setState(() {
-        _expenses = expenses;
-        _totalExpenses = totalExpenses;
         _expensesByCategory = expensesByCategory;
+        _totalExpenses = totalExpenses;
         _isLoading = false;
       });
     } catch (e) {
-      print('Error loading expenses for selected period: $e');
       setState(() => _isLoading = false);
     }
   }
@@ -325,7 +307,7 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
                     runSpacing: 8,
                     children: _expensesByCategory.entries.map<Widget>((entry) {
                       return _buildExpenseChip(
-                        entry.key.displayName, 
+                        _getTranslatedCategoryName(entry.key, l10n),
                         entry.value.toInt()
                       );
                     }).toList(),
@@ -505,11 +487,11 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
                      placeholder: l10n.enterAmount,
                      validator: (value) {
                        if (value == null || value.trim().isEmpty) {
-                         return 'Amount is required';
+                         return l10n.amountIsRequired;
                        }
                        final amount = double.tryParse(value.replaceAll('/', ''));
                        if (amount == null || amount <= 0) {
-                         return 'Please enter a valid amount';
+                         return l10n.pleaseEnterValidAmount;
                        }
                        return null;
                      },
@@ -552,8 +534,8 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
                               
                               Navigator.pop(context);
                               ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Expense added successfully!'),
+                                SnackBar(
+                                  content: Text(l10n.expenseAddedSuccessfully),
                                   backgroundColor: Colors.green,
                                 ),
                               );
@@ -563,7 +545,7 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
                             } catch (e) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
-                                  content: Text('Error adding expense: $e'),
+                                  content: Text('${l10n.errorAddingExpense}: $e'),
                                   backgroundColor: Colors.red,
                                 ),
                               );
@@ -681,71 +663,6 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
           fontWeight: FontWeight.w600,
           fontSize: 14,
         ),
-      ),
-    );
-  }
-
-  Widget _buildExpenseListItem(ExpenseModel expense) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.black.withValues(alpha: 0.1)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: Colors.black,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: const Icon(
-              Icons.receipt,
-              color: Colors.white,
-              size: 20,
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  expense.description,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: Colors.black,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  '${expense.dateTime.day}/${expense.dateTime.month}/${expense.dateTime.year} • ${expense.category.displayName}',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Colors.grey,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Text(
-            '₹${expense.amount.toStringAsFixed(0)}',
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              color: Colors.black,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ],
       ),
     );
   }

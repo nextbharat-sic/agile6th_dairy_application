@@ -50,7 +50,7 @@ class IncomeModel {
 
   /// Create a model from a map, likely from a database record.
   factory IncomeModel.fromMap(Map<String, dynamic> map) {
-    DateTime _parseDate(dynamic value, {DateTime? fallback}) {
+    DateTime parseDate(dynamic value, {DateTime? fallback}) {
       if (value == null) return fallback ?? DateTime.now();
       if (value is Timestamp) return value.toDate();
       if (value is DateTime) return value;
@@ -71,7 +71,7 @@ class IncomeModel {
 
     return IncomeModel(
       id: map['id'] as String,
-      dateTime: _parseDate(dateField),
+      dateTime: parseDate(dateField),
       animalType: AnimalType.values.byName(map['animalType'] as String),
       session: SessionType.values.byName(map['session'] as String),
       liters: (map['liters'] as num).toDouble(),
@@ -79,8 +79,8 @@ class IncomeModel {
       fat: (map['fat'] as num).toDouble(),
       costPerLiter: (map['costPerLiter'] as num).toDouble(),
       totalIncome: (map['totalIncome'] as num).toDouble(),
-      createdAt: _parseDate(createdAtField, fallback: _parseDate(dateField)),
-      updatedAt: _parseDate(updatedAtField, fallback: _parseDate(dateField)),
+      createdAt: parseDate(createdAtField, fallback: parseDate(dateField)),
+      updatedAt: parseDate(updatedAtField, fallback: parseDate(dateField)),
     );
   }
   Map<String, dynamic> toMap() => {

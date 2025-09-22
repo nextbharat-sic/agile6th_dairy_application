@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -48,11 +49,9 @@ class _ZoomableWidgetState extends State<ZoomableWidget> {
       },
       onScaleUpdate: (details) {
         setState(() {
-          // Handle scaling
           _scale = (_previousScale * details.scale)
               .clamp(widget.minScale, widget.maxScale);
           
-          // Handle panning - this now works properly during and after zoom
           if (_initialFocalPoint != null) {
             final Offset normalizedOffset = (details.focalPoint - _initialFocalPoint!) / _previousScale;
             _offset = _previousOffset + normalizedOffset;
@@ -91,8 +90,7 @@ class ReportsScreen extends StatefulWidget {
 
 class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  String _selectedPeriod = 'Monthly';
-  bool _isTableZooming = false; // Track table zoom state
+  bool _isTableZooming = false;
 
   late final ReportService _reportService;
   String? _userId;
@@ -104,11 +102,21 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
   // UI selections - Initialize with current date
   int _selectedMonthIndex = DateTime.now().month - 1; // 0..11
   int _selectedYear = DateTime.now().year;
+  
+  // Track current tab explicitly - FIXED
+  int _currentTabIndex = 0; // 0 = Monthly, 1 = Yearly
+  
+  // Average data
+  Map<String, dynamic>? _averageData;
+  StreamSubscription<QuerySnapshot<Map<String, dynamic>>>? _incomeSub;
+  StreamSubscription<QuerySnapshot<Map<String, dynamic>>>? _expenseSub;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    
+    // Initialize tab controller first
+    _tabController = TabController(length: 2, vsync: this, initialIndex: 0);
 
     final firestore = FirebaseFirestore.instance;
     final incomeRepo = IncomeRepository(firestore);
@@ -118,44 +126,63 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
       expenseRepository: expenseRepo,
     );
 
-    // Initialize with current month's data (default view)
-    _loadCurrentMonthReport();
+    // Initialize after widget is built to access localization
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadCurrentMonthReport();
+      _setupRealtimeListeners();
+    });
   }
 
-  // Load current month's report as default
+  // Load current month's report as default - FIXED with proper state reset
   void _loadCurrentMonthReport() {
     final now = DateTime.now();
+    setState(() {
+      _selectedMonthIndex = now.month - 1; // Reset to current month
+      _currentTabIndex = 0; // Set to monthly tab
+      _report = null; // Clear previous report data
+    });
+    
     final monthStart = DateTime(now.year, now.month, 1);
     final monthEnd = DateTime(now.year, now.month + 1, 0, 23, 59, 59, 999);
     final actualEnd = now.isBefore(monthEnd) ? now : monthEnd;
     _refetchWithRange(monthStart, actualEnd, GroupByFrequency.day);
+    _loadAverages();
   }
 
-  // Load current year's report
+  // Load current year's report - FIXED with proper state reset
   void _loadCurrentYearReport() {
     final now = DateTime.now();
+    setState(() {
+      _selectedYear = now.year; // Reset to current year
+      _currentTabIndex = 1; // Set to yearly tab
+      _report = null; // Clear previous report data
+    });
+    
     final yearStart = DateTime(now.year, 1, 1);
     final yearEnd = DateTime(now.year, 12, 31, 23, 59, 59, 999);
     final actualEnd = now.isBefore(yearEnd) ? now : yearEnd;
     _refetchWithRange(yearStart, actualEnd, GroupByFrequency.month);
+    _loadAverages();
   }
-
 
   Future<void> _refetchWithRange(DateTime start, DateTime end, GroupByFrequency groupBy) async {
     try {
       setState(() {
         _isLoading = true;
+        _hasError = false;
       });
 
       final user = FirebaseAuth.instance.currentUser;
       if (user == null) return;
       _userId = user.uid;
 
-      // Cap end to today to meet "only up to current date/month" requirement
+      // Cap end to today
       final now = DateTime.now();
       if (end.isAfter(now)) {
         end = now;
       }
+
+      print('Loading report with frequency: $groupBy, start: $start, end: $end'); // Debug log
 
       final result = await _reportService.generateReport(
         userId: _userId!,
@@ -166,12 +193,15 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
         generateAnimalBreakdown: true,
       );
 
+      print('Report loaded with ${result.dataBreakdown?.length ?? 0} entries'); // Debug log
+
       if (!mounted) return;
       setState(() {
         _report = result;
         _isLoading = false;
       });
     } catch (e) {
+      print('Error loading report: $e'); // Debug log
       if (!mounted) return;
       setState(() {
         _hasError = true;
@@ -186,9 +216,72 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
     return '${value.toStringAsFixed(2)}/-';
   }
 
+  // Setup real-time listeners for average updates
+  void _setupRealtimeListeners() {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+    _userId = user.uid;
+
+    final userRef = FirebaseFirestore.instance.collection('users').doc(_userId);
+    
+    _incomeSub?.cancel();
+    _expenseSub?.cancel();
+    
+    _incomeSub = userRef.collection('income').snapshots().listen((_) {
+      _loadAverages();
+    });
+    
+    _expenseSub = userRef.collection('expenses').snapshots().listen((_) {
+      _loadAverages();
+    });
+  }
+
+  // Load averages for current period
+  Future<void> _loadAverages() async {
+    if (_userId == null) return;
+
+    final now = DateTime.now();
+    GroupByFrequency frequency;
+    DateTime startDate, endDate;
+
+    if (_currentTabIndex == 0) {
+      // Monthly tab - use day frequency
+      frequency = GroupByFrequency.day;
+      final month = _selectedMonthIndex + 1;
+      startDate = DateTime(now.year, month, 1);
+      endDate = DateTime(now.year, month + 1, 0, 23, 59, 59, 999);
+      if (now.isBefore(endDate) && now.month == month) endDate = now;
+    } else {
+      // Yearly tab - use month frequency
+      frequency = GroupByFrequency.month;
+      startDate = DateTime(_selectedYear, 1, 1);
+      endDate = DateTime(_selectedYear, 12, 31, 23, 59, 59, 999);
+      if (_selectedYear == now.year && now.isBefore(endDate)) endDate = now;
+    }
+
+    try {
+      final averages = await _reportService.calculateAverages(
+        userId: _userId!,
+        startDate: startDate,
+        endDate: endDate,
+        groupByFrequency: frequency,
+        animalTypes: const [AnimalType.buffalo, AnimalType.cow],
+      );
+
+      if (!mounted) return;
+      setState(() {
+        _averageData = averages;
+      });
+    } catch (e) {
+      print('Error loading averages: $e');
+    }
+  }
+
   @override
   void dispose() {
     _tabController.dispose();
+    _incomeSub?.cancel();
+    _expenseSub?.cancel();
     super.dispose();
   }
 
@@ -198,9 +291,9 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
     if (l10n == null) return const SizedBox.shrink();
     
     if (_isLoading) {
-      return const Scaffold(
-        backgroundColor: Colors.grey,
-        body: Center(child: CircularProgressIndicator()),
+      return Scaffold(
+        backgroundColor: Colors.grey[200],
+        body: const Center(child: CircularProgressIndicator()),
       );
     }
 
@@ -249,7 +342,7 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
               ),
             ),
             const SizedBox(height: 8),
-            Icon(Icons.bar_chart, color: Colors.white, size: 32),
+            const Icon(Icons.bar_chart, color: Colors.white, size: 32),
           ],
         ),
         centerTitle: true,
@@ -293,8 +386,8 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
                     controller: _tabController,
                     physics: const NeverScrollableScrollPhysics(),
                     children: [
-                      _buildReportContent(l10n.monthly, 'dd/mm/yy', l10n),
-                      _buildReportContent(l10n.yearly, 'dd/mm/yy', l10n),
+                      _buildReportContent(0, l10n), // Pass tab index
+                      _buildReportContent(1, l10n), // Pass tab index
                     ],
                   ),
                 ),
@@ -307,19 +400,21 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
   }
 
   Widget _buildTabButton(String label, int tabIndex) {
-    final isSelected = _selectedPeriod == label;
+    final isSelected = _currentTabIndex == tabIndex;
     return Expanded(
       child: GestureDetector(
         onTap: () {
           setState(() {
-            _selectedPeriod = label;
+            _currentTabIndex = tabIndex;
             _tabController.index = tabIndex;
           });
           
-          // Load appropriate default data
-          if (label.toLowerCase().contains('month')) {
+          // FIXED: Always reset to current month/year when switching tabs with proper frequency
+          if (tabIndex == 0) {
+            // Monthly tab
             _loadCurrentMonthReport();
           } else {
+            // Yearly tab
             _loadCurrentYearReport();
           }
         },
@@ -346,147 +441,161 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
     );
   }
 
-  Widget _buildReportContent(String periodLabel, String dateLabel, AppLocalizations l10n) {
-    final List<String> monthOptions = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  // FIXED: Completely rewritten to use tab index instead of period label
+  Widget _buildReportContent(int tabIndex, AppLocalizations l10n) {
+    final List<String> monthOptions = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+        .sublist(0, DateTime.now().month); // Only up to current month
     final List<String> yearOptions = ['2022', '2023', '2024', '2025'];
-    final GroupByFrequency frequency = _getFrequencyFromLabel(periodLabel);
     
-    // Use state variables for the dropdown values
-    String selectedPeriod = frequency == GroupByFrequency.month 
-        ? monthOptions[_selectedMonthIndex] 
-        : _selectedYear.toString();
-    final nowForLabel = DateTime.now();
-    String selectedDate = '${nowForLabel.day.toString().padLeft(2, '0')}/${nowForLabel.month.toString().padLeft(2, '0')}/${nowForLabel.year}';
+    // FIXED: Use tab index to determine what to show
+    final isMonthlyTab = tabIndex == 0;
+    final frequency = isMonthlyTab ? GroupByFrequency.day : GroupByFrequency.month;
+    
+    // FIXED: Correct dropdown values based on tab
+    String selectedPeriod;
+    if (isMonthlyTab) {
+      // Monthly tab - show month selector
+      selectedPeriod = monthOptions[_selectedMonthIndex.clamp(0, 11)];
+    } else {
+      // Yearly tab - show year selector
+      selectedPeriod = _selectedYear.toString();
+    }
 
-        return SingleChildScrollView(
-          // Disable scrolling when table is being zoomed
-          physics: _isTableZooming ? const NeverScrollableScrollPhysics() : null,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+    print('Building content for tab: $tabIndex, isMonthly: $isMonthlyTab, selectedPeriod: $selectedPeriod'); // Debug
+
+    return SingleChildScrollView(
+      physics: _isTableZooming ? const NeverScrollableScrollPhysics() : null,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Selectors
+            Row(
               children: [
-                // Selectors
-                Row(
-                  children: [
-                    Expanded(
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: Colors.black, width: 1),
-                        ),
-                        child: DropdownButtonHideUnderline(
-                          child: DropdownButton<String>(
-                            value: selectedPeriod,
-                            isExpanded: true,
-                            isDense: true,
-                            icon: const Icon(Icons.arrow_drop_down, color: Colors.black),
-                        items: (frequency == GroupByFrequency.month ? monthOptions : yearOptions)
-                                .map((String value) {
-                              return DropdownMenuItem<String>(
-                                value: value,
-                                child: Text(
-                                  value,
-                                  style: const TextStyle(
-                                    color: Colors.black,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              );
-                            }).toList(),
-                            onChanged: (value) {
+                SizedBox(
+                  width: 180, // original pill width when both were present
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.black, width: 1),
+                    ),
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton<String>(
+                        value: selectedPeriod,
+                        isExpanded: true,
+                        isDense: true,
+                        icon: const Icon(Icons.arrow_drop_down, color: Colors.black),
+                        // FIXED: Show correct options based on tab
+                        items: (isMonthlyTab ? monthOptions : yearOptions)
+                            .map((String value) {
+                          return DropdownMenuItem<String>(
+                            value: value,
+                            child: Text(
+                              value,
+                              style: const TextStyle(
+                                color: Colors.black,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                        onChanged: (value) {
                           if (value == null) return;
-                          
-                          if (frequency == GroupByFrequency.month) {
+                          if (isMonthlyTab) {
+                            // Monthly tab - month selection
                             final idx = monthOptions.indexOf(value);
                             if (idx >= 0) {
                               setState(() {
                                 _selectedMonthIndex = idx;
                               });
-                              
                               final now = DateTime.now();
-                              final start = DateTime(now.year, idx + 1, 1);
-                              final endOfMonth = DateTime(now.year, idx + 2, 0, 23, 59, 59, 999);
-                              final end = now.isBefore(endOfMonth) ? now : endOfMonth;
+                              final month = idx + 1;
+                              final start = DateTime(now.year, month, 1);
+                              final endOfMonth = DateTime(now.year, month + 1, 0, 23, 59, 59, 999);
+                              final end = now.isBefore(endOfMonth) && now.month == month ? now : endOfMonth;
                               _refetchWithRange(start, end, GroupByFrequency.day);
+                              _loadAverages();
                             }
                           } else {
+                            // Yearly tab - year selection
                             final year = int.tryParse(value);
                             if (year != null) {
-                              setState(() { 
-                                _selectedYear = year; 
+                              setState(() {
+                                _selectedYear = year;
                               });
-                              
                               final now = DateTime.now();
                               final start = DateTime(year, 1, 1);
                               final endOfYear = DateTime(year, 12, 31, 23, 59, 59, 999);
                               final end = (year == now.year && now.isBefore(endOfYear)) ? now : endOfYear;
                               _refetchWithRange(start, end, GroupByFrequency.month);
+                              _loadAverages();
                             }
                           }
-                            },
-                          ),
-                        ),
+                        },
                       ),
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: Colors.black, width: 1),
-                        ),
-                        child: GestureDetector(
-                          onTap: () async {
-                            final picked = await showDatePicker(
-                              context: context,
-                              initialDate: DateTime.now(),
-                              firstDate: DateTime(2020),
-                              lastDate: DateTime.now(),
-                            );
-                            if (picked != null) {
-                              setState(() => selectedDate = '${picked.day.toString().padLeft(2, '0')}/${picked.month.toString().padLeft(2, '0')}/${picked.year}');
-                            }
-                          },
-                          child: Row(
-                            children: [
-                              Text(
-                                '${l10n.date}: $selectedDate',
-                                style: const TextStyle(
-                                  color: Colors.black,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                              const Spacer(),
-                              const Icon(Icons.calendar_today, color: Colors.black, size: 18),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 18),
-            
-                // Table
-                _buildReportTable(periodLabel, l10n),
-                const SizedBox(height: 18),
-            
-            // Chart Section
-                Container(
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.black, width: 1),
                   ),
+                ),
+                const SizedBox(width: 12),
+                // Expanded(
+                //   child: Container(
+                //     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                //     decoration: BoxDecoration(
+                //       color: Colors.white,
+                //       borderRadius: BorderRadius.circular(12),
+                //       border: Border.all(color: Colors.black, width: 1),
+                //     ),
+                //     child: Text(
+                //       '${l10n.date}: ${DateTime.now().day.toString().padLeft(2, '0')}/${DateTime.now().month.toString().padLeft(2, '0')}/${DateTime.now().year}',
+                //       style: const TextStyle(
+                //         color: Colors.black,
+                //         fontWeight: FontWeight.w600,
+                //       ),
+                //     ),
+                //   ),
+                // ),
+              ],
+            ),
+            const SizedBox(height: 18),
+        
+            // Table
+            NotificationListener<ScaleStartNotification>(
+              onNotification: (notification) {
+                setState(() {
+                  _isTableZooming = true;
+                });
+                return false;
+              },
+              child: NotificationListener<ScaleEndNotification>(
+                onNotification: (notification) {
+                  setState(() {
+                    _isTableZooming = false;
+                  });
+                  return false;
+                },
+                child: ZoomableWidget(
+                  minScale: 1.0,
+                  maxScale: 3.0,
+                  child: _buildReportTable(frequency, l10n), // Pass frequency
+                ),
+              ),
+            ),
+            const SizedBox(height: 18),
+        
+            // Chart Section
+            Container(
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.black, width: 1),
+              ),
               padding: const EdgeInsets.all(16),
-                  child: Column(
-                    children: [
+              child: Column(
+                children: [
                   // Custom Legend
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -499,78 +608,84 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
                   const SizedBox(height: 16),
                   
                   // Line Chart
-                      SizedBox(
-                    height: 200,
-                    child: _buildMilkProductionChart(_report, _getFrequencyFromLabel(periodLabel), l10n),
+                  NotificationListener<ScaleStartNotification>(
+                    onNotification: (notification) {
+                      setState(() {
+                        _isTableZooming = true;
+                      });
+                      return false;
+                    },
+                    child: NotificationListener<ScaleEndNotification>(
+                      onNotification: (notification) {
+                        setState(() {
+                          _isTableZooming = false;
+                        });
+                        return false;
+                      },
+                      child: SizedBox(
+                        height: 200,
+                        child: ZoomableWidget(
+                          minScale: 1.0,
+                          maxScale: 4.0,
+                          child: _buildMilkProductionChart(_report, frequency, l10n),
+                        ),
                       ),
+                    ),
+                  ),
                   
                   const SizedBox(height: 16),
                   
-                  // Chart Statistics
-                      Text(
-                    frequency == GroupByFrequency.week
-                            ? 'Milk Weekly Average : 148 L\nSNF Weekly Average : 12\nFat% Weekly Average : 20%'
-                        : frequency == GroupByFrequency.month
-                                ? 'Milk Monthly Average : 520 L\nSNF Monthly Average : 20\nFat% Monthly Average : 20%'
-                                : l10n.milkYearlyAverage,
-                        style: const TextStyle(
-                          color: Colors.black,
-                          fontWeight: FontWeight.w500,
-                      fontSize: 12,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
+                  // Chart Statistics - Dynamic Averages
+                  _buildDynamicAverages(frequency, l10n),
+                ],
+              ),
+            ),
+            const SizedBox(height: 18),
+        
+            // Income/Expense/Profit section
+            Container(
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text(
+                    frequency == GroupByFrequency.day
+                        ? l10n.monthlyIncome
+                        : l10n.yearlyIncome,
+                    style: const TextStyle(
+                      color: Colors.black,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 18),
-            
-                // Income/Expense/Profit section
-                Container(
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Text(
-                    frequency == GroupByFrequency.week
-                            ? l10n.weeklyIncome
-                        : frequency == GroupByFrequency.month
-                                ? l10n.monthlyIncome
-                                : l10n.yearlyIncome,
-                        style: const TextStyle(
-                          color: Colors.black,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
+                  const SizedBox(height: 8),
                   _buildIncomeRow(
                     l10n.expenseHeader,
                     _formatCurrency((_report?.summary.expense as num?)?.toDouble()),
                   ),
-                      const SizedBox(height: 8),
+                  const SizedBox(height: 8),
                   _buildIncomeRow(
                     l10n.incomeHeader,
                     _formatCurrency(_report?.summary.yield.income),
                   ),
-                      const SizedBox(height: 8),
+                  const SizedBox(height: 8),
                   _buildIncomeRow(
                     l10n.profitHeader,
                     _formatCurrency(_report?.summary.profit),
                   ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 18),
-              ],
+                ],
+              ),
             ),
-          ),
-        );
+            const SizedBox(height: 18),
+          ],
+        ),
+      ),
+    );
   }
 
   // Helper widget for the legend
@@ -632,16 +747,19 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
       cowSpots.add(FlSpot(i.toDouble(), cowData?.milkQuantity ?? 0.0));
       buffaloSpots.add(FlSpot(i.toDouble(), buffaloData?.milkQuantity ?? 0.0));
 
-      // Bottom axis label per frequency
+      // Bottom axis label per frequency - FIXED to remove leading zeros
       String key = entry.key;
       switch (frequency) {
         case GroupByFrequency.day:
-          bottomLabels[i] = key;
+          // Convert "01", "02" to "1", "2" 
+          final dayNumber = int.tryParse(key) ?? 0;
+          bottomLabels[i] = dayNumber.toString();
           break;
         case GroupByFrequency.week:
           // Normalize Week labels (W1, Week1 -> W1)
           final cleaned = key.toUpperCase().replaceAll('WEEK', '').replaceAll('W', '').trim();
-          bottomLabels[i] = 'W$cleaned';
+          final weekNum = int.tryParse(cleaned) ?? 0;
+          bottomLabels[i] = 'W$weekNum';
           break;
         case GroupByFrequency.month:
           final map = {
@@ -663,8 +781,9 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
         case GroupByFrequency.year:
           bottomLabels[i] = key;
           break;
-        default:
+        case GroupByFrequency.quarter: // Added missing case
           bottomLabels[i] = key;
+          break;
       }
     }
 
@@ -712,7 +831,7 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
         borderData: FlBorderData(show: false),
         backgroundColor: Colors.white,
         lineBarsData: [
-          // Cow Milk Line (Orange)
+          // Cow Milk Line (Blue)
           LineChartBarData(
             spots: cowSpots,
             isCurved: true,
@@ -722,7 +841,7 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
             dotData: const FlDotData(show: true),
             belowBarData: BarAreaData(show: false),
           ),
-          // Buffalo Milk Line (Tomato Red)
+          // Buffalo Milk Line (Red)
           LineChartBarData(
             spots: buffaloSpots,
             isCurved: true,
@@ -757,21 +876,13 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
     );
   }
 
-  // Helper to convert tab label to enum
-  GroupByFrequency _getFrequencyFromLabel(String label) {
-    if (label.toLowerCase().contains('month')) return GroupByFrequency.month;
-    return GroupByFrequency.year;
-  }
-
-  // Helper to compare keys for sorting (robust to different key formats)
+  // Helper to compare keys for sorting
   int _compareKeys(String a, String b, GroupByFrequency frequency) {
     switch (frequency) {
       case GroupByFrequency.day:
-        // Expect keys like '01', '02', ... '31'
         int day(String s) => int.tryParse(s.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
         return day(a).compareTo(day(b));
       case GroupByFrequency.week:
-        // Accept formats like W1, Week1, Week 1
         int parseWeek(String s) {
           final cleaned = s.toUpperCase().replaceAll('WEEK', '').replaceAll('W', '').trim();
           return int.tryParse(cleaned) ?? 0;
@@ -781,7 +892,6 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
         return weekA.compareTo(weekB);
       
       case GroupByFrequency.month:
-        // Normalize to three-letter month for comparison
         int monthIndex(String s) {
           final map = {
             'JANUARY': 0, 'JAN': 0,
@@ -804,33 +914,48 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
         return monthA.compareTo(monthB);
       
       case GroupByFrequency.year:
-        // For years: 2022, 2023, 2024, etc.
         final yearA = int.tryParse(a) ?? 0;
         final yearB = int.tryParse(b) ?? 0;
         return yearA.compareTo(yearB);
       
-      default:
+      case GroupByFrequency.quarter:
         return a.compareTo(b);
     }
   }
 
-  Widget _buildReportTable(String periodLabel, AppLocalizations l10n) {
-    final isMonth = _getFrequencyFromLabel(periodLabel) == GroupByFrequency.month;
-    final String firstColumnHeader = isMonth ? 'DAY' : l10n.month;
+  // FIXED: Simplified table building using frequency parameter
+  Widget _buildReportTable(GroupByFrequency frequency, AppLocalizations l10n) {
+    final isDay = frequency == GroupByFrequency.day;
+    final String firstColumnHeader = isDay ? l10n.day : l10n.month;
+
+    print('Building table with frequency: $frequency, isDay: $isDay'); // Debug log
 
     // Build data from backend report if available
     final breakdown = _report?.dataBreakdown;
     final List<Map<String, dynamic>> data;
+    
     if (breakdown != null && breakdown.isNotEmpty) {
+      print('Report breakdown has ${breakdown.length} entries'); // Debug log
       final entries = breakdown.entries.toList()
-        ..sort((a, b) => _compareKeys(a.key, b.key, isMonth ? GroupByFrequency.day : GroupByFrequency.month));
+        ..sort((a, b) => _compareKeys(a.key, b.key, frequency));
+      
       data = entries.map((entry) {
-        final key = entry.key; // '01'..'31' for day, or 'Jan'..'Dec' for month
+        final key = entry.key;
         final ReportMetrics metrics = entry.value;
         final cow = metrics.animalBreakdown[AnimalType.cow] ?? const YieldMetrics();
         final buffalo = metrics.animalBreakdown[AnimalType.buffalo] ?? const YieldMetrics();
+        
+        // For days, remove leading zeros from display
+        String displayKey = key;
+        if (isDay) {
+          final dayNumber = int.tryParse(key) ?? 0;
+          displayKey = dayNumber.toString();
+        }
+        
+        print('Table entry: $displayKey - Cow: ${cow.milkQuantity}, Buffalo: ${buffalo.milkQuantity}'); // Debug log
+        
         return {
-          'period': key,
+          'period': displayKey,
           'values': [
             cow.milkQuantity.toStringAsFixed(0),
             cow.avgSnf.toStringAsFixed(0),
@@ -842,11 +967,13 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
         };
       }).toList();
     } else {
+      print('No report breakdown data available'); // Debug log
       // Fallback dummy if no data yet
       data = [
-        {'period': isMonth ? '01' : 'Jan', 'values': ['0','0','0','0','0','0']},
+        {'period': isDay ? '1' : 'Jan', 'values': ['0','0','0','0','0','0']},
       ];
     }
+    
     return Container(
       decoration: BoxDecoration(
         border: Border.all(color: Colors.black, width: 1),
@@ -865,9 +992,9 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
 
   Widget _buildTableHeader(String firstColumnHeader, AppLocalizations l10n) {
     return Container(
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         color: Colors.white,
-        borderRadius: const BorderRadius.only(
+        borderRadius: BorderRadius.only(
           topLeft: Radius.circular(6),
           topRight: Radius.circular(6),
         ),
@@ -951,7 +1078,7 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
   }
 
   Widget _buildSubHeaderCell(String text, {required int flex, bool hasLeftBorder = false, bool hasRightBorder = true}) {
-    final isMilk = text == 'Milk(L)';
+    final isMilk = text.contains('Milk');
     return Expanded(
       flex: flex,
       child: Container(
@@ -968,7 +1095,7 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
             text,
             style: TextStyle(
               fontWeight: FontWeight.bold,
-              fontSize: isMilk ? 9 : 11, // Reduce only for Milk(L)
+              fontSize: isMilk ? 9 : 11,
               color: Colors.black,
             ),
           ),
@@ -1061,6 +1188,62 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
           ),
         ),
       ],
+    );
+  }
+
+  // Build dynamic averages based on actual data
+  Widget _buildDynamicAverages(GroupByFrequency frequency, AppLocalizations l10n) {
+    if (_averageData == null) {
+      return const Text(
+        'Loading averages...',
+        style: TextStyle(
+          color: Colors.grey,
+          fontWeight: FontWeight.w500,
+          fontSize: 12,
+        ),
+        textAlign: TextAlign.center,
+      );
+    }
+
+    final milkAvg = _averageData!['milkAverage'] as double? ?? 0.0;
+    final fatAvg = _averageData!['fatAverage'] as double? ?? 0.0;
+    final snfAvg = _averageData!['snfAverage'] as double? ?? 0.0;
+    final dataPoints = _averageData!['dataPoints'] as int? ?? 0;
+
+    if (dataPoints == 0) {
+      return const Text(
+        'No data available for averages',
+        style: TextStyle(
+          color: Colors.grey,
+          fontWeight: FontWeight.w500,
+          fontSize: 12,
+        ),
+        textAlign: TextAlign.center,
+      );
+    }
+
+    // Format averages based on frequency
+    String milkText, fatText, snfText;
+    if (frequency == GroupByFrequency.day) {
+      // Monthly view - show daily averages
+      milkText = '${l10n.milk} Daily Average: ${milkAvg.toStringAsFixed(1)}L';
+      fatText = '${l10n.fat} Daily Average: ${fatAvg.toStringAsFixed(1)}%';
+      snfText = '${l10n.snf} Daily Average: ${snfAvg.toStringAsFixed(1)}';
+    } else {
+      // Yearly view - show monthly averages
+      milkText = '${l10n.milk} Monthly Average: ${milkAvg.toStringAsFixed(1)}L';
+      fatText = '${l10n.fat} Monthly Average: ${fatAvg.toStringAsFixed(1)}%';
+      snfText = '${l10n.snf} Monthly Average: ${snfAvg.toStringAsFixed(1)}';
+    }
+
+    return Text(
+      '$milkText\n$fatText\n$snfText',
+      style: const TextStyle(
+        color: Colors.black,
+        fontWeight: FontWeight.w500,
+        fontSize: 12,
+      ),
+      textAlign: TextAlign.center,
     );
   }
 }

@@ -41,10 +41,7 @@ class SettingsScreen extends StatelessWidget {
         ),
         centerTitle: true,
         actions: [
-          IconButton(
-            icon: const Icon(Icons.settings, color: Colors.white, size: 28),
-            onPressed: () {},
-          ),
+          // Removed extra settings icon
         ],
       ),
       body: Padding(
@@ -91,7 +88,7 @@ class SettingsScreen extends StatelessWidget {
         ),
         child: Text(
           label,
-          style: const TextStyle(fontWeight: FontWeight.w700),
+          style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 18,), 
         ),
       ),
     );
@@ -113,7 +110,7 @@ class SettingsScreen extends StatelessWidget {
           AppLocalizations.of(context)!.language,
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
             color: AppTheme.textPrimaryColor,
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.w600
           ),
         ),
         content: Column(
@@ -215,7 +212,7 @@ class SettingsScreen extends StatelessWidget {
           ),
         ),
         content: Text(
-          'Are you sure you want to logout?',
+          l10n.logoutConfirmation,
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
             color: AppTheme.textSecondaryColor,
           ),
@@ -224,7 +221,7 @@ class SettingsScreen extends StatelessWidget {
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: Text(
-              'Cancel',
+              l10n.cancel,
               style: TextStyle(
                 color: AppTheme.textSecondaryColor,
               ),

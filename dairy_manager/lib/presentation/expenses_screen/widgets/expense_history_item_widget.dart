@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
+import '../../../l10n/app_localizations.dart';
 
 import '../../../core/app_export.dart';
 
@@ -19,6 +20,7 @@ class ExpenseHistoryItemWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final category = categories.firstWhere(
       (cat) => cat["name"] == expense["category"],
       orElse: () => {
@@ -54,17 +56,17 @@ class ExpenseHistoryItemWidget extends StatelessWidget {
         return await showDialog<bool>(
               context: context,
               builder: (context) => AlertDialog(
-                title: Text('Delete Expense'),
-                content: Text('Are you sure you want to delete this expense?'),
+                title: Text(l10n.deleteExpense),
+                content: Text(l10n.areYouSureDeleteExpense),
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.pop(context, false),
-                    child: Text('Cancel'),
+                    child: Text(l10n.cancel),
                   ),
                   TextButton(
                     onPressed: () => Navigator.pop(context, true),
                     child: Text(
-                      'Delete',
+                      l10n.delete,
                       style: TextStyle(
                           color: AppTheme.lightTheme.colorScheme.error),
                     ),
@@ -175,7 +177,7 @@ class ExpenseHistoryItemWidget extends StatelessWidget {
                                     ),
                                     SizedBox(width: 1.w),
                                     Text(
-                                      'Receipt',
+                                      l10n.receipt,
                                       style: AppTheme
                                           .lightTheme.textTheme.bodySmall
                                           ?.copyWith(

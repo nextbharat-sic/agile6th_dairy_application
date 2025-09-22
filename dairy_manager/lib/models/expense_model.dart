@@ -42,8 +42,6 @@ class ExpenseModel {
   /// Create a model from Firestore data.
   factory ExpenseModel.fromMap(Map<String, dynamic> map, {String? documentId}) {
     try {
-      print('Parsing expense from map: $map');
-      print('Document ID: $documentId');
       
       // Handle legacy data that might have old field names
       final timestamp = map['timestamp'] ?? map['dateTime'];
@@ -66,7 +64,7 @@ class ExpenseModel {
       }
 
       // Parse timestamp safely
-      DateTime _parseDate(dynamic value) {
+      DateTime parseDate(dynamic value) {
         if (value == null) return DateTime.now();
         try {
           // Firestore Timestamp
@@ -89,7 +87,7 @@ class ExpenseModel {
         }
         throw ArgumentError('Invalid timestamp format: $value');
       }
-      final dateTime = _parseDate(timestamp);
+      final dateTime = parseDate(timestamp);
 
       // Parse amount safely
       double amountValue;
@@ -118,9 +116,6 @@ class ExpenseModel {
         amount: amountValue,
       );
     } catch (e) {
-      print('Error parsing expense from map: $e');
-      print('Map data: $map');
-      print('Document ID: $documentId');
       rethrow;
     }
   }

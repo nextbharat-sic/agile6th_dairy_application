@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
+import '../../../l10n/app_localizations.dart';
 
 import '../../../core/app_export.dart';
 
@@ -17,6 +18,7 @@ class ExpenseCategorySelectorWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       padding: EdgeInsets.all(4.w),
       decoration: BoxDecoration(
@@ -31,7 +33,7 @@ class ExpenseCategorySelectorWidget extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Select Category',
+                l10n.selectCategory,
                 style: AppTheme.lightTheme.textTheme.titleLarge,
               ),
               IconButton(
@@ -104,7 +106,7 @@ class ExpenseCategorySelectorWidget extends StatelessWidget {
                       ),
                       SizedBox(height: 0.5.h),
                       Text(
-                        'Avg: ₹${(category["averageSpending"] as double).toStringAsFixed(0)}',
+                        '${l10n.avg}: ₹${(category["averageSpending"] as double).toStringAsFixed(0)}',
                         style:
                             AppTheme.lightTheme.textTheme.bodySmall?.copyWith(
                           color: AppTheme.lightTheme.colorScheme.onSurface

@@ -8,7 +8,7 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
 
     <application
-            android:label="dairy_manager"
+            android:label="RakuNote"
             android:name="${applicationName}"
             android:icon="@mipmap/ic_launcher">
         <activity

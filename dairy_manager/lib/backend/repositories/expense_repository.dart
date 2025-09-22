@@ -45,11 +45,9 @@ class ExpenseRepository {
         // Now add the expense
         final expenseDocRef = userDocRef.collection('expenses').doc(expenseId);
         final expenseData = model.toMap();
-        print('Adding expense data: $expenseData'); // Debug log
         transaction.set(expenseDocRef, expenseData);
       });
     } catch (e) {
-      print('Error adding expense: $e'); // Debug log
       rethrow;
     }
   }
@@ -61,12 +59,10 @@ class ExpenseRepository {
     DateTime endDateTime
   ) async {
     try {
-      print('Fetching expenses for user: $userId, from: $startDateTime to: $endDateTime');
       
       final startTimestamp = startDateTime.toIso8601String();
       final endTimestamp = endDateTime.toIso8601String();
       
-      print('Querying with timestamp range: $startTimestamp to $endTimestamp');
       
       final snapshot = await firestore.collection('users').doc(userId)
           .collection('expenses')
@@ -75,23 +71,20 @@ class ExpenseRepository {
           .orderBy('timestamp', descending: true)
           .get();
 
-      print('Found ${snapshot.docs.length} expenses');
       
       final expenses = snapshot.docs.where((doc) {
         final canParse = ExpenseModel.canParse(doc.data());
         if (!canParse) {
-          print('Skipping invalid document ${doc.id}: ${doc.data()}');
+          // print('Skipping invalid document ${doc.id}: ${doc.data()}');
         }
         return canParse;
       }).map((doc) {
-        print('Processing document ${doc.id} with data: ${doc.data()}');
+        // print('Processing document ${doc.id} with data: ${doc.data()}');
         return ExpenseModel.fromMap(doc.data(), documentId: doc.id);
       }).toList();
       
-      print('Successfully parsed ${expenses.length} expenses');
       return expenses;
     } catch (e) {
-      print('Error fetching expenses: $e');
       rethrow;
     }
   }
@@ -126,7 +119,6 @@ class ExpenseRepository {
   /// Get recent expenses for a user (last 10)
   Future<List<ExpenseModel>> getRecentExpenses(String userId) async {
     try {
-      print('Fetching recent expenses for user: $userId');
       
       final snapshot = await firestore.collection('users').doc(userId)
           .collection('expenses')
@@ -134,20 +126,17 @@ class ExpenseRepository {
           .limit(10)
           .get();
 
-      print('Found ${snapshot.docs.length} recent expenses');
       
       final expenses = snapshot.docs.where((doc) {
         final canParse = ExpenseModel.canParse(doc.data());
         if (!canParse) {
-          print('Skipping invalid recent expense document ${doc.id}: ${doc.data()}');
+          // print('Skipping invalid recent expense document ${doc.id}: ${doc.data()}');
         }
         return canParse;
       }).map((doc) => ExpenseModel.fromMap(doc.data(), documentId: doc.id)).toList();
       
-      print('Successfully parsed ${expenses.length} recent expenses');
       return expenses;
     } catch (e) {
-      print('Error fetching recent expenses: $e');
       rethrow;
     }
   }
@@ -169,24 +158,20 @@ class ExpenseRepository {
   /// Clean up invalid expense documents
   Future<void> cleanupInvalidExpenses(String userId) async {
     try {
-      print('Cleaning up invalid expenses for user: $userId');
       
       final snapshot = await firestore.collection('users').doc(userId)
           .collection('expenses')
           .get();
 
-      int cleanedCount = 0;
       for (final doc in snapshot.docs) {
         if (!ExpenseModel.canParse(doc.data())) {
-          print('Deleting invalid expense document: ${doc.id}');
+          // print('Deleting invalid expense document: ${doc.id}');
           await doc.reference.delete();
-          cleanedCount++;
         }
       }
       
-      print('Cleaned up $cleanedCount invalid expense documents');
+      // print('Cleaned up $cleanedCount invalid expense documents');
     } catch (e) {
-      print('Error cleaning up invalid expenses: $e');
       rethrow;
     }
   }

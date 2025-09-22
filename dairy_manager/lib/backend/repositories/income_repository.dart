@@ -52,9 +52,6 @@ class IncomeRepository {
 
     // 4. Execute the fully constructed query
     final snapshot = await query.get();
-    for (final doc in snapshot.docs) {
-      print(doc.data());
-    }
     return snapshot;
   }
 }

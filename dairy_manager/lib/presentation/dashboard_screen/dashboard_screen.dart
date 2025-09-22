@@ -24,7 +24,6 @@ class DashboardScreen extends StatelessWidget {
                   radius: 38,
                   backgroundImage: AssetImage('assets/images/profile_placeholder.png'),
                   onBackgroundImageError: (exception, stackTrace) {
-                    print('Profile image not found: $exception');
                   },
                   child: Text(
                     userName.isNotEmpty ? userName[0].toUpperCase() : 'U',
@@ -73,7 +72,6 @@ class DashboardScreen extends StatelessWidget {
                 height: 90,
                 fit: BoxFit.cover,
                 errorBuilder: (context, error, stackTrace) {
-                  print('Milk drip image not found: $error');
                   return Container(
                     height: 90,
                     color: Colors.white,
@@ -181,7 +179,6 @@ class DashboardScreen extends StatelessWidget {
                   width: 70,
                   height: 70,
                   errorBuilder: (context, error, stackTrace) {
-                    print('Dashboard card image not found: $image - $error');
                     return Icon(
                       Icons.image_not_supported,
                       size: 48,

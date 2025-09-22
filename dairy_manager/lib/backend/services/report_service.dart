@@ -136,4 +136,126 @@ class ReportService {
     }
     return summaryAggregator.toReportMetrics(GroupByFrequency.year, breakdown);
   }
+
+  /// Calculates average values excluding zero/empty data points
+  Future<Map<String, dynamic>> calculateAverages({
+    required String userId,
+    required DateTime startDate,
+    required DateTime endDate,
+    required GroupByFrequency groupByFrequency,
+    required List<AnimalType> animalTypes,
+  }) async {
+    final normalizedStartDate = DateUtils.getStartOfDay(startDate);
+    final normalizedEndDate = DateUtils.getEndOfDay(endDate);
+
+    // Fetch all income data
+    final incomeSnapshot = await _incomeRepository.getIncomeForAnimalsInDateRange(
+      userId,
+      normalizedStartDate,
+      normalizedEndDate,
+    );
+
+    final incomes = incomeSnapshot.docs
+        .map<IncomeModel>((doc) => IncomeModel.fromMap(doc.data()))
+        .toList();
+
+    // Filter out zero values and calculate averages
+    final validIncomes = incomes.where((income) => 
+        income.liters > 0 && income.fat > 0 && income.snf > 0).toList();
+
+    if (validIncomes.isEmpty) {
+      return {
+        'milkAverage': 0.0,
+        'fatAverage': 0.0,
+        'snfAverage': 0.0,
+        'dataPoints': 0,
+        'period': _getPeriodLabel(groupByFrequency),
+      };
+    }
+
+    // Calculate averages by animal type
+    final Map<AnimalType, List<IncomeModel>> incomesByAnimal = {};
+    for (final animalType in animalTypes) {
+      incomesByAnimal[animalType] = validIncomes
+          .where((income) => income.animalType == animalType)
+          .toList();
+    }
+
+    // Calculate overall averages
+    final totalMilk = validIncomes.fold(0.0, (sum, income) => sum + income.liters);
+    final totalFat = validIncomes.fold(0.0, (sum, income) => sum + income.fat);
+    final totalSnf = validIncomes.fold(0.0, (sum, income) => sum + income.snf);
+    final dataPoints = validIncomes.length;
+
+    // Calculate averages by period (day/month)
+    final Map<String, List<IncomeModel>> periodData = {};
+    for (final income in validIncomes) {
+      final key = DateUtils.generateGroupKeyForDate(income.dateTime, groupByFrequency);
+      periodData.putIfAbsent(key, () => []).add(income);
+    }
+
+    // Calculate period averages (excluding periods with no data)
+    final periodAverages = <String, Map<String, double>>{};
+    periodData.forEach((period, periodIncomes) {
+      if (periodIncomes.isNotEmpty) {
+        final periodMilk = periodIncomes.fold(0.0, (sum, income) => sum + income.liters);
+        final periodFat = periodIncomes.fold(0.0, (sum, income) => sum + income.fat);
+        final periodSnf = periodIncomes.fold(0.0, (sum, income) => sum + income.snf);
+        
+        periodAverages[period] = {
+          'milk': periodMilk,
+          'fat': periodFat / periodIncomes.length,
+          'snf': periodSnf / periodIncomes.length,
+        };
+      }
+    });
+
+    return {
+      'milkAverage': totalMilk / dataPoints,
+      'fatAverage': totalFat / dataPoints,
+      'snfAverage': totalSnf / dataPoints,
+      'dataPoints': dataPoints,
+      'period': _getPeriodLabel(groupByFrequency),
+      'periodAverages': periodAverages,
+      'animalBreakdown': _calculateAnimalAverages(incomesByAnimal),
+    };
+  }
+
+  /// Calculate averages by animal type
+  Map<AnimalType, Map<String, double>> _calculateAnimalAverages(
+      Map<AnimalType, List<IncomeModel>> incomesByAnimal) {
+    final Map<AnimalType, Map<String, double>> result = {};
+    
+    incomesByAnimal.forEach((animalType, incomes) {
+      if (incomes.isNotEmpty) {
+        final totalMilk = incomes.fold(0.0, (sum, income) => sum + income.liters);
+        final totalFat = incomes.fold(0.0, (sum, income) => sum + income.fat);
+        final totalSnf = incomes.fold(0.0, (sum, income) => sum + income.snf);
+        
+        result[animalType] = {
+          'milk': totalMilk / incomes.length,
+          'fat': totalFat / incomes.length,
+          'snf': totalSnf / incomes.length,
+        };
+      }
+    });
+    
+    return result;
+  }
+
+  /// Get period label for display
+  String _getPeriodLabel(GroupByFrequency frequency) {
+    switch (frequency) {
+      case GroupByFrequency.day:
+        return 'Daily';
+      case GroupByFrequency.week:
+        return 'Weekly';
+      case GroupByFrequency.month:
+        return 'Monthly';
+      case GroupByFrequency.year:
+        return 'Yearly';
+      case GroupByFrequency.quarter:
+        return 'Quarterly';
+    }
+  }
 }

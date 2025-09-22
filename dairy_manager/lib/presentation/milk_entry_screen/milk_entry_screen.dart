@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -7,6 +8,7 @@ import '../../backend/repositories/user_repository.dart';
 import '../../backend/services/income_service.dart';
 import '../../constants/constants.dart';
 import '../../l10n/app_localizations.dart';
+import '../../utils/date_utils.dart' as DMDateUtils;
 
 class MilkEntryScreen extends StatefulWidget {
   const MilkEntryScreen({super.key});
@@ -18,6 +20,7 @@ class MilkEntryScreen extends StatefulWidget {
 class _MilkEntryScreenState extends State<MilkEntryScreen> {
   String? _userId;
   late IncomeService _incomeService;
+  StreamSubscription<QuerySnapshot<Map<String, dynamic>>>? _todayIncomeSub;
 
   // Selector types
   AnimalType selectedAnimal = AnimalType.buffalo;
@@ -52,13 +55,117 @@ class _MilkEntryScreenState extends State<MilkEntryScreen> {
     final today = DateTime.now();
     dateController.text =
         '${today.day.toString().padLeft(2, '0')}/${today.month.toString().padLeft(2, '0')}/${today.year}';
+    _loadSavedCosts();
+    _loadTodayIncomeInitial();
+    _setupTodayIncomeListener();
+  }
+
+  @override
+  void dispose() {
+    _todayIncomeSub?.cancel();
+    super.dispose();
+  }
+
+  Future<void> _loadTodayIncomeInitial() async {
+    if (_userId == null) return;
+    final totals = await _incomeService.getTotalIncomeForDay(
+      userId: _userId!,
+      date: DateTime.now(),
+      animalTypes: const [AnimalType.cow, AnimalType.buffalo],
+    );
+    if (!mounted) return;
+    setState(() {
+      cowIncome = totals[AnimalType.cow] ?? 0.0;
+      buffaloIncome = totals[AnimalType.buffalo] ?? 0.0;
+    });
+  }
+
+  void _setupTodayIncomeListener() {
+    if (_userId == null) return;
+    final dayStart = DMDateUtils.DateUtils.getStartOfDay(DateTime.now()).toIso8601String();
+    final dayEnd = DMDateUtils.DateUtils.getEndOfDay(DateTime.now()).toIso8601String();
+
+    final userRef = FirebaseFirestore.instance
+        .collection('users')
+        .doc(_userId)
+        .collection('income');
+
+    _todayIncomeSub?.cancel();
+    _todayIncomeSub = userRef
+        .where('dateTime', isGreaterThanOrEqualTo: dayStart)
+        .where('dateTime', isLessThanOrEqualTo: dayEnd)
+        .snapshots()
+        .listen((snapshot) {
+      double cowTotal = 0.0;
+      double buffaloTotal = 0.0;
+      for (final doc in snapshot.docs) {
+        final data = doc.data();
+        final animalKey = (data['animalType'] as String?) ?? '';
+        final totalIncome = (data['totalIncome'] as num?)?.toDouble() ?? 0.0;
+        if (animalKey == AnimalType.cow.key) {
+          cowTotal += totalIncome;
+        } else if (animalKey == AnimalType.buffalo.key) {
+          buffaloTotal += totalIncome;
+        }
+      }
+      if (!mounted) return;
+      setState(() {
+        cowIncome = cowTotal;
+        buffaloIncome = buffaloTotal;
+      });
+    });
+  }
+
+  Future<void> _loadSavedCosts() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      lockedCowCost = prefs.getDouble('locked_cow_cost') ?? 50.0;
+      lockedBuffaloCost = prefs.getDouble('locked_buffalo_cost') ?? 60.0;
+      isCostLocked = prefs.getBool('is_cost_locked') ?? false;
+    });
+    _updateCostField();
+  }
+
+  Future<void> _saveCosts() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setDouble('locked_cow_cost', lockedCowCost);
+    await prefs.setDouble('locked_buffalo_cost', lockedBuffaloCost);
+    await prefs.setBool('is_cost_locked', isCostLocked);
+  }
+
+  void _updateCostField() {
+    if (!isCostLocked) return;
+    final cost = selectedAnimal == AnimalType.cow ? lockedCowCost : lockedBuffaloCost;
+    costController.text = cost.toStringAsFixed(0);
+  }
+
+  void _toggleCostLock() {
+    setState(() {
+      if (isCostLocked) {
+        isCostLocked = false;
+      } else {
+        final currentCost = double.tryParse(costController.text) ??
+            (selectedAnimal == AnimalType.cow ? lockedCowCost : lockedBuffaloCost);
+        if (selectedAnimal == AnimalType.cow) {
+          lockedCowCost = currentCost;
+        } else {
+          lockedBuffaloCost = currentCost;
+        }
+        isCostLocked = true;
+        _saveCosts();
+      }
+    });
   }
 
   void clearFields() {
     milkController.clear();
     snfController.clear();
     fatController.clear();
-    costController.clear();
+    if (isCostLocked) {
+      _updateCostField();
+    } else {
+      costController.clear();
+    }
   }
 
   Future<void> _selectDate(BuildContext context) async {
@@ -270,8 +377,8 @@ class _MilkEntryScreenState extends State<MilkEntryScreen> {
             const SizedBox(height: 8),
             _inputFieldRow(l10n.fat, fatController),
             const SizedBox(height: 8),
-            _inputFieldRow(l10n.costL, costController,
-                onChanged: (value) => ()),
+            _inputFieldRowWithLock(l10n.costL, costController,
+                onChanged: (value) {}),
             const SizedBox(height: 20),
             SizedBox(
               width: double.infinity,
@@ -295,8 +402,8 @@ class _MilkEntryScreenState extends State<MilkEntryScreen> {
                                 const BorderSide(color: Colors.black, width: 1),
                           ),
                         ),
-                        child: const Text(
-                          'SUBMIT',
+                        child: Text(
+                          AppLocalizations.of(context)!.submit,
                           style: TextStyle(
                               color: Colors.black, fontWeight: FontWeight.bold),
                         ),
@@ -464,6 +571,55 @@ class _MilkEntryScreenState extends State<MilkEntryScreen> {
               ),
               onChanged: onChanged,
             ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _inputFieldRowWithLock(String label, TextEditingController controller,
+      {Function(String)? onChanged}) {
+    final l10n = AppLocalizations.of(context)!;
+    return Row(
+      children: [
+        SizedBox(
+          width: 80,
+          child: Text(
+            label,
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: TextField(
+            controller: controller,
+            readOnly: isCostLocked,
+            keyboardType: TextInputType.number,
+            decoration: InputDecoration(
+              hintText: l10n.inputText,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: const BorderSide(color: Colors.grey),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: const BorderSide(color: Colors.grey),
+              ),
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              suffixIcon: IconButton(
+                onPressed: _toggleCostLock,
+                icon: Image.asset(
+                  isCostLocked
+                      ? 'assets/images/lock.png'
+                      : 'assets/images/unlock.png',
+                  width: 20,
+                  height: 20,
+                  color: Colors.black,
+                ),
+              ),
+            ),
+            onChanged: onChanged,
           ),
         ),
       ],

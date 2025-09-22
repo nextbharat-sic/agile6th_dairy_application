@@ -23,31 +23,6 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  void _handleLogin() async {
-    if (_formKey.currentState!.validate()) {
-      try {
-        await context.read<AuthProvider>().login(
-          _usernameController.text,
-          _passwordController.text,
-        );
-        
-        // Login successful - navigate to dashboard
-        if (mounted) {
-          Navigator.pushReplacementNamed(context, AppRoutes.dashboard);
-        }
-      } catch (e) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Login failed: ${e.toString()}'),
-              backgroundColor: Colors.red,
-            ),
-          );
-        }
-      }
-    }
-  }
-
   void _handleGoogleSignIn() async {
     try {
       await context.read<AuthProvider>().signInWithGoogle();
@@ -144,7 +119,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               elevation: 2,
-                              shadowColor: Colors.black.withOpacity(0.1),
+                              shadowColor: Colors.black.withValues(alpha: (0.1 * 255).toDouble()),
                             ),
                             child: authProvider.isLoading
                                 ? const SizedBox(

@@ -461,6 +461,281 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Cancel'**
   String get cancel;
+
+  // Edit Entry Screen Translations
+  /// No description provided for @editEntry.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Entry'**
+  String get editEntry;
+
+  /// No description provided for @today.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get today;
+
+  /// No description provided for @yesterday.
+  ///
+  /// In en, this message translates to:
+  /// **'Yesterday'**
+  String get yesterday;
+
+  /// No description provided for @dayBeforeYesterday.
+  ///
+  /// In en, this message translates to:
+  /// **'Day before yesterday'**
+  String get dayBeforeYesterday;
+
+  /// No description provided for @costPerL.
+  ///
+  /// In en, this message translates to:
+  /// **'Cost/L'**
+  String get costPerL;
+
+  /// No description provided for @submit.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit'**
+  String get submit;
+
+  /// No description provided for @pleaseFillMilkAndCost.
+  ///
+  /// In en, this message translates to:
+  /// **'Please fill Milk and Cost fields'**
+  String get pleaseFillMilkAndCost;
+
+  /// No description provided for @entrySavedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Entry saved successfully'**
+  String get entrySavedSuccessfully;
+
+  /// No description provided for @errorSavingEntry.
+  ///
+  /// In en, this message translates to:
+  /// **'Error saving entry'**
+  String get errorSavingEntry;
+
+  /// No description provided for @todaysIncome.
+  ///
+  /// In en, this message translates to:
+  /// **'TODAY\'S INCOME'**
+  String get todaysIncome;
+
+  // Average labels
+  /// No description provided for @milkDailyAverage.
+  ///
+  /// In en, this message translates to:
+  /// **'Milk Daily Average'**
+  String get milkDailyAverage;
+
+  /// No description provided for @fatDailyAverage.
+  ///
+  /// In en, this message translates to:
+  /// **'Fat% Daily Average'**
+  String get fatDailyAverage;
+
+  /// No description provided for @fatMonthlyAverage.
+  ///
+  /// In en, this message translates to:
+  /// **'Fat% Monthly Average'**
+  String get fatMonthlyAverage;
+
+  /// No description provided for @snfDailyAverage.
+  ///
+  /// In en, this message translates to:
+  /// **'SNF Daily Average'**
+  String get snfDailyAverage;
+
+  /// No description provided for @snfMonthlyAverage.
+  ///
+  /// In en, this message translates to:
+  /// **'SNF Monthly Average'**
+  String get snfMonthlyAverage;
+
+  // Expense form labels
+  /// No description provided for @descriptionOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Description (Optional)'**
+  String get descriptionOptional;
+
+  /// No description provided for @enterExpenseDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter expense details...'**
+  String get enterExpenseDetails;
+
+  /// No description provided for @addReceipt.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Receipt'**
+  String get addReceipt;
+
+  /// No description provided for @receiptAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'Receipt Added'**
+  String get receiptAdded;
+
+  /// No description provided for @addReceiptPhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Receipt Photo'**
+  String get addReceiptPhoto;
+
+  /// No description provided for @camera.
+  ///
+  /// In en, this message translates to:
+  /// **'Camera'**
+  String get camera;
+
+  /// No description provided for @gallery.
+  ///
+  /// In en, this message translates to:
+  /// **'Gallery'**
+  String get gallery;
+
+  /// No description provided for @cameraFunctionalityComingSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Camera functionality coming soon'**
+  String get cameraFunctionalityComingSoon;
+
+  /// No description provided for @galleryFunctionalityComingSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Gallery functionality coming soon'**
+  String get galleryFunctionalityComingSoon;
+
+  // Validation messages
+  /// No description provided for @pleaseEnterAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter amount'**
+  String get pleaseEnterAmount;
+
+  /// No description provided for @pleaseEnterValidAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter valid amount'**
+  String get pleaseEnterValidAmount;
+
+  // Additional expense screen strings
+  /// No description provided for @amountIsRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount is required'**
+  String get amountIsRequired;
+
+  /// No description provided for @expenseAddedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Expense added successfully!'**
+  String get expenseAddedSuccessfully;
+
+  /// No description provided for @errorAddingExpense.
+  ///
+  /// In en, this message translates to:
+  /// **'Error adding expense'**
+  String get errorAddingExpense;
+
+  /// No description provided for @avg.
+  ///
+  /// In en, this message translates to:
+  /// **'Avg'**
+  String get avg;
+
+  /// No description provided for @deleteExpense.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Expense'**
+  String get deleteExpense;
+
+  /// No description provided for @areYouSureDeleteExpense.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete this expense?'**
+  String get areYouSureDeleteExpense;
+
+  /// No description provided for @delete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get delete;
+
+  /// No description provided for @receipt.
+  ///
+  /// In en, this message translates to:
+  /// **'Receipt'**
+  String get receipt;
+
+  /// No description provided for @logoutConfirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to log out?'**
+  String get logoutConfirmation;
+
+  /// No description provided for @emailAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Email address'**
+  String get emailAddress;
+
+  /// No description provided for @phoneNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone number'**
+  String get phoneNumber;
+
+  /// No description provided for @age.
+  ///
+  /// In en, this message translates to:
+  /// **'Age'**
+  String get age;
+
+  /// No description provided for @cattleOwned.
+  ///
+  /// In en, this message translates to:
+  /// **'Cattle owned'**
+  String get cattleOwned;
+
+  /// No description provided for @location.
+  ///
+  /// In en, this message translates to:
+  /// **'Location'**
+  String get location;
+
+  /// No description provided for @name.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get name;
+
+  /// No description provided for @enterName.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter name'**
+  String get enterName;
+
+  /// No description provided for @invalidEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid email'**
+  String get invalidEmail;
+
+  /// No description provided for @save.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get save;
+
+  /// No description provided for @day.
+  ///
+  /// In en, this message translates to:
+  /// **'Day'**
+  String get day;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
