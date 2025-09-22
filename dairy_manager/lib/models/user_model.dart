@@ -9,6 +9,8 @@ class UserModel {
   final String farmLocation;
   final double costPerLiterCow;
   final double costPerLiterBuffalo;
+  final int? age;
+  final int? cattleOwned;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -20,6 +22,8 @@ class UserModel {
     required this.farmLocation,
     required this.costPerLiterCow,
     required this.costPerLiterBuffalo,
+    this.age,
+    this.cattleOwned,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -34,6 +38,8 @@ class UserModel {
       farmLocation: entity.farmLocation,
       costPerLiterCow: entity.costPerLiterCow,
       costPerLiterBuffalo: entity.costPerLiterBuffalo,
+      age: entity.age,
+      cattleOwned: entity.cattleOwned,
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
     );
@@ -48,7 +54,10 @@ class UserModel {
       phoneNumber: map['phoneNumber'] ?? '',
       farmLocation: map['farmLocation'] ?? '',
       costPerLiterCow: (map['costPerLiterCow'] as num?)?.toDouble() ?? 50.0,
-      costPerLiterBuffalo: (map['costPerLiterBuffalo'] as num?)?.toDouble() ?? 55.0,
+      costPerLiterBuffalo:
+          (map['costPerLiterBuffalo'] as num?)?.toDouble() ?? 55.0,
+      age: map['age'] as int?,
+      cattleOwned: map['cattleOwned'] as int?,
       createdAt: map['createdAt'] != null
           ? DateTime.parse(map['createdAt'])
           : DateTime.now(),
@@ -59,16 +68,18 @@ class UserModel {
   }
 
   Map<String, dynamic> toMap() => {
-    'uid': uid,
-    'name': name,
-    'email': email,
-    'phoneNumber': phoneNumber,
-    'farmLocation': farmLocation,
-    'costPerLiterCow': costPerLiterCow,
-    'costPerLiterBuffalo': costPerLiterBuffalo,
-    'createdAt': createdAt.toIso8601String(),
-    'updatedAt': updatedAt.toIso8601String(),
-  };
+        'uid': uid,
+        'name': name,
+        'email': email,
+        'phoneNumber': phoneNumber,
+        'farmLocation': farmLocation,
+        'costPerLiterCow': costPerLiterCow,
+        'costPerLiterBuffalo': costPerLiterBuffalo,
+        'age': age,
+        'cattleOwned': cattleOwned,
+        'createdAt': createdAt.toIso8601String(),
+        'updatedAt': updatedAt.toIso8601String(),
+      };
 
   /// Create a copy with updated fields
   UserModel copyWith({
@@ -79,6 +90,8 @@ class UserModel {
     String? farmLocation,
     double? costPerLiterCow,
     double? costPerLiterBuffalo,
+    int? age,
+    int? cattleOwned,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -90,9 +103,10 @@ class UserModel {
       farmLocation: farmLocation ?? this.farmLocation,
       costPerLiterCow: costPerLiterCow ?? this.costPerLiterCow,
       costPerLiterBuffalo: costPerLiterBuffalo ?? this.costPerLiterBuffalo,
+      age: age ?? this.age,
+      cattleOwned: cattleOwned ?? this.cattleOwned,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
   }
 }
-

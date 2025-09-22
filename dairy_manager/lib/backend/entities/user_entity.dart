@@ -9,6 +9,8 @@ class UserEntity {
   final String farmLocation;
   final double costPerLiterCow;
   final double costPerLiterBuffalo;
+  final int? age;
+  final int? cattleOwned;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -20,13 +22,26 @@ class UserEntity {
     required this.farmLocation,
     required this.costPerLiterCow,
     required this.costPerLiterBuffalo,
+    this.age,
+    this.cattleOwned,
     DateTime? createdAt,
     DateTime? updatedAt,
   })  : createdAt = createdAt ?? DateTime.now(),
         updatedAt = updatedAt ?? DateTime.now() {
-    
     // Validate cost values are non-negative
     Validator.validateNonNegativeNumber('costPerLiterCow', costPerLiterCow);
-    Validator.validateNonNegativeNumber('costPerLiterBuffalo', costPerLiterBuffalo);
+    Validator.validateNonNegativeNumber(
+        'costPerLiterBuffalo', costPerLiterBuffalo);
+
+    // Validate age if provided
+    if (age != null) {
+      Validator.validateNonNegativeNumber('age', age!.toDouble());
+    }
+
+    // Validate cattle owned if provided
+    if (cattleOwned != null) {
+      Validator.validateNonNegativeNumber(
+          'cattleOwned', cattleOwned!.toDouble());
+    }
   }
 }

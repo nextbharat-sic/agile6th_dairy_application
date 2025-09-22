@@ -11,6 +11,37 @@ class UserRepository {
 
   UserRepository(this.firestore);
 
+  /// Retrieves user data for a given userId.
+  /// Returns null if the user document doesn't exist.
+  Future<UserModel?> getUser(String userId) async {
+    try {
+      final docRef = firestore.collection('users').doc(userId);
+      final snapshot = await docRef.get();
+
+      if (!snapshot.exists) {
+        dev.log('User document not found for userId: $userId',
+            name: 'UserRepository');
+        return null;
+      }
+
+      final userData = snapshot.data();
+      if (userData == null) {
+        dev.log('User document exists but has no data for userId: $userId',
+            name: 'UserRepository');
+        return null;
+      }
+
+      final userModel = UserModel.fromMap(userData);
+      dev.log('Successfully retrieved user data for userId: $userId',
+          name: 'UserRepository');
+      return userModel;
+    } catch (e) {
+      dev.log('Error retrieving user data for userId: $userId - $e',
+          name: 'UserRepository');
+      rethrow;
+    }
+  }
+
   /// Retrieves the current cost-per-liter for the given animal.
   /// Returns 0.0 if no value is set.
   Future<double> getCostPerLiter(String userId, AnimalType animalType) async {
@@ -57,6 +88,8 @@ class UserRepository {
     String? farmLocation,
     double? costCow,
     double? costBuffalo,
+    int? age,
+    int? cattleOwned,
   }) async {
     final docRef = firestore.collection('users').doc(user.uid);
 
@@ -73,6 +106,8 @@ class UserRepository {
           farmLocation: farmLocation ?? '',
           costPerLiterCow: costCow ?? 50.0,
           costPerLiterBuffalo: costBuffalo ?? 55.0,
+          age: age ?? 0, // Default age or you might want null
+          cattleOwned: cattleOwned ?? 0, // Default cattle count
         );
 
         // Convert to model for storage
@@ -82,7 +117,8 @@ class UserRepository {
         // Removed creation of placeholder subcollection documents to comply with rules
       } else {
         // Get existing user data
-        final existingModel = UserModel.fromMap(snap.data() ?? const <String, dynamic>{});
+        final existingModel =
+            UserModel.fromMap(snap.data() ?? const <String, dynamic>{});
 
         // Create updated entity with new values (fallback to existing if not provided)
         final updatedEntity = UserEntity(
@@ -93,6 +129,8 @@ class UserRepository {
           farmLocation: farmLocation ?? existingModel.farmLocation,
           costPerLiterCow: costCow ?? existingModel.costPerLiterCow,
           costPerLiterBuffalo: costBuffalo ?? existingModel.costPerLiterBuffalo,
+          age: age ?? existingModel.age,
+          cattleOwned: cattleOwned ?? existingModel.cattleOwned,
           createdAt: existingModel.createdAt,
           updatedAt: DateTime.now(), // Always update the timestamp
         );
@@ -101,18 +139,21 @@ class UserRepository {
         final updatedModel = UserModel.fromEntity(updatedEntity);
 
         // Only update if there are actual changes
-        final hasChanges =
-            updatedModel.name != existingModel.name ||
-                updatedModel.phoneNumber != existingModel.phoneNumber ||
-                updatedModel.farmLocation != existingModel.farmLocation ||
-                updatedModel.costPerLiterCow != existingModel.costPerLiterCow ||
-                updatedModel.costPerLiterBuffalo != existingModel.costPerLiterBuffalo;
+        final hasChanges = updatedModel.name != existingModel.name ||
+            updatedModel.phoneNumber != existingModel.phoneNumber ||
+            updatedModel.farmLocation != existingModel.farmLocation ||
+            updatedModel.costPerLiterCow != existingModel.costPerLiterCow ||
+            updatedModel.costPerLiterBuffalo !=
+                existingModel.costPerLiterBuffalo ||
+            updatedModel.age != existingModel.age ||
+            updatedModel.cattleOwned != existingModel.cattleOwned;
 
         if (hasChanges) {
           tx.update(docRef, updatedModel.toMap());
           dev.log('Updated user doc for ${user.uid}', name: 'UserRepository');
         } else {
-          dev.log('No changes detected for user ${user.uid}', name: 'UserRepository');
+          dev.log('No changes detected for user ${user.uid}',
+              name: 'UserRepository');
         }
       }
     });
