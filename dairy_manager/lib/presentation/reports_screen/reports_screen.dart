@@ -443,8 +443,23 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
 
   // FIXED: Completely rewritten to use tab index instead of period label
   Widget _buildReportContent(int tabIndex, AppLocalizations l10n) {
-    final List<String> monthOptions = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-        .sublist(0, DateTime.now().month); // Only up to current month
+    final List<String> monthOptions = Localizations.localeOf(context).languageCode == 'te'
+        ? [
+            l10n.january,
+            l10n.february,
+            l10n.march,
+            l10n.april,
+            l10n.may,
+            l10n.june,
+            l10n.july,
+            l10n.august,
+            l10n.september,
+            l10n.october,
+            l10n.november,
+            l10n.december,
+          ].sublist(0, DateTime.now().month)
+        : ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+            .sublist(0, DateTime.now().month);
     final List<String> yearOptions = ['2022', '2023', '2024', '2025'];
     
     // FIXED: Use tab index to determine what to show
