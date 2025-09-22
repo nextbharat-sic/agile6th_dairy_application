@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
-import '../backend/services/income_service.dart';
 import '../backend/services/reports_service.dart';
 import '../models/report_data.dart';
 
 class ReportsProvider extends ChangeNotifier {
-  final IncomeService _incomeService;
   final ReportsService _reportsService;
 
-  ReportsProvider(this._incomeService, this._reportsService);
+  ReportsProvider(this._reportsService);
 
   // State variables
   List<ReportData> _weeklyReports = [];

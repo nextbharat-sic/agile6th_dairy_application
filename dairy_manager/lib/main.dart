@@ -67,7 +67,7 @@ class _MyAppState extends State<MyApp> {
             final userRepo = UserRepository(firestore);
             
             // Initialize services
-            final incomeService = IncomeService(
+            IncomeService(
               incomeRepo: incomeRepo, 
               userRepo: userRepo
             );
@@ -79,7 +79,7 @@ class _MyAppState extends State<MyApp> {
             );
             
             // Create and return ReportsProvider
-            return ReportsProvider(incomeService, reportsService);
+            return ReportsProvider(reportsService);
           },
         ),
         

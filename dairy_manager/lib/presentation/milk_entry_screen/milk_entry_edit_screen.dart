@@ -166,10 +166,6 @@ class _MilkEntryEditScreenState extends State<MilkEntryEditScreen> {
     );
   }
 
-  String _formatRelativeDate(int daysAgo) {
-    final d = DateTime.now().subtract(Duration(days: daysAgo));
-    return '${d.day.toString().padLeft(2, '0')}/${d.month.toString().padLeft(2, '0')}/${d.year}';
-  }
 
   Widget _entryTile(int index) {
     final e = _entries[index];

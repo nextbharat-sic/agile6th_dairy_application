@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../theme/app_theme.dart';
 import '../../backend/services/expense_service.dart';
 import '../../backend/repositories/expense_repository.dart';
 import '../../constants/constants.dart';
-import '../../models/expense_model.dart';
 import '../../l10n/app_localizations.dart';
 
 class ExpensesScreen extends StatefulWidget {
@@ -21,7 +21,6 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
   bool _isLoading = true;
   
   // Real data from backend
-  List<ExpenseModel> _expenses = [];
   Map<ExpenseCategory, double> _expensesByCategory = {};
   double _totalExpenses = 0.0;
   
@@ -87,7 +86,7 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
     
     try {
       final currentDate = DateTime.now();
-      final expenses = await _expenseService.getExpensesForMonth(
+      await _expenseService.getExpensesForMonth(
         _userId!, 
         currentDate.month, 
         currentDate.year
@@ -106,7 +105,6 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
       );
       
       setState(() {
-        _expenses = expenses;
         _totalExpenses = totalExpenses;
         _expensesByCategory = expensesByCategory;
         _isLoading = false;
@@ -126,7 +124,7 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
       final monthIndex = _months.indexOf(_selectedMonth) + 1;
       final year = int.parse(_selectedYear);
       
-      final expenses = await _expenseService.getExpensesForMonth(
+      await _expenseService.getExpensesForMonth(
         _userId!, 
         monthIndex, 
         year
@@ -145,7 +143,6 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
       );
       
       setState(() {
-        _expenses = expenses;
         _totalExpenses = totalExpenses;
         _expensesByCategory = expensesByCategory;
         _isLoading = false;
@@ -494,16 +491,20 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
                    ),
                   const SizedBox(height: 16),
                   
-                  // Equipment field
+                  // Amount field
                    _buildExpenseField(
                      controller: amountController,
                      label: l10n.amount,
                      placeholder: l10n.enterAmount,
+                     keyboardType: TextInputType.number,
+                     inputFormatters: [
+                       FilteringTextInputFormatter.digitsOnly,
+                     ],
                      validator: (value) {
                        if (value == null || value.trim().isEmpty) {
                          return 'Amount is required';
                        }
-                       final amount = double.tryParse(value.replaceAll('/', ''));
+                       final amount = double.tryParse(value);
                        if (amount == null || amount <= 0) {
                          return 'Please enter a valid amount';
                        }
@@ -601,6 +602,8 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
     bool readOnly = false,
     VoidCallback? onTap,
     String? Function(String?)? validator,
+    TextInputType? keyboardType,
+    List<TextInputFormatter>? inputFormatters,
   }) {
     return Row(
       children: [
@@ -622,6 +625,8 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
             readOnly: readOnly,
             onTap: onTap,
             validator: validator,
+            keyboardType: keyboardType,
+            inputFormatters: inputFormatters,
             decoration: InputDecoration(
               hintText: placeholder,
               hintStyle: TextStyle(
@@ -681,70 +686,6 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
     );
   }
 
-  Widget _buildExpenseListItem(ExpenseModel expense) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.black.withValues(alpha: 0.1)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: Colors.black,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: const Icon(
-              Icons.receipt,
-              color: Colors.white,
-              size: 20,
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  expense.description,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: Colors.black,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  '${expense.dateTime.day}/${expense.dateTime.month}/${expense.dateTime.year} • ${expense.category.displayName}',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Colors.grey,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Text(
-            '₹${expense.amount.toStringAsFixed(0)}',
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              color: Colors.black,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
 
 }

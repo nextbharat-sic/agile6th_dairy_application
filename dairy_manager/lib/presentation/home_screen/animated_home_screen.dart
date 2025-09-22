@@ -3,13 +3,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' hide AuthProvider;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:provider/provider.dart';
 import '../../backend/repositories/expense_repository.dart';
 import '../../backend/repositories/income_repository.dart';
 import '../../backend/services/report_service.dart';
 import '../../constants/constants.dart';
 import '../../models/report_models.dart';
-import '../../providers/auth_provider.dart';
 import '../../l10n/app_localizations.dart';
 import '../../utils/date_utils.dart' as CustomDateUtils;
 
@@ -87,8 +85,6 @@ class _AnimatedHomeScreenState extends State<AnimatedHomeScreen>
 
   @override
   Widget build(BuildContext context) {
-    final authProvider = context.watch<AuthProvider>();
-    final userName = authProvider.userName ?? 'User';
     final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
@@ -438,7 +434,6 @@ class InfiniteGlassCarousel extends StatefulWidget {
 
 class _InfiniteGlassCarouselState extends State<InfiniteGlassCarousel> {
   late final PageController _pageController;
-  int _currentPage = 0;
   late final ReportService _reportService;
   String? _userId;
 
@@ -462,7 +457,6 @@ class _InfiniteGlassCarouselState extends State<InfiniteGlassCarousel> {
       viewportFraction: 0.6,
       initialPage: initialPage,
     );
-    _currentPage = currentMonth;
 
     _loadReport();
   }
@@ -524,11 +518,6 @@ class _InfiniteGlassCarouselState extends State<InfiniteGlassCarousel> {
       height: 280,
       child: PageView.builder(
         controller: _pageController,
-        onPageChanged: (index) {
-          setState(() {
-            _currentPage = index % _monthsData.length;
-          });
-        },
         itemBuilder: (context, index) {
           final actualIndex = index % _monthsData.length;
           return AnimatedBuilder(
@@ -675,22 +664,24 @@ class _InfiniteGlassCarouselState extends State<InfiniteGlassCarousel> {
               ],
             ),
             padding: const EdgeInsets.all(12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
+            child: Stack(
               children: [
-                Text(
-                  _getTranslatedMonthName(monthData['name']!, l10n),
-                  style: TextStyle(
-                    color: isCurrentMonth
-                        ? Colors.white
-                        : Colors.white.withOpacity(0.9),
-                    fontSize: isCurrentMonth ? 28 : 24,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 1.0,
-                    fontFamily: 'Montserrat',
-                  ),
-                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      _getTranslatedMonthName(monthData['name']!, l10n),
+                      style: TextStyle(
+                        color: isCurrentMonth
+                            ? Colors.white
+                            : Colors.white.withOpacity(0.9),
+                        fontSize: isCurrentMonth ? 28 : 24,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 1.0,
+                        fontFamily: 'Montserrat',
+                      ),
+                    ),
                 const SizedBox(height: 8),
                 _buildDataRow(l10n.expense, monthData['expense']!,
                     isCurrentMonth: isCurrentMonth),
@@ -700,6 +691,24 @@ class _InfiniteGlassCarouselState extends State<InfiniteGlassCarousel> {
                 const SizedBox(height: 4),
                 _buildDataRow(l10n.profit, monthData['profit']!,
                     isProfit: true, isCurrentMonth: isCurrentMonth),
+                  ],
+                ),
+                // Current year positioned in top right
+                Positioned(
+                  top: 0,
+                  right: 0,
+                  child: Text(
+                    DateTime.now().year.toString(),
+                    style: TextStyle(
+                      color: isCurrentMonth
+                          ? Colors.white.withOpacity(0.8)
+                          : Colors.white.withOpacity(0.6),
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      fontFamily: 'Montserrat',
+                    ),
+                  ),
+                ),
               ],
             ),
           ),

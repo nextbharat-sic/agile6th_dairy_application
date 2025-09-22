@@ -101,7 +101,7 @@ class _BuffaloMorningScreenState extends State<BuffaloMorningScreen> {
       return;
     }
     try {
-      final total = await _incomeService.getTotalIncomeForDay(
+      await _incomeService.getTotalIncomeForDay(
         userId: _userId!,
         date: _selectedDate,
         animalTypes: [AnimalType.buffalo],
@@ -145,7 +145,7 @@ class _BuffaloMorningScreenState extends State<BuffaloMorningScreen> {
     final costPerLiter = double.tryParse(_costController.text) ?? 0.0;
 
     try {
-      final result = await _incomeService.addIncome(
+      await _incomeService.addIncome(
         userId: _userId!,
         dateTime: _selectedDate,
         animalType: animalType,

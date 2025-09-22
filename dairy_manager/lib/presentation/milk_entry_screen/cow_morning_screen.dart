@@ -405,47 +405,6 @@ class _CowMorningScreenState extends State<CowMorningScreen> {
     );
   }
 
-  Widget _buildToggleButton(String text, IconData icon, bool isMorning, bool isSelected) {
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          _isMorning = isMorning;
-        });
-      },
-      child: Container(
-        height: 48,
-        decoration: BoxDecoration(
-          color: isSelected 
-            ? const Color(0xFF395364)
-            : Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: isSelected ? const Color(0xFF395364) : Colors.white,
-            width: 2,
-          ),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              icon,
-              size: 20,
-              color: isSelected ? Colors.white : const Color(0xFF395364),
-            ),
-            const SizedBox(width: 8),
-            Text(
-              text,
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: isSelected ? Colors.white : const Color(0xFF395364),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 
   Widget _buildFormField({
     required TextEditingController controller,
