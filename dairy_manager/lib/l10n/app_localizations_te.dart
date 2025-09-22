@@ -60,7 +60,7 @@ class AppLocalizationsTe extends AppLocalizations {
   String get chooseCattle => 'పశువులను ఎంచుకోండి';
 
   @override
-  String get buffalo => 'ఎద్దు';
+  String get buffalo => 'గేదె';
 
   @override
   String get cow => 'ఆవు';
@@ -115,13 +115,93 @@ class AppLocalizationsTe extends AppLocalizations {
   String get selectWeek => 'వారాన్ని ఎంచుకోండి';
 
   @override
-  String get milkWeeklyAverage => 'పాల వారంలో సగటు : 148 లీ\nSNF వారంలో సగటు : 12\nకొవ్వు% వారంలో సగటు : 20%';
+  String get milkWeeklyTotal => 'పాల వారపు మొత్తం';
 
   @override
-  String get milkMonthlyAverage => 'పాల నెలలో సగటు : 520 లీ\nSNF నెలలో సగటు : 20\nకొవ్వు% నెలలో సగటు : 20%';
+  String get milkMonthlyTotal => 'పాల నెలవారీ మొత్తం';
 
   @override
-  String get milkYearlyAverage => 'పాల సంవత్సరంలో సగటు : 6000 లీ\nSNF సంవత్సరంలో సగటు : 20\nకొవ్వు% సంవత్సరంలో సగటు : 20%';
+  String get milkYearlyTotal => 'పాల సంవత్సర మొత్తం';
+
+  @override
+  String get snfAverage => 'SNF సగటు';
+
+  @override
+  String get fatAverage => 'కొవ్వు% సగటు';
+
+  @override
+  String get noDataAvailable => 'డేటా అందుబాటులో లేదు';
+
+  // Edit entry screen translations
+  @override
+  String get today => 'ఈ రోజు';
+
+  @override
+  String get yesterday => 'నిన్న';
+
+  @override
+  String get dayBeforeYesterday => 'మొన్న';
+
+  @override
+  String get snfPercent => 'SNF%';
+
+  @override
+  String get fatPercent => 'కొవ్వు%';
+
+  @override
+  String get costPerL => 'ధర/లీ';
+
+  // Logout confirmation dialog
+  @override
+  String get logoutConfirmation => 'మీరు లాగౌట్ చేయాలనుకుంటున్నారా?';
+
+  // Add expense form translations
+  @override
+  String get addReceiptPhoto => 'రసీదు ఫోటో జోడించండి';
+  @override
+  String get camera => 'కెమెరా';
+  @override
+  String get gallery => 'గ్యాలరీ';
+  @override
+  String get cameraFunctionalityComingSoon => 'కెమెరా ఫంక్షనాలిటీ త్వరలో వస్తుంది';
+  @override
+  String get galleryFunctionalityComingSoon => 'గ్యాలరీ ఫంక్షనాలిటీ త్వరలో వస్తుంది';
+  @override
+  String get pleaseEnterAmount => 'దయచేసి మొత్తం నమోదు చేయండి';
+  @override
+  String get pleaseEnterValidAmount => 'దయచేసి సరైన మొత్తం నమోదు చేయండి';
+  @override
+  String get descriptionOptional => 'వివరణ (ఐచ్ఛికం)';
+  @override
+  String get enterExpenseDetails => 'వ్యయ వివరాలను నమోదు చేయండి...';
+  @override
+  String get receiptAdded => 'రసీదు జోడించబడింది';
+  @override
+  String get addReceipt => 'రసీదు జోడించండి';
+
+  // Edit entry form translations
+  @override
+  String get editEntry => 'ఎంట్రీ సవరించండి';
+
+  // Additional missing translations
+  @override
+  String get todaysIncome => 'ఈ రోజు ఆదాయం';
+  @override
+  String get buffaloLabel => 'గేదె';
+  @override
+  String get cowLabel => 'ఆవు';
+
+  // Profile page translations
+  @override
+  String get emailAddress => 'ఇమెయిల్ చిరునామా';
+  @override
+  String get phoneNumber => 'ఫోన్ నంబర్';
+  @override
+  String get age => 'వయస్సు';
+  @override
+  String get cattleOwned => 'స్వంత పశువులు';
+  @override
+  String get location => 'స్థానం';
 
   @override
   String get milkLHeader => 'పాలు(లీ)';
@@ -293,4 +373,25 @@ class AppLocalizationsTe extends AppLocalizations {
 
   @override
   String get cancel => 'రద్దు చేయండి';
+
+  // Delete confirmation dialog
+  @override
+  String get deleteExpense => 'ఖర్చును తొలగించండి';
+  @override
+  String get deleteConfirmation => 'మీరు ఈ ఖర్చును తొలగించాలనుకుంటున్నారా?';
+  @override
+  String get delete => 'తొలగించండి';
+
+  // Profile edit screen translations
+  @override
+  String get editProfile => 'ప్రొఫైల్ సవరించండి';
+  @override
+  String get name => 'పేరు';
+  @override
+  String get enterName => 'పేరు నమోదు చేయండి';
+  @override
+  String get invalidEmail => 'చెల్లని ఇమెయిల్';
+  @override
+  String get save => 'సేవ్ చేయండి';
+
 }

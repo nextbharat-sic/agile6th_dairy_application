@@ -321,7 +321,7 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
                     runSpacing: 8,
                     children: _expensesByCategory.entries.map<Widget>((entry) {
                       return _buildExpenseChip(
-                        entry.key.displayName, 
+                        _getTranslatedCategoryName(entry.key, l10n), 
                         entry.value.toInt()
                       );
                     }).toList(),

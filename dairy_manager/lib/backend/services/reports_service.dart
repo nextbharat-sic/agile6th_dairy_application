@@ -36,7 +36,6 @@ class ReportsService {
         _userId!,
         weekStart,
         weekEnd,
-        [AnimalType.cow, AnimalType.buffalo],
       );
 
       // Get expense data for the week (not used in current implementation)
@@ -122,7 +121,6 @@ class ReportsService {
         _userId!,
         monthStart,
         monthEnd,
-        [AnimalType.cow, AnimalType.buffalo],
       );
 
       // Process income data by week within the month
@@ -201,7 +199,6 @@ class ReportsService {
         _userId!,
         yearStart,
         yearEnd,
-        [AnimalType.cow, AnimalType.buffalo],
       );
 
       // Process income data by month
@@ -286,7 +283,6 @@ class ReportsService {
         _userId!,
         startDate,
         endDate,
-        [AnimalType.cow, AnimalType.buffalo],
       );
 
       // Get expense data
