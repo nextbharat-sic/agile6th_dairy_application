@@ -46,6 +46,9 @@ class _MilkEntryScreenState extends State<MilkEntryScreen> {
     final today = DateTime.now();
     dateController.text =
         '${today.day.toString().padLeft(2, '0')}/${today.month.toString().padLeft(2, '0')}/${today.year}';
+    
+    // Load today's income
+    _loadTodaysIncome();
   }
 
   void clearFields() {
@@ -53,6 +56,45 @@ class _MilkEntryScreenState extends State<MilkEntryScreen> {
     snfController.clear();
     fatController.clear();
     costController.clear();
+  }
+
+  Future<void> _loadTodaysIncome() async {
+    if (_userId == null) return;
+    
+    try {
+      final today = DateTime.now();
+      final todayIncomeList = await _incomeService.getTotalIncomeForDay(
+        userId: _userId!,
+        date: today,
+        animalTypes: [AnimalType.cow, AnimalType.buffalo],
+      );
+      
+      setState(() {
+        cowIncome = todayIncomeList[AnimalType.cow] ?? 0.0;
+        buffaloIncome = todayIncomeList[AnimalType.buffalo] ?? 0.0;
+      });
+    } catch (e) {
+      print('Error loading today\'s income: $e');
+    }
+  }
+
+  Future<void> _loadIncomeForDate(DateTime date) async {
+    if (_userId == null) return;
+    
+    try {
+      final incomeList = await _incomeService.getTotalIncomeForDay(
+        userId: _userId!,
+        date: date,
+        animalTypes: [AnimalType.cow, AnimalType.buffalo],
+      );
+      
+      setState(() {
+        cowIncome = incomeList[AnimalType.cow] ?? 0.0;
+        buffaloIncome = incomeList[AnimalType.buffalo] ?? 0.0;
+      });
+    } catch (e) {
+      print('Error loading income for date: $e');
+    }
   }
 
   Future<void> _selectDate(BuildContext context) async {
@@ -67,6 +109,8 @@ class _MilkEntryScreenState extends State<MilkEntryScreen> {
         dateController.text =
             '${picked.day.toString().padLeft(2, '0')}/${picked.month.toString().padLeft(2, '0')}/${picked.year}';
       });
+      // Reload income for the selected date
+      await _loadIncomeForDate(picked);
     }
   }
 
@@ -110,11 +154,8 @@ class _MilkEntryScreenState extends State<MilkEntryScreen> {
         newCostPerLiter: double.parse(costController.text),
       );
 
-      // Update state with new income values
-      setState(() {
-        cowIncome = result.todayIncomeList[AnimalType.cow] ?? 0.0;
-        buffaloIncome = result.todayIncomeList[AnimalType.buffalo] ?? 0.0;
-      });
+      // Reload today's income to get updated totals
+      await _loadTodaysIncome();
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -324,10 +365,10 @@ class _MilkEntryScreenState extends State<MilkEntryScreen> {
             const SizedBox(height: 32),
             Divider(thickness: 2, color: Colors.black26),
             const SizedBox(height: 24),
-            const Center(
+            Center(
               child: Text(
-                'TODAY\'S INCOME',
-                style: TextStyle(
+                l10n.todaysIncome,
+                style: const TextStyle(
                   color: Colors.black,
                   fontWeight: FontWeight.bold,
                   fontSize: 14,
@@ -338,8 +379,8 @@ class _MilkEntryScreenState extends State<MilkEntryScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                _incomeDisplay('Buffalo', buffaloIncome),
-                _incomeDisplay('Cow', cowIncome),
+                _incomeDisplay(l10n.buffaloLabel, buffaloIncome),
+                _incomeDisplay(l10n.cowLabel, cowIncome),
               ],
             ),
             const SizedBox(height: 24),

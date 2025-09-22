@@ -6,6 +6,7 @@ import '../../backend/repositories/user_repository.dart';
 import '../../backend/services/income_service.dart';
 import '../../constants/constants.dart';
 import '../../theme/app_theme.dart';
+import '../../l10n/app_localizations.dart';
 
 class BuffaloMorningScreen extends StatefulWidget {
   const BuffaloMorningScreen({super.key});
@@ -489,7 +490,7 @@ class _BuffaloMorningScreenState extends State<BuffaloMorningScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          "Today's Income",
+                          AppLocalizations.of(context)!.todaysIncome,
                           style:
                               Theme.of(context).textTheme.titleSmall?.copyWith(
                                     color: Colors.white,

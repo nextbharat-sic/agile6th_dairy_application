@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../theme/app_theme.dart';
+import '../../l10n/app_localizations.dart';
 
 class CowMorningScreen extends StatefulWidget {
   const CowMorningScreen({super.key});
@@ -375,7 +376,7 @@ class _CowMorningScreenState extends State<CowMorningScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          "Today's Income",
+                          AppLocalizations.of(context)!.todaysIncome,
                           style: Theme.of(context).textTheme.titleSmall?.copyWith(
                                 color: Colors.white,
                                 fontWeight: FontWeight.w600,

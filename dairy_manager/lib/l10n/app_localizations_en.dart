@@ -114,14 +114,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get selectWeek => 'Select Week';
 
-  @override
-  String get milkWeeklyAverage => 'Milk Weekly Average : 148 L\nSNF Weekly Average : 12\nFat% Weekly Average : 20%';
-
-  @override
-  String get milkMonthlyAverage => 'Milk Monthly Average : 520 L\nSNF Monthly Average : 20\nFat% Monthly Average : 20%';
-
-  @override
-  String get milkYearlyAverage => 'Milk Yearly Average : 6000 L\nSNF Yearly Average : 20\nFat% Yearly Average : 20%';
 
   @override
   String get milkLHeader => 'Milk(L)';
@@ -293,4 +285,114 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get cancel => 'Cancel';
+
+  // Reports screen average text translations
+  @override
+  String get milkWeeklyTotal => 'Milk Weekly Total';
+
+  @override
+  String get milkMonthlyTotal => 'Milk Monthly Total';
+
+  @override
+  String get milkYearlyTotal => 'Milk Yearly Total';
+
+  @override
+  String get snfAverage => 'SNF Average';
+
+  @override
+  String get fatAverage => 'Fat% Average';
+
+  @override
+  String get noDataAvailable => 'No data available';
+
+  // Edit entry screen translations
+  @override
+  String get today => 'Today';
+
+  @override
+  String get yesterday => 'Yesterday';
+
+  @override
+  String get dayBeforeYesterday => 'Day before yesterday';
+
+  @override
+  String get snfPercent => 'SNF%';
+
+  @override
+  String get fatPercent => 'Fat%';
+
+  @override
+  String get costPerL => 'Cost/L';
+
+  // Logout confirmation dialog
+  @override
+  String get logoutConfirmation => 'Are you sure you want to logout?';
+
+  // Add expense form translations
+  @override
+  String get addReceiptPhoto => 'Add Receipt Photo';
+  @override
+  String get camera => 'Camera';
+  @override
+  String get gallery => 'Gallery';
+  @override
+  String get cameraFunctionalityComingSoon => 'Camera functionality coming soon';
+  @override
+  String get galleryFunctionalityComingSoon => 'Gallery functionality coming soon';
+  @override
+  String get pleaseEnterAmount => 'Please enter amount';
+  @override
+  String get pleaseEnterValidAmount => 'Please enter valid amount';
+  @override
+  String get descriptionOptional => 'Description (Optional)';
+  @override
+  String get enterExpenseDetails => 'Enter expense details...';
+  @override
+  String get receiptAdded => 'Receipt Added';
+  @override
+  String get addReceipt => 'Add Receipt';
+
+  // Edit entry form translations
+  @override
+  String get editEntry => 'Edit Entry';
+
+  // Additional missing translations
+  @override
+  String get todaysIncome => 'TODAY\'S INCOME';
+  @override
+  String get buffaloLabel => 'Buffalo';
+  @override
+  String get cowLabel => 'Cow';
+
+  // Profile page translations
+  @override
+  String get emailAddress => 'Email Address';
+  @override
+  String get phoneNumber => 'Phone Number';
+  @override
+  String get age => 'Age';
+  @override
+  String get cattleOwned => 'Cattle Owned';
+  @override
+  String get location => 'Location';
+
+  // Delete confirmation dialog
+  @override
+  String get deleteExpense => 'Delete Expense';
+  @override
+  String get deleteConfirmation => 'Are you sure you want to delete this expense?';
+  @override
+  String get delete => 'Delete';
+
+  // Profile edit screen translations
+  @override
+  String get editProfile => 'Edit Profile';
+  @override
+  String get name => 'Name';
+  @override
+  String get enterName => 'Enter name';
+  @override
+  String get invalidEmail => 'Invalid email';
+  @override
+  String get save => 'SAVE';
 }

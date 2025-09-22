@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
 
 import '../../../core/app_export.dart';
+import '../../../l10n/app_localizations.dart';
 
 class ExpenseCategorySelectorWidget extends StatelessWidget {
   final List<Map<String, dynamic>> categories;
@@ -15,8 +16,30 @@ class ExpenseCategorySelectorWidget extends StatelessWidget {
     required this.onCategorySelected,
   });
 
+  String _getTranslatedCategoryName(String categoryName, AppLocalizations l10n) {
+    // Convert string category name to ExpenseCategory enum
+    try {
+      final category = ExpenseCategory.values.firstWhere(
+        (cat) => cat.key == categoryName.toLowerCase(),
+        orElse: () => ExpenseCategory.other,
+      );
+      
+      switch (category) {
+        case ExpenseCategory.feed: return l10n.feed;
+        case ExpenseCategory.labour: return l10n.labour;
+        case ExpenseCategory.healthcare: return l10n.healthcare;
+        case ExpenseCategory.utilities: return l10n.utilities;
+        case ExpenseCategory.equipment: return l10n.equipment;
+        case ExpenseCategory.other: return l10n.other;
+      }
+    } catch (e) {
+      return categoryName; // Fallback to original name if conversion fails
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       padding: EdgeInsets.all(4.w),
       decoration: BoxDecoration(
@@ -91,7 +114,7 @@ class ExpenseCategorySelectorWidget extends StatelessWidget {
                       ),
                       SizedBox(height: 0.5.h),
                       Text(
-                        category["name"] as String,
+                        _getTranslatedCategoryName(category["name"] as String, l10n),
                         style:
                             AppTheme.lightTheme.textTheme.bodyMedium?.copyWith(
                           color: isSelected
