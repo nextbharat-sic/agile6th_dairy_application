@@ -4,7 +4,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../l10n/app_localizations.dart';
-// Removed direct dependency on app AuthProvider; we use FirebaseAuth directly for prefills
+import '../../backend/repositories/user_repository.dart';
+import '../../models/user_model.dart';
 
 class ProfileEditScreen extends StatefulWidget {
   const ProfileEditScreen({super.key});
@@ -23,17 +24,15 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
   final _locationCtrl = TextEditingController();
 
   File? _imageFile;
+  late final UserRepository _userRepository;
+  UserModel? _currentUserData;
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    final user = FirebaseAuth.instance.currentUser;
-    _nameCtrl.text = user?.displayName ?? '';
-    _emailCtrl.text = user?.email ?? '';
-    _phoneCtrl.text = '';
-    _ageCtrl.text = '';
-    _cattleCtrl.text = '';
-    _locationCtrl.text = '';
+    _userRepository = UserRepository(FirebaseFirestore.instance);
+    _loadUserData();
   }
 
   @override
@@ -47,17 +46,135 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
     super.dispose();
   }
 
+  Future<void> _loadUserData() async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        // Try to get user data from repository
+        final userData = await _userRepository.getUser(user.uid);
+
+        setState(() {
+          _currentUserData = userData;
+
+          if (userData != null) {
+            // Use repository data if available
+            _nameCtrl.text = userData.name;
+            _emailCtrl.text = userData.email;
+            _phoneCtrl.text = userData.phoneNumber;
+            _ageCtrl.text = userData.age! > 0 ? userData.age.toString() : '';
+            _cattleCtrl.text = userData.cattleOwned! > 0
+                ? userData.cattleOwned.toString()
+                : '';
+            _locationCtrl.text = userData.farmLocation;
+          } else {
+            // Fall back to Firebase Auth data if no user document exists
+            _nameCtrl.text = user.displayName ?? '';
+            _emailCtrl.text = user.email ?? '';
+            _phoneCtrl.text = '';
+            _ageCtrl.text = '';
+            _cattleCtrl.text = '';
+            _locationCtrl.text = '';
+          }
+
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      setState(() => _isLoading = false);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to load user data: $e')),
+        );
+      }
+    }
+  }
+
   Future<void> _pickImage() async {
     final picker = ImagePicker();
-    final picked = await picker.pickImage(source: ImageSource.gallery, imageQuality: 85);
+    final picked =
+        await picker.pickImage(source: ImageSource.gallery, imageQuality: 85);
     if (picked != null) {
       setState(() => _imageFile = File(picked.path));
+    }
+  }
+
+  Future<void> _saveProfile() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) return;
+
+      // Parse numeric fields
+      final age = _ageCtrl.text.trim().isEmpty
+          ? 0
+          : int.tryParse(_ageCtrl.text.trim()) ?? 0;
+      final cattleOwned = _cattleCtrl.text.trim().isEmpty
+          ? 0
+          : int.tryParse(_cattleCtrl.text.trim()) ?? 0;
+
+      // Use upsertUserOld method from repository
+      await _userRepository.upsertUserOld(
+        user: user,
+        name: _nameCtrl.text.trim(),
+        phoneNumber: _phoneCtrl.text.trim(),
+        farmLocation: _locationCtrl.text.trim(),
+        age: age,
+        cattleOwned: cattleOwned,
+        // Keep existing cost values if user data exists
+        costCow: _currentUserData?.costPerLiterCow,
+        costBuffalo: _currentUserData?.costPerLiterBuffalo,
+      );
+
+      if (mounted) {
+        Navigator.pop(context, {
+          'name': _nameCtrl.text,
+          'email': _emailCtrl.text,
+          'phone': _phoneCtrl.text,
+          'location': _locationCtrl.text,
+          'age': age,
+          'cattleOwned': cattleOwned,
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to save: $e')),
+        );
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+
+    if (_isLoading) {
+      return Scaffold(
+        backgroundColor: Colors.grey[200],
+        appBar: AppBar(
+          backgroundColor: Colors.black,
+          toolbarHeight: 90,
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(bottom: Radius.circular(30)),
+          ),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: Colors.white, size: 28),
+            onPressed: () => Navigator.pop(context),
+          ),
+          title: Text(
+            l10n.editProfile,
+            style: const TextStyle(
+                color: Colors.white, fontSize: 22, fontWeight: FontWeight.w600),
+          ),
+          centerTitle: true,
+        ),
+        body: const Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
     return Scaffold(
       backgroundColor: Colors.grey[200],
       appBar: AppBar(
@@ -72,7 +189,8 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
         ),
         title: Text(
           l10n.editProfile,
-          style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w600),
+          style: const TextStyle(
+              color: Colors.white, fontSize: 22, fontWeight: FontWeight.w600),
         ),
         centerTitle: true,
       ),
@@ -89,9 +207,11 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                     CircleAvatar(
                       radius: 60,
                       backgroundColor: Colors.white,
-                      backgroundImage: _imageFile != null ? FileImage(_imageFile!) : null,
+                      backgroundImage:
+                          _imageFile != null ? FileImage(_imageFile!) : null,
                       child: _imageFile == null
-                          ? const Icon(Icons.person, size: 48, color: Colors.black54)
+                          ? const Icon(Icons.person,
+                              size: 48, color: Colors.black54)
                           : null,
                     ),
                     GestureDetector(
@@ -99,9 +219,11 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                       child: Container(
                         width: 34,
                         height: 34,
-                        decoration: const BoxDecoration(color: Colors.black, shape: BoxShape.circle),
+                        decoration: const BoxDecoration(
+                            color: Colors.black, shape: BoxShape.circle),
                         child: Center(
-                          child: Image.asset('assets/images/edit.png', width: 18, height: 18, color: Colors.white),
+                          child: Image.asset('assets/images/edit.png',
+                              width: 18, height: 18, color: Colors.white),
                         ),
                       ),
                     ),
@@ -109,9 +231,14 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                 ),
                 const SizedBox(height: 20),
                 _label(l10n.name),
-                _field(_nameCtrl, validator: (v) => v!.trim().isEmpty ? l10n.enterName : null),
+                _field(_nameCtrl,
+                    validator: (v) =>
+                        v!.trim().isEmpty ? l10n.enterName : null),
                 _label(l10n.emailAddress),
-                _field(_emailCtrl, keyboardType: TextInputType.emailAddress, validator: (v) => v!.contains('@') ? null : l10n.invalidEmail),
+                _field(_emailCtrl,
+                    keyboardType: TextInputType.emailAddress,
+                    validator: (v) =>
+                        v!.contains('@') ? null : l10n.invalidEmail),
                 _label(l10n.phoneNumber),
                 _field(_phoneCtrl, keyboardType: TextInputType.phone),
                 _label(l10n.age),
@@ -124,44 +251,18 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                 SizedBox(
                   width: 200,
                   child: ElevatedButton(
-                    onPressed: () async {
-                      if (_formKey.currentState!.validate()) {
-                        try {
-                          final uid = FirebaseAuth.instance.currentUser?.uid;
-                          if (uid != null) {
-                            final nowIso = DateTime.now().toIso8601String();
-                            await FirebaseFirestore.instance.collection('users').doc(uid).update({
-                              'name': _nameCtrl.text.trim(),
-                              // email is immutable per rules
-                              'phoneNumber': _phoneCtrl.text.trim(),
-                              'farmLocation': _locationCtrl.text.trim(),
-                              'updatedAt': nowIso,
-                            });
-                          }
-                          if (context.mounted) {
-                            Navigator.pop(context, {
-                              'name': _nameCtrl.text,
-                              'email': _emailCtrl.text,
-                              'phone': _phoneCtrl.text,
-                              'location': _locationCtrl.text,
-                            });
-                          }
-                        } catch (e) {
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('Failed to save: $e')),
-                            );
-                          }
-                        }
-                      }
-                    },
+                    onPressed: _saveProfile,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.white,
                       foregroundColor: Colors.black,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24), side: const BorderSide(color: Colors.black, width: 1.5)),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(24),
+                          side: const BorderSide(
+                              color: Colors.black, width: 1.5)),
                       padding: const EdgeInsets.symmetric(vertical: 14),
                     ),
-                    child: Text(l10n.save, style: const TextStyle(fontWeight: FontWeight.w700)),
+                    child: Text(l10n.save,
+                        style: const TextStyle(fontWeight: FontWeight.w700)),
                   ),
                 )
               ],
@@ -176,24 +277,36 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
         padding: const EdgeInsets.only(left: 6.0, bottom: 6.0, top: 16.0),
         child: Align(
           alignment: Alignment.centerLeft,
-          child: Text(text, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: Colors.black)),
+          child: Text(text,
+              style: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 13,
+                  color: Colors.black)),
         ),
       );
 
-  Widget _field(TextEditingController controller, {TextInputType? keyboardType, String? Function(String?)? validator}) => TextFormField(
+  Widget _field(TextEditingController controller,
+          {TextInputType? keyboardType,
+          String? Function(String?)? validator}) =>
+      TextFormField(
         controller: controller,
         keyboardType: keyboardType,
         validator: validator,
         decoration: InputDecoration(
           filled: true,
           fillColor: Colors.white,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(30), borderSide: const BorderSide(color: Colors.transparent)),
-          enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(30), borderSide: const BorderSide(color: Colors.transparent)),
-          focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(30), borderSide: const BorderSide(color: Colors.black87, width: 1)),
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(30),
+              borderSide: const BorderSide(color: Colors.transparent)),
+          enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(30),
+              borderSide: const BorderSide(color: Colors.transparent)),
+          focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(30),
+              borderSide: const BorderSide(color: Colors.black87, width: 1)),
           suffixIcon: const Icon(Icons.edit, size: 18, color: Colors.black87),
         ),
       );
 }
-
-
