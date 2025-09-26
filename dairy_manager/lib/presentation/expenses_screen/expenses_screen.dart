@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/services.dart';
 import '../../theme/app_theme.dart';
 import '../../backend/services/expense_service.dart';
 import '../../backend/repositories/expense_repository.dart';
@@ -480,11 +481,15 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
                    ),
                   const SizedBox(height: 16),
                   
-                  // Equipment field
+                  // Amount field (numeric keyboard)
                    _buildExpenseField(
                      controller: amountController,
-                     label: l10n.amount,
+                     label: l10n.expense,
                      placeholder: l10n.enterAmount,
+                     keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                     inputFormatters: [
+                       FilteringTextInputFormatter.allow(RegExp(r'[0-9\.]')),
+                     ],
                      validator: (value) {
                        if (value == null || value.trim().isEmpty) {
                          return l10n.amountIsRequired;
@@ -560,12 +565,17 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
                             borderRadius: BorderRadius.circular(8),
                           ),
                           elevation: 2,
-                        ),
-                        child: Text(
-                          l10n.addExpense,
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
+                        ).merge(ButtonStyle(
+                          alignment: Alignment.center,
+                        )),
+                        child: Center(
+                          child: Text(
+                            l10n.addExpense,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
                         ),
                       ),
@@ -587,6 +597,8 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
     bool readOnly = false,
     VoidCallback? onTap,
     String? Function(String?)? validator,
+    TextInputType? keyboardType,
+    List<TextInputFormatter>? inputFormatters,
   }) {
     return Row(
       children: [
@@ -606,6 +618,8 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
           child: TextFormField(
             controller: controller,
             readOnly: readOnly,
+            keyboardType: keyboardType,
+            inputFormatters: inputFormatters,
             onTap: onTap,
             validator: validator,
             decoration: InputDecoration(

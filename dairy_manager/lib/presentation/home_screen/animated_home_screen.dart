@@ -38,22 +38,23 @@ class _AnimatedHomeScreenState extends State<AnimatedHomeScreen>
     // Initialize the draggable controller
     _draggableController = DraggableScrollableController();
 
+    // SYNCHRONIZED: Both controllers use same duration for sync
     _milkDripController = AnimationController(
-      duration: const Duration(milliseconds: 600),
+      duration: const Duration(milliseconds: 800),
       vsync: this,
     );
 
     _buttonsController = AnimationController(
-      duration: const Duration(milliseconds: 600),
+      duration: const Duration(milliseconds: 800),
       vsync: this,
     );
 
     _milkDripAnimation = Tween<double>(
       begin: 0.0,
-      end: -1.5, // Move further up so it becomes fully invisible
+      end: -1.5,
     ).animate(CurvedAnimation(
       parent: _milkDripController,
-      curve: Curves.easeInOutExpo,
+      curve: Curves.easeInOutCubic,
     ));
 
     _buttonsAnimation = Tween<double>(
@@ -61,7 +62,7 @@ class _AnimatedHomeScreenState extends State<AnimatedHomeScreen>
       end: 1.0,
     ).animate(CurvedAnimation(
       parent: _buttonsController,
-      curve: Curves.easeInOutExpo,
+      curve: Curves.easeInOutCubic,
     ));
 
     // Start automatic swipe timer for 2 seconds
@@ -76,51 +77,31 @@ class _AnimatedHomeScreenState extends State<AnimatedHomeScreen>
     });
   }
 
-  // FIXED: Enhanced method to ensure complete screen expansion
   void _expandToFullScreen() async {
     HapticFeedback.lightImpact();
     setState(() {
       _isExpanded = true;
     });
     
-    // Start visual animations immediately
+    // SYNCHRONIZED: Start all animations together
     _milkDripController.forward();
     _buttonsController.forward();
     
-    // Animate to absolute full screen (1.0 = 100% screen height)
+    // Single smooth animation to target position
     await _draggableController.animateTo(
-      1.0, // Full screen expansion
-      duration: const Duration(milliseconds: 800), // Slightly longer for smoother effect
-      curve: Curves.easeInOutCubic, // Smoother curve for better feel
+      1.0,
+      duration: const Duration(milliseconds: 800),
+      curve: Curves.easeInOutCubic,
     );
   }
 
   @override
   void dispose() {
-    // Cancel the timer to prevent memory leaks
     _autoSwipeTimer?.cancel();
     _milkDripController.dispose();
     _buttonsController.dispose();
     _draggableController.dispose();
     super.dispose();
-  }
-
-  void _handleSwipeUp() {
-    HapticFeedback.lightImpact();
-    setState(() {
-      _isExpanded = true;
-    });
-    _milkDripController.forward();
-    _buttonsController.forward();
-  }
-
-  void _handleSwipeDown() {
-    HapticFeedback.lightImpact();
-    setState(() {
-      _isExpanded = false;
-    });
-    _milkDripController.reverse();
-    _buttonsController.reverse();
   }
 
   @override
@@ -131,109 +112,123 @@ class _AnimatedHomeScreenState extends State<AnimatedHomeScreen>
       backgroundColor: Colors.black,
       body: Stack(
         children: [
-          // Main content with DraggableScrollableSheet
+          // Main content with DraggableScrollableSheet - DISABLED MANUAL INTERACTION
           DraggableScrollableSheet(
             controller: _draggableController,
             initialChildSize: 0.75,
             minChildSize: 0.75,
-            maxChildSize: 1.0, // Full screen maximum
+            maxChildSize: 1.0,
+            snap: false, // Disabled snapping
             builder: (context, scrollController) {
-              return NotificationListener<DraggableScrollableNotification>(
-                onNotification: (notification) {
-                  // Cancel auto swipe timer if user interacts manually
-                  _autoSwipeTimer?.cancel();
-                  
-                  // FIXED: Adjusted triggers to work better with automatic expansion
-                  if (notification.extent >= 0.99 && !_isExpanded) { // Very close to full screen
-                    _handleSwipeUp();
-                  } else if (notification.extent <= 0.85 && _isExpanded) { // More lenient down trigger
-                    _handleSwipeDown();
-                  }
-                  return false;
-                },
-                child: Container(
-                  decoration: const BoxDecoration(
-                    color: Colors.black,
-                  ),
-                  child: SingleChildScrollView(
-                    controller: scrollController,
-                    physics: const ClampingScrollPhysics(), // Better scroll behavior
-                    child: Column(
-                      children: [
-                        // ENHANCED: More dramatic spacing animation for full-screen effect
-                        AnimatedBuilder(
-                          animation: _buttonsAnimation,
-                          builder: (context, child) {
-                            return SizedBox(
-                              height: 175 - (_buttonsAnimation.value * 90), // Increased from 70 to 90
-                            );
-                          },
-                        ),
-                        // RakuDiary Title and Settings icon on same line
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 20),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              _buildRakuDiaryTitle(),
-                              GestureDetector(
-                                onTap: () =>
-                                    Navigator.pushNamed(context, '/settings'),
-                                child: Container(
-                                  padding: const EdgeInsets.all(8),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white.withValues(alpha: 0.2),
-                                    borderRadius: BorderRadius.circular(12),
+              return Container(
+                decoration: const BoxDecoration(
+                  color: Colors.black,
+                ),
+                child: SingleChildScrollView(
+                  controller: scrollController,
+                  // DISABLED: Manual scrolling completely disabled
+                  physics: const NeverScrollableScrollPhysics(),
+                  child: Column(
+                    children: [
+                      // ADJUSTED: Moderate height reduction to match your image
+                      AnimatedBuilder(
+                        animation: _buttonsAnimation,
+                        builder: (context, child) {
+                          return SizedBox(
+                            height: 175 - (_buttonsAnimation.value * 90), // REDUCED: 80px instead of 120px
+                          );
+                        },
+                      ),
+                      
+                      // ADJUSTED: Moderate content push to position title correctly
+                      AnimatedBuilder(
+                        animation: _buttonsAnimation,
+                        builder: (context, child) {
+                          return Transform.translate(
+                            offset: Offset(0, -(_buttonsAnimation.value * 35)), // REDUCED: 20px instead of 80px
+                            child: child,
+                          );
+                        },
+                        child: Column(
+                          children: [
+                            // RakuDiary Title and Settings icon on same line
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 20),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  _buildRakuDiaryTitle(),
+                                  GestureDetector(
+                                    onTap: () =>
+                                        Navigator.pushNamed(context, '/settings'),
+                                    child: Container(
+                                      padding: const EdgeInsets.all(8),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white.withValues(alpha: 0.2),
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child: const Icon(
+                                        Icons.settings,
+                                        color: Colors.white,
+                                        size: 24,
+                                      ),
+                                    ),
                                   ),
-                                  child: const Icon(
-                                    Icons.settings,
-                                    color: Colors.white,
-                                    size: 24,
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 35),
+                            // Infinite Glass Morphism Carousel
+                            InfiniteGlassCarousel(l10n: l10n),
+                            const SizedBox(height: 40),
+                            // Navigation Buttons
+                            AnimatedBuilder(
+                              animation: _buttonsAnimation,
+                              child: _buildNavigationButtons(l10n),
+                              builder: (context, child) {
+                                return Transform.translate(
+                                  offset: Offset(
+                                      0, (1 - _buttonsAnimation.value) * 120), // Keep button animation as is
+                                  child: Opacity(
+                                    opacity: _buttonsAnimation.value,
+                                    child: child,
                                   ),
-                                ),
-                              ),
-                            ],
-                          ),
+                                );
+                              },
+                            ),
+                            
+                            // ADJUSTED: Moderate invisible spacer
+                            AnimatedBuilder(
+                              animation: _buttonsAnimation,
+                              builder: (context, child) {
+                                return SizedBox(
+                                  height: 20 + (_buttonsAnimation.value * 40), // REDUCED: 40px instead of 150px
+                                );
+                              },
+                            ),
+                            
+                            // ADJUSTED: Moderate bottom padding
+                            SizedBox(height: 60 + MediaQuery.of(context).padding.bottom), // REDUCED: 60px instead of 150px
+                          ],
                         ),
-                        const SizedBox(height: 35),
-                        // Infinite Glass Morphism Carousel
-                        InfiniteGlassCarousel(l10n: l10n),
-                        const SizedBox(height: 40),
-                        // Navigation Buttons (animated with enhanced movement)
-                        AnimatedBuilder(
-                          animation: _buttonsAnimation,
-                          child: _buildNavigationButtons(l10n),
-                          builder: (context, child) {
-                            return Transform.translate(
-                              offset: Offset(
-                                  0, (1 - _buttonsAnimation.value) * 120), // Increased from 100 to 120
-                              child: Opacity(
-                                opacity: _buttonsAnimation.value,
-                                child: child,
-                              ),
-                            );
-                          },
-                        ),
-                        // ADDED: Extra bottom padding to ensure full scrollability
-                        SizedBox(height: 50 + MediaQuery.of(context).padding.bottom),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
               );
             },
           ),
-          // Animated Milk Drip Overlay at the top (enhanced positioning)
+          // Milk Drip Overlay with synchronized timing
           AnimatedBuilder(
             animation: _milkDripAnimation,
             builder: (context, child) {
               return Positioned(
-                // ENHANCED: Better positioning calculation for full-screen effect
-                top: 32 + (_milkDripAnimation.value * MediaQuery.of(context).size.height * 0.5), // Increased multiplier
+                // ADJUSTED: Moderate positioning to match your image
+                top: 32 + (_milkDripAnimation.value * MediaQuery.of(context).size.height * 0.35), // REDUCED: 0.35 instead of 0.6
                 left: 0,
                 right: 0,
                 child: SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.55, // Slightly larger
+                  height: MediaQuery.of(context).size.height * 0.4, // REDUCED: 0.4 instead of 0.6
                   child: Image.asset(
                     'assets/images/milkdrip-.png',
                     width: double.infinity,
@@ -250,13 +245,12 @@ class _AnimatedHomeScreenState extends State<AnimatedHomeScreen>
     );
   }
 
-  // Rest of your methods remain the same...
   Widget _buildRakuDiaryTitle() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         const Text(
-          'RakuNo',
+          'Kisan',
           style: TextStyle(
             color: Colors.white,
             fontSize: 40,
@@ -268,7 +262,7 @@ class _AnimatedHomeScreenState extends State<AnimatedHomeScreen>
         Stack(
           children: [
             Text(
-              'Te',
+              'Diary',
               style: TextStyle(
                 fontSize: 40,
                 fontWeight: FontWeight.bold,
@@ -281,7 +275,7 @@ class _AnimatedHomeScreenState extends State<AnimatedHomeScreen>
               ),
             ),
             Text(
-              'Te',
+              'Diary',
               style: const TextStyle(
                 color: Colors.black,
                 fontSize: 40,
@@ -466,7 +460,7 @@ class _AnimatedHomeScreenState extends State<AnimatedHomeScreen>
   }
 }
 
-// InfiniteGlassCarousel class remains exactly the same as your original code...
+// Modified InfiniteGlassCarousel with ENABLED infinite scrolling
 class InfiniteGlassCarousel extends StatefulWidget {
   final AppLocalizations l10n;
   
@@ -477,7 +471,6 @@ class InfiniteGlassCarousel extends StatefulWidget {
 }
 
 class _InfiniteGlassCarouselState extends State<InfiniteGlassCarousel> {
-  // ... [All the existing InfiniteGlassCarousel code remains unchanged] ...
   late final PageController _pageController;
   int _currentPage = 0;
   late final ReportService _reportService;
@@ -486,6 +479,10 @@ class _InfiniteGlassCarouselState extends State<InfiniteGlassCarousel> {
   List<Map<String, String>> _monthsData = [];
   StreamSubscription<QuerySnapshot<Map<String, dynamic>>>? _incomeSub;
   StreamSubscription<QuerySnapshot<Map<String, dynamic>>>? _expenseSub;
+  
+  // ADDED: Timer for infinite auto-scroll
+  Timer? _carouselTimer;
+  static const Duration _scrollDuration = Duration(seconds: 3);
 
   @override
   void initState() {
@@ -514,7 +511,14 @@ class _InfiniteGlassCarouselState extends State<InfiniteGlassCarousel> {
     _setupRealtimeListeners();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _ensureCurrentMonthCentered();
+      _startCarouselTimer(); // Start auto-scroll after initial setup
     });
+  }
+
+  // ADDED: Start carousel auto-scroll timer
+  void _startCarouselTimer() {
+    // Disabled auto-scroll: carousel is user-controlled only
+    _carouselTimer?.cancel();
   }
 
   void _initializeDefaultData() {
@@ -553,10 +557,21 @@ class _InfiniteGlassCarouselState extends State<InfiniteGlassCarousel> {
       final allMonths = getMonthDataList(result);
       _monthsData = allMonths.take(currentMonthIndex + 1).toList();
     });
+    
+    // Ensure current month is visible by default
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _ensureCurrentMonthCentered();
+    });
+    
+    // Restart timer after data update
+    if (_monthsData.isNotEmpty) {
+      _startCarouselTimer();
+    }
   }
 
   @override
   void dispose() {
+    _carouselTimer?.cancel(); // ADDED: Cancel carousel timer
     _incomeSub?.cancel();
     _expenseSub?.cancel();
     _pageController.dispose();
@@ -589,6 +604,7 @@ class _InfiniteGlassCarouselState extends State<InfiniteGlassCarousel> {
       height: 280,
       child: PageView.builder(
         controller: _pageController,
+        // ENABLED: Removed NeverScrollableScrollPhysics to enable infinite scrolling
         onPageChanged: (index) {
           setState(() {
             _currentPage = index % _monthsData.length;
@@ -811,28 +827,54 @@ class _InfiniteGlassCarouselState extends State<InfiniteGlassCarousel> {
               ],
             ),
             padding: const EdgeInsets.all(12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
+            child: Stack(
               children: [
-                Text(
-                  _getTranslatedMonthName(monthData['name']!, l10n),
-                  style: TextStyle(
-                    color: isCurrentMonth
-                        ? Colors.white
-                        : Colors.white.withValues(alpha: 0.9),
-                    fontSize: isCurrentMonth ? 28 : 24,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 1.0,
-                    fontFamily: 'Montserrat',
+                // Current year in top right corner
+                
+                Positioned(
+                  top: 8,
+                  right: 8,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    child: Text(
+                      '${DateTime.now().year}',
+                      style: TextStyle(
+                        color: isCurrentMonth
+                            ? Colors.white
+                            : Colors.white.withValues(alpha: 0.8),
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                        fontFamily: 'Montserrat',
+                      ),
+                    ),
                   ),
                 ),
-                const SizedBox(height: 8),
-                _buildDataRow(l10n.expense, monthData['expense']!, isCurrentMonth: isCurrentMonth),
-                const SizedBox(height: 4),
-                _buildDataRow(l10n.revenue, monthData['revenue']!, isCurrentMonth: isCurrentMonth),
-                const SizedBox(height: 4),
-                _buildDataRow(l10n.profit, monthData['profit']!, isProfit: true, isCurrentMonth: isCurrentMonth),
+
+                // Main content column
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      _getTranslatedMonthName(monthData['name']!, l10n),
+                      style: TextStyle(
+                        color: isCurrentMonth
+                            ? Colors.white
+                            : Colors.white.withValues(alpha: 0.9),
+                        fontSize: isCurrentMonth ? 28 : 24,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 1.0,
+                        fontFamily: 'Montserrat',
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    _buildDataRow(l10n.expense, monthData['expense']!, isCurrentMonth: isCurrentMonth),
+                    const SizedBox(height: 4),
+                    _buildDataRow(l10n.revenue, monthData['revenue']!, isCurrentMonth: isCurrentMonth),
+                    const SizedBox(height: 4),
+                    _buildDataRow(l10n.profit, monthData['profit']!, isProfit: true, isCurrentMonth: isCurrentMonth),
+                  ],
+                ),
               ],
             ),
           ),

@@ -440,13 +440,13 @@ class _MilkEntryScreenState extends State<MilkEntryScreen> {
             const SizedBox(height: 32),
             Divider(thickness: 2, color: Colors.black26),
             const SizedBox(height: 24),
-            const Center(
+            Center(
               child: Text(
-                'TODAY\'S INCOME',
-                style: TextStyle(
+                l10n.todaysIncome,
+                style: const TextStyle(
                   color: Colors.black,
                   fontWeight: FontWeight.bold,
-                  fontSize: 14,
+                  fontSize: 18,
                 ),
               ),
             ),
@@ -454,8 +454,8 @@ class _MilkEntryScreenState extends State<MilkEntryScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                _incomeDisplay('Buffalo', buffaloIncome),
-                _incomeDisplay('Cow', cowIncome),
+                _incomeDisplay(l10n.buffalo, buffaloIncome),
+                _incomeDisplay(l10n.cow, cowIncome),
               ],
             ),
             const SizedBox(height: 24),
@@ -557,7 +557,7 @@ class _MilkEntryScreenState extends State<MilkEntryScreen> {
               keyboardType: TextInputType.number,
               obscureText: false, // Always visible, never encrypted
               decoration: InputDecoration(
-                hintText: isDateField ? l10n.ddmmyyyy : l10n.inputText,
+                hintText: isDateField ? l10n.ddmmyyyy : l10n.inputNumber,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                   borderSide: const BorderSide(color: Colors.grey),
@@ -596,7 +596,7 @@ class _MilkEntryScreenState extends State<MilkEntryScreen> {
             readOnly: isCostLocked,
             keyboardType: TextInputType.number,
             decoration: InputDecoration(
-              hintText: l10n.inputText,
+              hintText: l10n.inputNumber,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
                 borderSide: const BorderSide(color: Colors.grey),
@@ -632,7 +632,7 @@ class _MilkEntryScreenState extends State<MilkEntryScreen> {
         Text(
           label,
           style: const TextStyle(
-            fontSize: 16,
+            fontSize: 18,
             fontWeight: FontWeight.bold,
             color: Colors.black,
           ),

@@ -93,35 +93,7 @@ class AuthProvider extends ChangeNotifier {
   Future<void> signInWithGoogle() async {
     _setLoading(true);
     try {
-      
-      // Check if user is already signed in
-      if (await _googleSignIn.isSignedIn()) {
-        await _googleSignIn.signOut();
-      }
-      
-      // Initialize Google Sign In
-      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
-      if (googleUser == null) {
-        _setLoading(false);
-        return;
-      }
-
-      final GoogleSignInAuthentication googleAuth =
-          await googleUser.authentication;
-      final AuthCredential credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
-      );
-
-      final userCredential = await _auth.signInWithCredential(credential);
-
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('auth_token', userCredential.user!.uid);
-      // Ensure Firestore user document exists
-      final firestore = FirebaseFirestore.instance;
-      await UserRepository(firestore).upsertUserOld(user: userCredential.user!);
-
-      // The authStateChanges listener will handle updating the UI
+      await _performGoogleSignInFlow();
     } on FirebaseAuthException catch (e) {
       String errorMessage = _getFirebaseErrorMessage(e.code);
       
@@ -131,7 +103,20 @@ class AuthProvider extends ChangeNotifier {
           errorMessage = 'An account already exists with the same email address but different sign-in credentials.';
           break;
         case 'invalid-credential':
-          errorMessage = 'The provided credential is invalid or expired.';
+          // Token might be stale or revoked for this Google account. Force revoke and retry once.
+          try {
+            await _googleSignIn.disconnect();
+          } catch (_) {}
+          try {
+            await _auth.signOut();
+          } catch (_) {}
+          try {
+            await _performGoogleSignInFlow();
+            return; // success on retry
+          } catch (_) {
+            // fall through to show error
+          }
+          errorMessage = 'The provided credential is invalid or expired. Please try again.';
           break;
         case 'operation-not-allowed':
           errorMessage = 'Google sign-in is not enabled. Please contact support.';
@@ -169,6 +154,47 @@ class AuthProvider extends ChangeNotifier {
     } finally {
       _setLoading(false);
     }
+  }
+
+  Future<void> _performGoogleSignInFlow() async {
+    // Ensure any old session is cleared
+    if (await _googleSignIn.isSignedIn()) {
+      await _googleSignIn.signOut();
+    }
+
+    final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+    if (googleUser == null) {
+      // User cancelled
+      return;
+    }
+
+    final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+    // If tokens are missing, force a disconnect and prompt again
+    if ((googleAuth.idToken == null || googleAuth.idToken!.isEmpty) && (googleAuth.accessToken == null || googleAuth.accessToken!.isEmpty)) {
+      await _googleSignIn.disconnect();
+      final GoogleSignInAccount? retryUser = await _googleSignIn.signIn();
+      if (retryUser == null) return;
+      final retryAuth = await retryUser.authentication;
+      await _finalizeFirebaseSignIn(retryAuth);
+      return;
+    }
+
+    await _finalizeFirebaseSignIn(googleAuth);
+  }
+
+  Future<void> _finalizeFirebaseSignIn(GoogleSignInAuthentication googleAuth) async {
+    final AuthCredential credential = GoogleAuthProvider.credential(
+      accessToken: googleAuth.accessToken,
+      idToken: googleAuth.idToken,
+    );
+
+    final userCredential = await _auth.signInWithCredential(credential);
+
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('auth_token', userCredential.user!.uid);
+    // Ensure Firestore user document exists
+    final firestore = FirebaseFirestore.instance;
+    await UserRepository(firestore).upsertUserOld(user: userCredential.user!);
   }
 
   Future<void> logout() async {

@@ -96,6 +96,9 @@ class AppLocalizationsTe extends AppLocalizations {
   String get inputText => 'టెక్స్ట్‌ను నమోదు చేయండి';
 
   @override
+  String get inputNumber => 'సంఖ్యను నమోదు చేయండి';
+
+  @override
   String get required => 'అవసరం';
 
   @override

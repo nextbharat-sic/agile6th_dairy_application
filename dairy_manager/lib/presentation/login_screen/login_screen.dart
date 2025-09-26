@@ -62,47 +62,47 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    // RakuDiary Logo/Title
+                    // KisanDiary Logo/Title
                     const SizedBox(height: 60),
                     _buildRakuDiaryTitle(),
-                    const SizedBox(height: 80),
+                    const SizedBox(height: 280),
                     
                     // Username Field
-                    _buildInputField(
-                      label: 'Username',
-                      controller: _usernameController,
-                      placeholder: 'Enter Username',
-                      keyboardType: TextInputType.text,
-                    ),
-                    const SizedBox(height: 24),
+                    // _buildInputField(
+                    //   label: 'Username',
+                    //   controller: _usernameController,
+                    //   placeholder: 'Enter Username',
+                    //   keyboardType: TextInputType.text,
+                    // ),
+                    // const SizedBox(height: 24),
                     
                     // Password Field
-                    _buildInputField(
-                      label: 'Password',
-                      controller: _passwordController,
-                      placeholder: 'Enter Password',
-                      isPassword: true,
-                    ),
-                    const SizedBox(height: 16),
+                    // _buildInputField(
+                    //   label: 'Password',
+                    //   controller: _passwordController,
+                    //   placeholder: 'Enter Password',
+                    //   isPassword: true,
+                    // ),
+                    // const SizedBox(height: 16),
                     
                     // Forgot Password Link
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: GestureDetector(
-                        onTap: () {
-                          Navigator.pushNamed(context, '/resetPassword');
-                        },
-                        child: const Text(
-                          'Forgot password?',
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 32),
+                    // Align(
+                    //   alignment: Alignment.centerLeft,
+                    //   child: GestureDetector(
+                    //     onTap: () {
+                    //       Navigator.pushNamed(context, '/resetPassword');
+                    //     },
+                    //     child: const Text(
+                    //       'Forgot password?',
+                    //       style: TextStyle(
+                    //         color: Colors.black,
+                    //         fontSize: 14,
+                    //         fontWeight: FontWeight.w500,
+                    //       ),
+                    //     ),
+                    //   ),
+                    // ),
+                    // const SizedBox(height: 32),
                     
                     // Login Button with Google Sign-In
                     Consumer<AuthProvider>(
@@ -131,7 +131,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                     ),
                                   )
                                 : const Text(
-                                    'Login',
+                                    'Login With Google',
                                     style: TextStyle(
                                       fontSize: 16,
                                       fontWeight: FontWeight.bold,
@@ -141,34 +141,34 @@ class _LoginScreenState extends State<LoginScreen> {
                         );
                       },
                     ),
-                    const SizedBox(height: 24),
+                    // const SizedBox(height: 24),
                     
                     // Register Link
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Text(
-                          'Not a member? ',
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontSize: 14,
-                          ),
-                        ),
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.pushNamed(context, AppRoutes.registrationScreen);
-                          },
-                          child: const Text(
-                            'Register now',
-                            style: TextStyle(
-                              color: Colors.black,
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
+                    // Row(
+                    //   mainAxisAlignment: MainAxisAlignment.center,
+                    //   children: [
+                    //     const Text(
+                    //       'Not a member? ',
+                    //       style: TextStyle(
+                    //         color: Colors.black,
+                    //         fontSize: 14,
+                    //       ),
+                    //     ),
+                    //     GestureDetector(
+                    //       onTap: () {
+                    //         Navigator.pushNamed(context, AppRoutes.registrationScreen);
+                    //       },
+                    //       child: const Text(
+                    //         'Register now',
+                    //         style: TextStyle(
+                    //           color: Colors.black,
+                    //           fontSize: 14,
+                    //           fontWeight: FontWeight.bold,
+                    //         ),
+                    //       ),
+                    //     ),
+                    //   ],
+                    // ),
                   ],
                 ),
               ),
@@ -185,7 +185,7 @@ class _LoginScreenState extends State<LoginScreen> {
       children: [
         // "Raku" in solid black
         const Text(
-          'RakuNo',
+          'Kisan',
           style: TextStyle(
             color: Colors.black,
             fontSize: 54,
@@ -198,7 +198,7 @@ class _LoginScreenState extends State<LoginScreen> {
           children: [
             // Stroke text (black outline)
             Text(
-              'Te',
+              'Diary',
               style: TextStyle(
                 fontSize: 54,
                 fontWeight: FontWeight.bold,
@@ -211,7 +211,7 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
             // Fill text (white inside)
             const Text(
-              'Te',
+              'Diary',
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 54,

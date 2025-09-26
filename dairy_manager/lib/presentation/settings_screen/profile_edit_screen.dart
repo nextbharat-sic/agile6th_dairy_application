@@ -34,6 +34,41 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
     _ageCtrl.text = '';
     _cattleCtrl.text = '';
     _locationCtrl.text = '';
+
+    // Load existing Firestore profile to prefill fields to prevent overwriting with blanks
+    _loadExistingProfile();
+  }
+
+  Future<void> _loadExistingProfile() async {
+    try {
+      final uid = FirebaseAuth.instance.currentUser?.uid;
+      if (uid == null) return;
+      final snap = await FirebaseFirestore.instance.collection('users').doc(uid).get();
+      final data = snap.data();
+      if (data == null) return;
+      if (mounted) {
+        setState(() {
+          _nameCtrl.text = (data['name'] as String?)?.trim().isNotEmpty == true
+              ? (data['name'] as String)
+              : _nameCtrl.text;
+          _emailCtrl.text = (data['email'] as String?)?.trim().isNotEmpty == true
+              ? (data['email'] as String)
+              : _emailCtrl.text;
+          _phoneCtrl.text = (data['phoneNumber'] as String?) ?? _phoneCtrl.text;
+          _locationCtrl.text = (data['farmLocation'] as String?) ?? _locationCtrl.text;
+          final dynamic ageVal = data['age'];
+          if (ageVal != null) {
+            _ageCtrl.text = ageVal.toString();
+          }
+          final dynamic cattleVal = data['cattleOwned'];
+          if (cattleVal != null) {
+            _cattleCtrl.text = cattleVal.toString();
+          }
+        });
+      }
+    } catch (_) {
+      // Ignore prefill errors; user can still edit
+    }
   }
 
   @override
@@ -127,16 +162,76 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                     onPressed: () async {
                       if (_formKey.currentState!.validate()) {
                         try {
+                          // Force-refresh auth token to avoid permission issues with stale credentials
+                          await FirebaseAuth.instance.currentUser?.getIdToken(true);
                           final uid = FirebaseAuth.instance.currentUser?.uid;
                           if (uid != null) {
                             final nowIso = DateTime.now().toIso8601String();
-                            await FirebaseFirestore.instance.collection('users').doc(uid).update({
-                              'name': _nameCtrl.text.trim(),
-                              // email is immutable per rules
-                              'phoneNumber': _phoneCtrl.text.trim(),
-                              'farmLocation': _locationCtrl.text.trim(),
-                              'updatedAt': nowIso,
-                            });
+                            // Upsert user profile with merge to ensure doc exists and fields update
+                            // Read existing to perform selective updates (avoid blank overwrites)
+                            final docRef = FirebaseFirestore.instance.collection('users').doc(uid);
+                            final existing = await docRef.get();
+                            final bool exists = existing.exists;
+                            final existingData = existing.data() ?? const <String, dynamic>{};
+
+                            final String newName = _nameCtrl.text.trim();
+                            final String newPhone = _phoneCtrl.text.trim();
+                            final String newLocation = _locationCtrl.text.trim();
+                            final String newAgeStr = _ageCtrl.text.trim();
+                            final String newCattleStr = _cattleCtrl.text.trim();
+                            final String? authEmail = FirebaseAuth.instance.currentUser?.email;
+                            if (!exists) {
+                              // Strict create per rules with only allowed keys
+                              final user = FirebaseAuth.instance.currentUser;
+                              final int ageForCreate = (int.tryParse(newAgeStr) ?? 0);
+                              final int cattleForCreate = (int.tryParse(newCattleStr) ?? 0);
+                              final Map<String, dynamic> createData = {
+                                'uid': uid,
+                                'name': newName.isNotEmpty ? newName : (user?.displayName ?? ''),
+                                'email': user?.email ?? '',
+                                'phoneNumber': newPhone,
+                                'farmLocation': newLocation,
+                                'costPerLiterCow': 50.0,
+                                'costPerLiterBuffalo': 55.0,
+                                'age': ageForCreate,
+                                'cattleOwned': cattleForCreate,
+                                'createdAt': nowIso,
+                                'updatedAt': nowIso,
+                              };
+                              await docRef.set(createData);
+                            } else {
+                              // Build full document for update to satisfy strict rules
+                              final int ageUpdated = int.tryParse(newAgeStr) ?? (existingData['age'] as num? ?? 0).toInt();
+                              final int cattleUpdated = int.tryParse(newCattleStr) ?? (existingData['cattleOwned'] as num? ?? 0).toInt();
+                              final String nameUpdated = newName.isNotEmpty ? newName : (existingData['name'] as String? ?? '');
+                              final String phoneUpdated = newPhone.isNotEmpty ? newPhone : (existingData['phoneNumber'] as String? ?? '');
+                              final String locationUpdated = newLocation.isNotEmpty ? newLocation : (existingData['farmLocation'] as String? ?? '');
+                              final double cowCost = (existingData['costPerLiterCow'] as num?)?.toDouble() ?? 50.0;
+                              final double buffaloCost = (existingData['costPerLiterBuffalo'] as num?)?.toDouble() ?? 55.0;
+                              final String createdAt = (existingData['createdAt'] as String?) ?? nowIso;
+                              final String emailPersist = authEmail ?? (existingData['email'] as String? ?? '');
+
+                              final Map<String, dynamic> fullData = {
+                                'uid': uid,
+                                'name': nameUpdated,
+                                'email': emailPersist,
+                                'phoneNumber': phoneUpdated,
+                                'farmLocation': locationUpdated,
+                                'costPerLiterCow': cowCost,
+                                'costPerLiterBuffalo': buffaloCost,
+                                'age': ageUpdated,
+                                'cattleOwned': cattleUpdated,
+                                'createdAt': createdAt,
+                                'updatedAt': nowIso,
+                              };
+                              await docRef.set(fullData);
+                            }
+
+                            // Also update FirebaseAuth displayName so app surfaces remain consistent
+                            final current = FirebaseAuth.instance.currentUser;
+                            if (current != null && current.displayName != _nameCtrl.text.trim()) {
+                              await current.updateDisplayName(_nameCtrl.text.trim());
+                            }
                           }
                           if (context.mounted) {
                             Navigator.pop(context, {
@@ -144,6 +239,8 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                               'email': _emailCtrl.text,
                               'phone': _phoneCtrl.text,
                               'location': _locationCtrl.text,
+                              'age': _ageCtrl.text,
+                              'cattle': _cattleCtrl.text,
                             });
                           }
                         } catch (e) {

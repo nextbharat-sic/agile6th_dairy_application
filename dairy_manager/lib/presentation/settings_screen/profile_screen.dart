@@ -12,8 +12,8 @@ class ProfileScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final authProvider = context.watch<AuthProvider>();
-    final userName = authProvider.userName ?? 'User';
-    final userEmail = authProvider.userEmail ?? 'user@example.com';
+    final fallbackName = authProvider.userName ?? 'User';
+    final fallbackEmail = authProvider.userEmail ?? 'user@example.com';
     final l10n = AppLocalizations.of(context);
     if (l10n == null) return const SizedBox.shrink();
 
@@ -26,7 +26,17 @@ class ProfileScreen extends StatelessWidget {
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(bottom: Radius.circular(30)),
         ),
-        title: Stack(
+        title: StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+          stream: FirebaseAuth.instance.currentUser == null
+              ? null
+              : FirebaseFirestore.instance
+                  .collection('users')
+                  .doc(FirebaseAuth.instance.currentUser!.uid)
+                  .snapshots(),
+          builder: (context, snapshot) {
+            final data = snapshot.data?.data() ?? const <String, dynamic>{};
+            final liveName = (data['name'] ?? fallbackName).toString();
+            return Stack(
           clipBehavior: Clip.none,
           children: [
             // Back button
@@ -51,7 +61,7 @@ class ProfileScreen extends StatelessWidget {
                       radius: 50,
                       backgroundColor: Colors.black,
                       child: Text(
-                        userName.isNotEmpty ? userName[0].toUpperCase() : 'U',
+                        liveName.isNotEmpty ? liveName[0].toUpperCase() : 'U',
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 36,
@@ -62,7 +72,7 @@ class ProfileScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 10),
                   Text(
-                    userName,
+                    liveName,
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 18,
@@ -97,6 +107,8 @@ class ProfileScreen extends StatelessWidget {
               ),
             ),
           ],
+            );
+          },
         ),
         centerTitle: true,
       ),
@@ -110,25 +122,32 @@ class ProfileScreen extends StatelessWidget {
                   .snapshots(),
           builder: (context, snapshot) {
             final data = snapshot.data?.data() ?? {};
+            final name = (data['name'] ?? fallbackName).toString();
+            final email = (data['email'] ?? fallbackEmail).toString();
             final phone = (data['phoneNumber'] ?? '---').toString();
             final location = (data['farmLocation'] ?? '---').toString();
-            // name currently not rendered in fields; header already shows userName
+            final age = (data['age'] != null) ? data['age'].toString() : '—';
+            final cattleOwned = (data['cattleOwned'] != null) ? data['cattleOwned'].toString() : '—';
             return SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Update header name live when stream updates
+                  if (name != fallbackName) ...[
+                    const SizedBox(height: 0),
+                  ],
                   _label(l10n.emailAddress),
-                  _input(context, value: userEmail),
+                  _input(context, value: email),
                   const SizedBox(height: 12),
                   _label(l10n.phoneNumber),
                   _input(context, value: phone),
                   const SizedBox(height: 12),
                   _label(l10n.age),
-                  _input(context, value: '—'),
+                  _input(context, value: age),
                   const SizedBox(height: 12),
                   _label(l10n.cattleOwned),
-                  _input(context, value: '—'),
+                  _input(context, value: cattleOwned),
                   const SizedBox(height: 12),
                   _label(l10n.location),
                   _input(context, value: location),

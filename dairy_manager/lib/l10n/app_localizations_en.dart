@@ -47,7 +47,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get expenses => 'Expenses';
 
   @override
-  String get expense => 'EXPENSE';
+  String get expense => 'Expense';
 
   @override
   String get revenue => 'REVENUE';
@@ -94,6 +94,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get inputText => 'Input Text';
+
+  @override
+  String get inputNumber => 'Input Number';
 
   @override
   String get required => 'Required';

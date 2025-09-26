@@ -264,6 +264,12 @@ abstract class AppLocalizations {
   /// **'Input Text'**
   String get inputText;
 
+  /// No description provided for @inputNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Input Number'**
+  String get inputNumber;
+
   /// No description provided for @required.
   ///
   /// In en, this message translates to:
