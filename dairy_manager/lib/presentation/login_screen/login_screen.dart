@@ -62,10 +62,18 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    // KisanDiary Logo/Title
-                    const SizedBox(height: 60),
+                    // Logo and KisanDiary Title
+                    const SizedBox(height: 10),
+                    Center(
+                      child: Image.asset(
+                        'assets/images/logo-black.png',
+                        height: 200, // Large logo
+                        fit: BoxFit.contain,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
                     _buildRakuDiaryTitle(),
-                    const SizedBox(height: 280),
+                    const SizedBox(height: 120),
                     
                     // Username Field
                     // _buildInputField(

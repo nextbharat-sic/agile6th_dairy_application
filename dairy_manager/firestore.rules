@@ -1,21 +1,23 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Allow authenticated users to read and write their own data
+    // Allow authenticated users to read and write their own user document
     match /users/{userId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
+
+      // Allow authenticated users to read and write their own subcollections (expenses, income, milk_entries, etc.)
+      match /{subcollection=**}/{docId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
     }
-    
-    // Allow authenticated users to read and write income data
+    // Allow authenticated users to read and write income data (global, if needed)
     match /income/{incomeId} {
       allow read, write: if request.auth != null;
     }
-    
-    // Allow authenticated users to read and write animal data
+    // Allow authenticated users to read and write animal data (global, if needed)
     match /animals/{animalId} {
       allow read, write: if request.auth != null;
     }
-    
     // Allow authenticated users to read and write any other collections
     match /{document=**} {
       allow read, write: if request.auth != null;

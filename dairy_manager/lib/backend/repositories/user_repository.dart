@@ -73,6 +73,8 @@ class UserRepository {
           farmLocation: farmLocation ?? '',
           costPerLiterCow: costCow ?? 50.0,
           costPerLiterBuffalo: costBuffalo ?? 55.0,
+          age: 0, // Default to 0 for new users
+          cattleOwned: 0, // Default to 0 for new users
         );
 
         // Convert to model for storage

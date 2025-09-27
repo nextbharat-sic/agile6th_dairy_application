@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:sizer/sizer.dart';
-
 import '../../../core/app_export.dart';
 import '../../../theme/app_theme.dart';
 
@@ -10,7 +8,7 @@ class SignupRedirectWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(vertical: 2.h),
+      padding: EdgeInsets.symmetric(vertical: 2),
       child: Column(
         children: [
           Container(
@@ -18,7 +16,7 @@ class SignupRedirectWidget extends StatelessWidget {
             height: 1,
             color: AppTheme.lightTheme.dividerColor,
           ),
-          SizedBox(height: 2.h),
+          SizedBox(height: 2),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -29,12 +27,12 @@ class SignupRedirectWidget extends StatelessWidget {
                       .withValues(alpha: 0.7),
                 ),
               ),
-              SizedBox(width: 1.w),
+              SizedBox(width: 1),
               TextButton(
                 onPressed: () => _navigateToSignup(context),
                 style: TextButton.styleFrom(
                   padding:
-                      EdgeInsets.symmetric(horizontal: 2.w, vertical: 0.5.h),
+                      EdgeInsets.symmetric(horizontal: 2, vertical: 4.0),
                   minimumSize: Size.zero,
                   tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 ),
@@ -57,3 +55,4 @@ class SignupRedirectWidget extends StatelessWidget {
     Navigator.pushNamed(context, '/registration-screen');
   }
 }
+

@@ -248,7 +248,30 @@ class _AnimatedHomeScreenState extends State<AnimatedHomeScreen>
   Widget _buildRakuDiaryTitle() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.baseline,
+      textBaseline: TextBaseline.alphabetic,
       children: [
+        // Logo on the left, animated with the title
+        AnimatedBuilder(
+          animation: _buttonsAnimation,
+          builder: (context, child) {
+            return Transform.scale(
+              scale: 0.8 + (_buttonsAnimation.value * 0.2), // subtle scale in
+              child: child,
+            );
+          },
+          child: Baseline(
+            baseline: 50,
+            baselineType: TextBaseline.alphabetic,
+            child: Image.asset(
+              'assets/images/logo.png',
+              height: 60,
+              width: 60,
+              fit: BoxFit.contain,
+            ),
+          ),
+        ),
+        const SizedBox(width: 0),
         const Text(
           'Kisan',
           style: TextStyle(

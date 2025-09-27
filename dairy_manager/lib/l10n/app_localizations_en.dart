@@ -331,6 +331,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get snfDailyAverage => 'SNF Daily Average';
   @override
   String get snfMonthlyAverage => 'SNF Monthly Average';
+  @override
+  String get milkMonthlyAverageLabel => 'Milk Monthly Average';
 
   // Expense form labels
   @override

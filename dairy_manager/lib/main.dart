@@ -14,17 +14,27 @@ import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  
+  try {
+    await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  } catch (e) {
+    print('Firebase initialization error: $e');
+    // Continue with app initialization even if Firebase fails
+  }
+  
   ErrorWidget.builder = (FlutterErrorDetails details) {
     return CustomErrorWidget(
       errorDetails: details,
     );
   };
-  Future.wait([
-    SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp])
-  ]).then((value) {
-    runApp(MyApp());
-  });
+  
+  try {
+    await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+  } catch (e) {
+    print('SystemChrome error: $e');
+  }
+  
+  runApp(MyApp());
 }
 
 class MyApp extends StatefulWidget {

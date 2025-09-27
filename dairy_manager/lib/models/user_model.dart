@@ -11,6 +11,8 @@ class UserModel {
   final double costPerLiterBuffalo;
   final DateTime createdAt;
   final DateTime updatedAt;
+  final int age;
+  final int cattleOwned;
 
   UserModel({
     required this.uid,
@@ -22,6 +24,8 @@ class UserModel {
     required this.costPerLiterBuffalo,
     required this.createdAt,
     required this.updatedAt,
+    this.age = 0,
+    this.cattleOwned = 0,
   });
 
   /// Create a model from an entity
@@ -36,6 +40,8 @@ class UserModel {
       costPerLiterBuffalo: entity.costPerLiterBuffalo,
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
+      age: entity.age,
+      cattleOwned: entity.cattleOwned,
     );
   }
 
@@ -55,6 +61,8 @@ class UserModel {
       updatedAt: map['updatedAt'] != null
           ? DateTime.parse(map['updatedAt'])
           : DateTime.now(),
+      age: map['age'] is int ? map['age'] : 0,
+      cattleOwned: map['cattleOwned'] is int ? map['cattleOwned'] : 0,
     );
   }
 
@@ -68,6 +76,8 @@ class UserModel {
     'costPerLiterBuffalo': costPerLiterBuffalo,
     'createdAt': createdAt.toIso8601String(),
     'updatedAt': updatedAt.toIso8601String(),
+    'age': age,
+    'cattleOwned': cattleOwned,
   };
 
   /// Create a copy with updated fields
@@ -81,6 +91,8 @@ class UserModel {
     double? costPerLiterBuffalo,
     DateTime? createdAt,
     DateTime? updatedAt,
+    int? age,
+    int? cattleOwned,
   }) {
     return UserModel(
       uid: uid ?? this.uid,
@@ -92,6 +104,8 @@ class UserModel {
       costPerLiterBuffalo: costPerLiterBuffalo ?? this.costPerLiterBuffalo,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      age: age ?? this.age,
+      cattleOwned: cattleOwned ?? this.cattleOwned,
     );
   }
 }

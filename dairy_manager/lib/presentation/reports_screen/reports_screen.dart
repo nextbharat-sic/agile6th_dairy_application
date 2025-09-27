@@ -869,7 +869,7 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
         ],
         lineTouchData: LineTouchData(
           touchTooltipData: LineTouchTooltipData(
-            tooltipBgColor: Colors.black.withOpacity(0.8),
+            getTooltipColor: (LineBarSpot touchedSpot) => Colors.black.withOpacity(0.8),
             getTooltipItems: (List<LineBarSpot> touchedBarSpots) {
               return touchedBarSpots.map((barSpot) {
                 final flSpot = barSpot;
@@ -1241,14 +1241,14 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
     String milkText, fatText, snfText;
     if (frequency == GroupByFrequency.day) {
       // Monthly view - show daily averages
-      milkText = '${l10n.milk} Daily Average: ${milkAvg.toStringAsFixed(1)}L';
-      fatText = '${l10n.fat} Daily Average: ${fatAvg.toStringAsFixed(1)}%';
-      snfText = '${l10n.snf} Daily Average: ${snfAvg.toStringAsFixed(1)}';
+      milkText = l10n.milkDailyAverage + ': ${milkAvg.toStringAsFixed(1)}L';
+      fatText = l10n.fatDailyAverage + ': ${fatAvg.toStringAsFixed(1)}%';
+      snfText = l10n.snfDailyAverage + ': ${snfAvg.toStringAsFixed(1)}';
     } else {
       // Yearly view - show monthly averages
-      milkText = '${l10n.milk} Monthly Average: ${milkAvg.toStringAsFixed(1)}L';
-      fatText = '${l10n.fat} Monthly Average: ${fatAvg.toStringAsFixed(1)}%';
-      snfText = '${l10n.snf} Monthly Average: ${snfAvg.toStringAsFixed(1)}';
+      milkText = l10n.milkMonthlyAverageLabel + ': ' + milkAvg.toStringAsFixed(1) + 'L';
+      fatText = l10n.fatMonthlyAverage + ': ' + fatAvg.toStringAsFixed(1) + '%';
+      snfText = l10n.snfMonthlyAverage + ': ' + snfAvg.toStringAsFixed(1);
     }
 
     return Text(

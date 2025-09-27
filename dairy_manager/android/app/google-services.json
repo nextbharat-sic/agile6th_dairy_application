@@ -14,11 +14,11 @@
       },
       "oauth_client": [
         {
-          "client_id": "526058541371-jrupktrmm7r3hh67ss8tuj6epbipa1bu.apps.googleusercontent.com",
+          "client_id": "526058541371-48mtrj3hpt9edcekj5o3pvr4pbo6cc86.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.dairy_manager.app",
-            "certificate_hash": "25c139e68cde5617d4290cc8042a9c7542460b53"
+            "certificate_hash": "f6a7ff926dd2d9fdfb0a8aec90146b7351e68665"
           }
         },
         {
@@ -37,6 +37,35 @@
             "certificate_hash": "d9f2b17f73647dfdbd3e7606d93eef2bdda3e0ee"
           }
         },
+        {
+          "client_id": "526058541371-1tsa6f523nt73mgsiktb4rarm8ltq5su.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCBCsc9xl_jyIW5rNa2_U20diiYzpuVufs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "526058541371-1tsa6f523nt73mgsiktb4rarm8ltq5su.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:526058541371:android:fbad161b3bbb2349b5671e",
+        "android_client_info": {
+          "package_name": "com.dairy_manager.dairy_manager"
+        }
+      },
+      "oauth_client": [
         {
           "client_id": "526058541371-1tsa6f523nt73mgsiktb4rarm8ltq5su.apps.googleusercontent.com",
           "client_type": 3

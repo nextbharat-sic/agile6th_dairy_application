@@ -61,7 +61,7 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyCBCsc9xl_jyIW5rNa2_U20diiYzpuVufs',
-    appId: '1:526058541371:android:fbad161b3bbb2349b5671e',
+    appId: '1:526058541371:android:97e26faac2c01949b5671e',
     messagingSenderId: '526058541371',
     projectId: 'agile6th',
     storageBucket: 'agile6th.firebasestorage.app',

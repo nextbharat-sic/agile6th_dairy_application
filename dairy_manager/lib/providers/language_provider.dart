@@ -11,10 +11,16 @@ class LanguageProvider extends ChangeNotifier {
   }
   
   Future<void> _loadSavedLanguage() async {
-    final prefs = await SharedPreferences.getInstance();
-    final languageCode = prefs.getString('language_code') ?? 'en';
-    _locale = Locale(languageCode);
-    notifyListeners();
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final languageCode = prefs.getString('language_code') ?? 'en';
+      _locale = Locale(languageCode);
+      notifyListeners();
+    } catch (e) {
+      // If SharedPreferences fails, use default locale
+      _locale = const Locale('en');
+      notifyListeners();
+    }
   }
   
   Future<void> setLocale(Locale locale) async {

@@ -560,6 +560,12 @@ abstract class AppLocalizations {
   /// **'SNF Monthly Average'**
   String get snfMonthlyAverage;
 
+  /// No description provided for @milkMonthlyAverageLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Milk Monthly Average'**
+  String get milkMonthlyAverageLabel;
+
   // Expense form labels
   /// No description provided for @descriptionOptional.
   ///

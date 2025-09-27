@@ -29,22 +29,36 @@ class AuthProvider extends ChangeNotifier {
   bool get isLoading => _isLoading;
 
   AuthProvider() {
-    _auth.authStateChanges().listen((User? user) {
-      if (user == null) {
-        // User is signed out
-        _isAuthenticated = false;
-        _userId = null;
-        _userEmail = null;
-        _userName = null;
-      } else {
-        // User is signed in
-        _isAuthenticated = true;
-        _userId = user.uid;
-        _userEmail = user.email;
-        _userName = user.displayName ?? user.email?.split('@').first;
-      }
+    _initializeAuth();
+  }
+  
+  void _initializeAuth() {
+    try {
+      _auth.authStateChanges().listen((User? user) {
+        if (user == null) {
+          // User is signed out
+          _isAuthenticated = false;
+          _userId = null;
+          _userEmail = null;
+          _userName = null;
+        } else {
+          // User is signed in
+          _isAuthenticated = true;
+          _userId = user.uid;
+          _userEmail = user.email;
+          _userName = user.displayName ?? user.email?.split('@').first;
+        }
+        notifyListeners();
+      });
+    } catch (e) {
+      print('Auth initialization error: $e');
+      // Set default state if auth fails
+      _isAuthenticated = false;
+      _userId = null;
+      _userEmail = null;
+      _userName = null;
       notifyListeners();
-    });
+    }
   }
 
   Future<void> login(String email, String password) async {

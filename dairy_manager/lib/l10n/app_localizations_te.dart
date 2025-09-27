@@ -306,15 +306,18 @@ class AppLocalizationsTe extends AppLocalizations {
 
   // Average labels
   @override
-  String get milkDailyAverage => 'పాల రోజువారీ సగటు';
+  String get milkDailyAverage => 'పాలు రోజూ సగటు';
   @override
-  String get fatDailyAverage => 'కొవ్వు% రోజువారీ సగటు';
+  String get fatDailyAverage => 'కొవ్వు% రోజూ సగటు';
   @override
   String get fatMonthlyAverage => 'కొవ్వు% నెలవారీ సగటు';
   @override
-  String get snfDailyAverage => 'SNF రోజువారీ సగటు';
+  String get snfDailyAverage => 'SNF రోజూ సగటు';
   @override
   String get snfMonthlyAverage => 'SNF నెలవారీ సగటు';
+
+  @override
+  String get milkMonthlyAverageLabel => 'పాలు నెలవారీ సగటు';
 
   // Expense form labels
   @override

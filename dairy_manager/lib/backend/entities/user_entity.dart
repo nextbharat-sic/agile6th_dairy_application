@@ -9,6 +9,8 @@ class UserEntity {
   final String farmLocation;
   final double costPerLiterCow;
   final double costPerLiterBuffalo;
+  final int age;
+  final int cattleOwned;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -20,6 +22,8 @@ class UserEntity {
     required this.farmLocation,
     required this.costPerLiterCow,
     required this.costPerLiterBuffalo,
+    this.age = 0,
+    this.cattleOwned = 0,
     DateTime? createdAt,
     DateTime? updatedAt,
   })  : createdAt = createdAt ?? DateTime.now(),
