@@ -301,27 +301,33 @@ The application uses Provider for state management:
 
 ## UI/UX Design
 
-### Design System
-- **Primary Color**: #517186 (Blue)
-- **Secondary Color**: #395364 (Dark Blue)
-- **Accent Color**: #10B981 (Green)
-- **Background**: #517186
-- **Card Color**: #FFFFFF
-- **Text Primary**: #1E293B
-- **Text Secondary**: #64748B
+This section reflects the actual visuals of the Animated Home Screen (not the older dashboard design).
+
+### Design System (Animated Home Screen)
+- **Background**: #000000 (pure black)
+- **Foreground/Text (primary)**: #FFFFFF (white)
+- **Foreground/Text (secondary)**: white with reduced opacity (~80–90%)
+- **Glass overlay gradient**: `rgba(255,255,255,0.20)` → `rgba(255,255,255,0.05)` → `rgba(0,0,0,0.30)`
+- **Glass borders**: white with variable opacity (0.2 when inactive, up to 0.6 when active)
+- **Shadows (current card highlight)**: layered white glows with different radii + soft black drop shadow
+- **Large CTA button background**: #D8D8D8 (light gray)
+- **Icon disk color (CTA/tiles)**: #000000 (black) with white icon foreground
+- **Milk drip overlay**: full-width image aligned top, animated translate on expand
+
+Note: While a light theme exists in `theme/app_theme.dart`, the Animated Home Screen deliberately uses a dark, high-contrast composition with glassmorphism and white-on-black typography.
 
 ### Typography
-- **Font Family**: Inter (Google Fonts)
-- **Headings**: 24-32px, FontWeight.w600
-- **Body Text**: 14-16px, FontWeight.w400
-- **Labels**: 12-14px, FontWeight.w500
+- **Title/Display (Animated Home)**: Montserrat, bold, ~40px for the "Kisan Diary" lockup (white fill with white stroke outline)
+- **Section labels and metrics (cards/buttons)**: Montserrat, bold for headings and values
+- **General app text (outside Animated Home)**: Inter per theme for forms/controls
 
-### Component Library
-- Custom buttons with elevation
-- Glass morphism cards
-- Animated transitions
-- Responsive layouts
-- Loading states
+### Component Library (Animated Home Screen)
+- **Animated Home Screen scaffold** with black background and synchronized animations (milk drip, content buttons, draggable sheet)
+- **DraggableScrollableSheet** auto-expands after ~2s with cubic easing; manual scrolling disabled on the sheet
+- **Infinite Glass Carousel**: PageView with scaling/opacity effects, shows month, expense, revenue, profit
+- **Large "Milk Entry" CTA**: center-aligned text flanking a circular black icon disk within a gray button
+- **Secondary action tiles**: Reports and Expenses, glass-styled cards and buttons
+- **Settings entry**: top-right icon in translucent rounded container
 
 ---
 
