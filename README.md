@@ -1,6 +1,6 @@
-# Dairy Manager 🐄📱
+# Kisan Diary 🐄📱
 
-A modern, cross-platform dairy management app built with Flutter and Firebase. Dairy Manager empowers dairy farmers and businesses to track milk production, manage expenses, generate insightful reports, and streamline daily operations—all in a beautiful, responsive, and multilingual interface.
+A modern, cross-platform dairy management app built with Flutter and Firebase. Kisan Diary empowers dairy farmers and businesses to track milk production, manage expenses, generate insightful reports, and streamline daily operations—all in a beautiful, responsive, and multilingual interface.
 
 ---
 

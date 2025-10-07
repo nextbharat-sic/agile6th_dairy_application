@@ -1,4 +1,4 @@
-# Dairy Manager - Technical Documentation
+# Kisan Diary - Technical Documentation
 
 ## Table of Contents
 1. [Project Overview](#project-overview)
@@ -24,7 +24,7 @@
 
 ## Project Overview
 
-**Dairy Manager** is a comprehensive Flutter-based mobile application designed for dairy farm management. It provides farmers with tools to track milk production, manage expenses, generate reports, and streamline daily operations through a modern, responsive interface.
+**Kisan Diary** is a comprehensive Flutter-based mobile application designed for dairy farm management. It provides farmers with tools to track milk production, manage expenses, generate reports, and streamline daily operations through a modern, responsive interface.
 
 ### Key Features
 - **Milk Entry & Tracking**: Daily milk yield logging for cows and buffaloes with fat and SNF values
@@ -41,7 +41,7 @@
 
 ```mermaid
 graph TB
-    subgraph "Dairy Manager Application"
+    subgraph "Kisan Diary Application"
         subgraph "Frontend Layer"
             A[Flutter UI] --> B[Presentation Layer]
             B --> C[State Management]
@@ -594,9 +594,9 @@ flutter build web
 
 ## Conclusion
 
-Dairy Manager represents a modern, scalable solution for dairy farm management. Built with Flutter and Firebase, it provides a robust foundation for agricultural technology solutions. The clean architecture, comprehensive state management, and user-friendly interface make it an excellent choice for dairy farmers seeking digital transformation.
+Kisan Diary represents a modern, scalable solution for dairy farm management. Built with Flutter and Firebase, it provides a robust foundation for agricultural technology solutions. The clean architecture, comprehensive state management, and user-friendly interface make it an excellent choice for dairy farmers seeking digital transformation.
 
-The application's modular design allows for easy maintenance and feature additions, while the Firebase backend ensures scalability and reliability. With proper testing and deployment practices, Dairy Manager can serve as a reliable tool for modern dairy farm operations.
+The application's modular design allows for easy maintenance and feature additions, while the Firebase backend ensures scalability and reliability. With proper testing and deployment practices, Kisan Diary can serve as a reliable tool for modern dairy farm operations.
 
 ---
 

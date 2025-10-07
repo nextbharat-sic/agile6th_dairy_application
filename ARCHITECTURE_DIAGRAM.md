@@ -1,10 +1,10 @@
-# Dairy Manager - Architecture Diagram
+# Kisan Diary - Architecture Diagram
 
 ## System Architecture Overview
 
 ```mermaid
 graph TB
-    subgraph "Dairy Manager Application"
+    subgraph "Kisan Diary Application"
         subgraph "Frontend Layer"
             A[Flutter UI Framework] --> B[Presentation Layer]
             B --> C[State Management - Provider]
@@ -97,7 +97,7 @@ graph LR
 
 ```mermaid
 graph TB
-    subgraph "Dairy Manager Tech Stack"
+    subgraph "Kisan Diary Tech Stack"
         subgraph "Frontend Technologies"
             A[Flutter 3.9.2] --> B[Dart 3.6.0+]
             B --> C[Material Design 3]
@@ -292,4 +292,4 @@ graph TB
     G --> L
 ```
 
-This architecture diagram provides a comprehensive view of the Dairy Manager application's structure, showing how different components interact and how data flows through the system. The modular design ensures scalability, maintainability, and ease of development.
+This architecture diagram provides a comprehensive view of the Kisan Diary application's structure, showing how different components interact and how data flows through the system. The modular design ensures scalability, maintainability, and ease of development.
